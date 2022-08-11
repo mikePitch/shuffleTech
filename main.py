@@ -5,7 +5,7 @@ from tracker import *
 tracker = EuclideanDistTracker()
 
 cap = cv2.VideoCapture(2)
-
+print("hello worlds")
 #create tracker object
 
 #Object detection from stable camera
@@ -40,5 +40,7 @@ while True:
     if key == 27:
         break
 
+
 cap. release()
 cv2.destroyAllWindows()
+
