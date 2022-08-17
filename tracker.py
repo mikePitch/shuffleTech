@@ -22,7 +22,7 @@ class EuclideanDistTracker:
     def postAPI(self):
         print('now im alive')
 
-        url = "https://civiclaugh.backendless.app/api/data/puckLocations"
+        url = "https://elatedtwist.backendless.app/api/data/puckLocations"
 
         headers = CaseInsensitiveDict()
         headers["Content-Type"] = "application/json"

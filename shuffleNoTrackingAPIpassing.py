@@ -3,6 +3,15 @@ import requests
 import cv2
 import numpy as np
 
+from threading import Thread
+from _thread import *
+
+
+
+import requests
+from requests.structures import CaseInsensitiveDict
+from requests.structures import CaseInsensitiveDict
+
 #set Variables
 
 
@@ -100,6 +109,21 @@ if cap.isOpened():
             print(throwCount)
             return throwCount
 
+        def CallAPI(color, centresBlue, centresRed):
+            print('now im alive')
+            url = "https://elatedtwist.backendless.app/api/data/PuckLocations"
+            headers = CaseInsensitiveDict()
+            headers["Content-Type"] = "application/json"
+
+            print(color)
+            print(centresBlue)
+            print(centresRed)
+
+            data = '{"Color":"' + color + '", "TableID":' + str(1) + ', "centresBlue":"' + str(centresBlue) + '", "centresRed":"' + str(centresRed) + '"}'
+
+            resp = requests.post(url, headers=headers, data=data)
+            print(resp)
+            return(resp)
 
 
         #————————————Start puck detection on s key—————————————————
@@ -115,6 +139,7 @@ if cap.isOpened():
                 # if key == 100: #key "d"
                 #read frame
                 ret, frame = cap.read()
+
 
 
                 #refactor this ⬇︎⬇︎⬇︎⬇︎
@@ -196,7 +221,6 @@ if cap.isOpened():
                         centresBlue.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
                 
                 print("blue puck centres = ", centresBlue)
-                #ZZZZZZZ
             
                 #show Frame
                 cv2.imshow("flatframe", flatFrameClean)
@@ -211,7 +235,14 @@ if cap.isOpened():
                     tc = throwCounter(tc) 
                     
                     
-
+                try:
+                    print("Attempting Thread")
+                    # thread1 = Thread(target = CallAPI())
+                    argss = ("test", str(centresBlue),str(centresRed))
+                    start_new_thread(CallAPI,argss)
+                    
+                except:
+                    print("Error: unable to start thread")
 
                 if key == 27:
                     break
@@ -234,6 +265,9 @@ if cap.isOpened():
             print(x)
 
             print("sendCornerLocations() run")
+
+
+        
 
 
         
