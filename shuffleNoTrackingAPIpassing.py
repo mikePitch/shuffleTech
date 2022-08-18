@@ -126,8 +126,7 @@ if cap.isOpened():
                 
             blue = ",".join(centresBlue)
             red = ",".join(centresRed)
-            print(blue)
-            print(red)
+
 
             blue = "[" + blue + "]"
             red = "[" + red + "]"
@@ -190,8 +189,9 @@ if cap.isOpened():
             topRight = tabCorners[1]
             bottomLeft = tabCorners[2]
             bottomRight = tabCorners[3]
-
+            slowDown = 0
             while True:
+                slowDown = slowDown + 1
                 # if key == 100: #key "d"
                 #read frame
                 ret, frame = cap.read()
@@ -249,7 +249,7 @@ if cap.isOpened():
                         x, y, w, h = cv2.boundingRect(hull)
 
                         moments = cv2.moments(cnt)
-                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))) + '}'
+                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
                         appendString = appendString.replace('(','[')
                         appendString = appendString.replace(')',']')
                         centresRed.append(appendString)
@@ -283,7 +283,7 @@ if cap.isOpened():
                         # moments = cv2.moments(cnt)
                         # centresBlue.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
                         moments = cv2.moments(cnt)
-                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))) + '}'
+                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
                         appendString = appendString.replace('(','[')
                         appendString = appendString.replace(')',']')
                         centresBlue.append(appendString)
@@ -304,10 +304,12 @@ if cap.isOpened():
                     
                     
                 try:
-                    print("Attempting Thread")
-                    # thread1 = Thread(target = CallAPI())
-                    argss = ("test", centresBlue,centresRed)
-                    start_new_thread(CallAPI,argss)
+                    if slowDown == 3:
+                        print("Attempting Thread")
+                        # thread1 = Thread(target = CallAPI())
+                        argss = ("test", centresBlue,centresRed)
+                        start_new_thread(CallAPI,argss)
+                        slowDown = 0
                     
                 except:
                     print("Error: unable to start thread")
