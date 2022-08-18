@@ -3,6 +3,8 @@ import requests
 import cv2
 import numpy as np
 
+import json
+
 from threading import Thread
 from _thread import *
 
@@ -119,14 +121,68 @@ if cap.isOpened():
             print(centresBlue)
             print(centresRed)
 
-            data = '{"Color":"' + color + '", "TableID":' + str(1) + ', "centresBlue":"' + str(centresBlue) + '", "centresRed":"' + str(centresRed) + '"}'
+            blueString = ""
+           
+                
+            blue = ",".join(centresBlue)
+            red = ",".join(centresRed)
+            print(blue)
+            print(red)
+
+            blue = "[" + blue + "]"
+            red = "[" + red + "]"
+
+            
+
+            blueJSON = '{"locations":' + blue + '}'
+            redJSON = '{"locations":' + red + '}'
+
+
+            
+
+
+            data = '{"centresBlue1":' + blueJSON + ', "centresRed1": ' + redJSON + '}'
+            print (data)
 
             resp = requests.post(url, headers=headers, data=data)
+            print(resp.reason)
             print(resp)
             return(resp)
 
+# {
+# “table”: 1,
+# “locations”:[ 
+# {“puck”:[123,4323,1]},
+# {“puck”:[123,4323,1]}
+# ]}
 
-        #————————————Start puck detection on s key—————————————————
+
+# '{"Blue":
+#   "{
+#    "table":1,
+#    "locations":[
+#      {"puck":[581, 4395]},
+#      {"puck":[67, 1136]},
+#      {"puck":[284, 691]},
+#      {"puck":[23, 476]}
+#      ]}
+# ",
+#    
+#  "Red":
+#   "{
+#       "table":1,
+#       "locations":[
+#       {"puck":[213, 1149]},
+#       {"puck":[265, 954]},
+#       {"puck":[206, 901]},
+#       {"puck":[105, 575]}
+#       ]}
+#     "}
+# '
+
+
+
+#————————————Start puck detection on s key—————————————————
 
         def puckDetection(key, tc):
 
@@ -193,12 +249,19 @@ if cap.isOpened():
                         x, y, w, h = cv2.boundingRect(hull)
 
                         moments = cv2.moments(cnt)
-            
-                        centresRed.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
-                
+                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))) + '}'
+                        appendString = appendString.replace('(','[')
+                        appendString = appendString.replace(')',']')
+                        centresRed.append(appendString)
+                        
                 print("red puck centres = ", centresRed)
                 
-
+# {
+# “table”: 1,
+# “locations”:[
+# {“puck”:[123,4323,1]},
+# {“puck”:[123,4323,1]}
+# ]}
 
                 # #——————————————Blue Mask————————————————     
                 #set the lower and upper bounds for the blue hue (red hsv wraps)
@@ -217,9 +280,14 @@ if cap.isOpened():
                         cv2.drawContours(maskBlue, [hull], -1, (255,255, 255), -1)
 
                                         # compute the center of the contour
+                        # moments = cv2.moments(cnt)
+                        # centresBlue.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
                         moments = cv2.moments(cnt)
-                        centresBlue.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
-                
+                        appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))) + '}'
+                        appendString = appendString.replace('(','[')
+                        appendString = appendString.replace(')',']')
+                        centresBlue.append(appendString)
+
                 print("blue puck centres = ", centresBlue)
             
                 #show Frame
@@ -238,7 +306,7 @@ if cap.isOpened():
                 try:
                     print("Attempting Thread")
                     # thread1 = Thread(target = CallAPI())
-                    argss = ("test", str(centresBlue),str(centresRed))
+                    argss = ("test", centresBlue,centresRed)
                     start_new_thread(CallAPI,argss)
                     
                 except:
@@ -267,7 +335,7 @@ if cap.isOpened():
             print("sendCornerLocations() run")
 
 
-        
+
 
 
         
