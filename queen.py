@@ -3,8 +3,6 @@ import requests
 import cv2
 import numpy as np
 
-import json
-
 from threading import Thread
 from _thread import *
 
@@ -37,10 +35,12 @@ bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
 cap = cv2.VideoCapture(3)
+caplight = cv2.VideoCapture(1)
 
 #check if connection with camera is successfully
 if cap.isOpened():
     ret, frame = cap.read()  #capture a frame from live video
+    ret, frameCapLight = caplight.read()
 
     #check whether frame is successfully captured
     if ret:
@@ -147,38 +147,6 @@ if cap.isOpened():
             print(resp.reason)
             print(resp)
             return(resp)
-
-# {
-# “table”: 1,
-# “locations”:[ 
-# {“puck”:[123,4323,1]},
-# {“puck”:[123,4323,1]}
-# ]}
-
-
-# '{"Blue":
-#   "{
-#    "table":1,
-#    "locations":[
-#      {"puck":[581, 4395]},
-#      {"puck":[67, 1136]},
-#      {"puck":[284, 691]},
-#      {"puck":[23, 476]}
-#      ]}
-# ",
-#    
-#  "Red":
-#   "{
-#       "table":1,
-#       "locations":[
-#       {"puck":[213, 1149]},
-#       {"puck":[265, 954]},
-#       {"puck":[206, 901]},
-#       {"puck":[105, 575]}
-#       ]}
-#     "}
-# '
-
 
 
 #————————————Start puck detection on s key—————————————————
@@ -346,6 +314,7 @@ if cap.isOpened():
             ret, frame = cap.read() 
             
             cv2.imshow("Frame", frame)
+            cv2.imshow("Frame2", frameCapLight)
             key = cv2.waitKey(30)
             
             throwCount = 0 
