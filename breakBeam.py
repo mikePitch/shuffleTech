@@ -2,15 +2,20 @@
 import cv2
 import numpy as np
 import time
+
+
+
 #Create an object to hold reference to camera video capturing
 cap = cv2.VideoCapture(1)
+
 #check if connection with camera is successfully
 if cap.isOpened():
     ret, frame = cap.read()  #capture a frame from live video
+
     #check whether frame is successfully captured
     if ret:
         #print success if frame capturing was successful
-        print("Success : Captured break beam frame")
+        print("Success : Captured frame")
 
         #↓↓↓↓↓↓——————————Write Program In Below——————————↓↓↓↓↓↓
 
@@ -27,24 +32,41 @@ if cap.isOpened():
                 print("shot", redInt)
                 time.sleep(0.5)
 
+
+
             cv2.imshow("frameBW", frameBW)
             cv2.imshow("roi", roi)
             cv2.imshow("blur", blur)
             key = cv2.waitKey(30)
             
+            throwCount = 0 
+            if key == 97: #key "a"
+                print("a pressed")
+             
+                
 
+
+            if key == 115: #key "s"
+                #start Looking for pucks
+                print("Puck detection Initiallized")
+          
+            if key == 100: #key "d"
+                #send table corners to xano
+                print("d pressed")
+            
             if key == 27: #key "esc"
                 break
 
+ 
          #↑↑↑↑↑↑——————————Write Program Above——————————↑↑↑↑↑↑
 
     #print error if frame capturing was unsuccessful
     else:
-        print("Error : Failed to capture break beam frame")
+        print("Error : Failed to capture frame")
 
 # print error if the connection with camera is unsuccessful
 else:
-    print("Cannot open break beam camera")
+    print("Cannot open camera")
 
 
 

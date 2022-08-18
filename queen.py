@@ -11,6 +11,7 @@ from _thread import *
 import requests
 from requests.structures import CaseInsensitiveDict
 from requests.structures import CaseInsensitiveDict
+import time
 
 #set Variables
 
@@ -34,7 +35,7 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(3)
+cap = cv2.VideoCapture(2)
 caplight = cv2.VideoCapture(1)
 
 #check if connection with camera is successfully
@@ -110,6 +111,27 @@ if cap.isOpened():
             throwCount = throwCnt + 1
             print(throwCount)
             return throwCount
+
+        def breakBeamLogic():
+            roiLight = frameCapLight[530: 570,530: 720]
+            print(1)
+            blurLight = cv2.blur(roiLight,(1000,1000))
+            print(2)
+            average_color_row = np.average(blurLight, axis=0)
+            print(3)
+            average_color = np.average(average_color_row, axis=0)
+            print(4)
+            redInt = int(average_color[2])
+            print(5)
+            cv2.imshow("frameligh", frameCapLight)
+
+            if redInt < 255:
+                print("shot", redInt)
+                time.sleep(0.5)
+            print(redInt)
+
+            cv2.imshow("roiLight", roiLight)
+            cv2.imshow("blurLight", blurLight)
 
         def CallAPI(color, centresBlue, centresRed):
             print('now im alive')
@@ -281,7 +303,13 @@ if cap.isOpened():
                     
                 except:
                     print("Error: unable to start thread")
-
+                    
+                try: 
+                    print("Attempting Beam Thread") 
+                    start_new_thread(breakBeamLogic())
+                    slowDown = 0
+                except:
+                    print("Beam Thread Failed")
                 if key == 27:
                     break
 
