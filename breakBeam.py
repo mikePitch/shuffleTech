@@ -28,6 +28,7 @@ if cap.isOpened():
             average_color = np.average(average_color_row, axis=0)
             redInt = int(average_color[2])
             
+            print(redInt)
             if redInt < 255:
                 print("shot", redInt)
                 time.sleep(0.5)

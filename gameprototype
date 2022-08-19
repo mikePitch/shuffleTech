@@ -1,0 +1,27 @@
+import pygame
+
+
+
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Shuffles')
+screen.fill(background_colour)
+pygame.draw.rect(screen, table_colour, pygame.Rect(10, 10, 2250, 500))
+
+
+pygame.draw.circle(screen, (255,0,0),[puckX, puckY], 30, 0)
+pygame.display.flip()
+
+
+running = True
+
+while running:
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+
+
+        
+ 
+    
