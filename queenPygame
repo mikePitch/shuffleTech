@@ -5,11 +5,24 @@ import cv2
 import numpy as np
 import time
 import pygame
+
 from _thread import *
 from requests.structures import CaseInsensitiveDict
 
 
 global shotCount
+
+
+# PYGAME Setup
+
+background_colour = (255,255,255)
+table_colour = (202,164,116)
+(width, height) = (1100, 240) #108
+    
+
+puckX = 300
+puckY = 300
+
 
 
 #Set Variables
@@ -127,7 +140,7 @@ if cap.isOpened():
 
 
 #————————————Start puck detection on s key—————————————————
-        def puckDetection(key, tick):
+        def puckDetection(key, tick,GameScreen):
 
             topLeft = tabCorners[0]
             topRight = tabCorners[1]
@@ -180,6 +193,8 @@ if cap.isOpened():
                 contoursRed, _ = cv2.findContours(maskRed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 centresRed = []
                 detectionsRed = []
+                pygameArrayRed = []
+                
                 for cnt in contoursRed:
 
                     hull = cv2.convexHull(cnt)
@@ -199,6 +214,9 @@ if cap.isOpened():
                         appendString = appendString.replace(')',']')
                         centresRed.append(appendString)
 
+                        pygameArrayRedString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                        pygameArrayRed.append(pygameArrayRedString)
+
                 # #——————————————Blue Mask————————————————     
                 #set the lower and upper bounds for the blue hue (red hsv wraps)
                 lower_blue = np.array([100,80,100])
@@ -208,6 +226,7 @@ if cap.isOpened():
                 maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
                 contoursBlue, _ = cv2.findContours(maskBlue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 centresBlue = []
+                pygameArrayBlue = []
                 for cnt in contoursBlue:
                     hull = cv2.convexHull(cnt)
                     # Calculate area and remove small elements
@@ -223,6 +242,8 @@ if cap.isOpened():
                         appendString = appendString.replace('(','[')
                         appendString = appendString.replace(')',']')
                         centresBlue.append(appendString)
+                        pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                        pygameArrayBlue.append(pygameArrayBlueString)
             
                 #show Frame
                 cv2.imshow("flatframe", flatFrameClean)
@@ -230,20 +251,21 @@ if cap.isOpened():
                 cv2.imshow("redMask", maskRed)
                 cv2.imshow("blueMask", maskBlue)
 
+                pygameLoop(pygameArrayRed,pygameArrayBlue ,GameScreen)
 
                     #break loop
                 key = cv2.waitKey(30)
                   
                 # API THREAD                     
-                # try:
-                #     if slowDown == 3:
-                #         print("Attempting Thread")
-                #         # thread1 = Thread(target = CallAPI())
-                #         argss = (centresBlue,centresRed)
-                #         start_new_thread(CallAPI,argss)
-                #         slowDown = 0
-                # except Exception as e:
-                #     print("An error occurred in the API thread: " + str(e))
+                try:
+                    if slowDown == 3:
+                        print("Attempting Thread")
+                        # thread1 = Thread(target = CallAPI())
+                        argss = (centresBlue,centresRed)
+                        start_new_thread(CallAPI,argss)
+                        slowDown = 0
+                except Exception as e:
+                    print("An error occurred in the API thread: " + str(e))
                     
                 # BEAM DETECTION THREAD
                 try: 
@@ -275,8 +297,80 @@ if cap.isOpened():
             print(x)
 
             print("sendCornerLocations() run")
+        
+        def pygameInit():
+            background_colour = (255,255,255)
+            table_colour = (202,164,116)
+            (width, height) = (1050, 200) #108
+            puckX = 300
+            puckY = 300
+            
+            screen = pygame.display.set_mode((width, height))
+            pygame.display.set_caption('Shuffles')
+            screen.fill(background_colour)
+            
+            pygame.draw.rect(screen, table_colour, pygame.Rect(0,10,1050,180))
+            pygame.draw.circle(screen, (255,0,0),[puckX, puckY], 30, 0)
+            pygame.display.flip()
 
+            # running = True
+
+            # while running:
+
+            #     for event in pygame.event.get():
+            #         if event.type == pygame.QUIT:
+            #             running = False
+            return screen
+
+        def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
+            pygame.draw.rect(screen, table_colour, pygame.Rect(0,10,1050,180))
+            blueScore = 0
+            RedScore = 0 
+            for x in pygameArrayRed:
+                xpos = x.split(",")[0]
+                ypos = x.split(",")[1]
+                drawX = float(xpos) * 0.35
+                drawY = float(ypos) * 0.5 
+
+                if drawY < 80: 
+                    RedScore += 4
+                elif drawY < 220:
+                    RedScore += 3
+                elif drawY < 350:
+                    RedScore += 2
+                elif drawY < 450:
+                    RedScore += 1
+                        
+                pygame.draw.circle(screen, (255,0,0),[int(drawY), int(drawX)], 4, 0) 
+            for x in pygameArrayBlue:
+                xpos = x.split(",")[0]
+                ypos = x.split(",")[1]
+                drawX = float(xpos) * 0.35
+                drawY = float(ypos) * 0.5
+
+                if drawY < 80: 
+                    blueScore += 4
+                elif drawY < 220:
+                    blueScore += 3
+                elif drawY < 350:
+                    blueScore += 2
+                elif drawY < 450:
+                    blueScore += 1
+                pygame.draw.circle(screen, (0,0,255),[int(drawY), int(drawX)], 4, 0)     
+            
+            pygame.draw.line(screen, (0,0,0), (80,10),(80,190), 1)
+            pygame.draw.line(screen, (0,0,0), (220,10),(220,190), 1)
+            pygame.draw.line(screen, (0,0,0), (350,10),(350,190), 1)
+            pygame.draw.line(screen, (0,0,0), (450,10),(450,190), 1)
+            pygame.display.flip()
+                
+            print ("Blue Score: " + str(blueScore))
+            print ("Red Score: " + str(RedScore))
+
+
+        pygame.init()
         while True:
+            
             shotCount = 0
             ret, frame = cap.read() 
             ret, frameCapLight = caplight.read() 
@@ -293,8 +387,10 @@ if cap.isOpened():
             if key == 115: #key "s"
                 #start Looking for pucks
                 print("Puck detection Initiallized")
+                
+                GameScreen = pygameInit()
                 tick = 0
-                puckDetection(key, tick) 
+                puckDetection(key, tick, GameScreen) 
 
             if key == 100: #key "d"
                 #send table corners to xano
@@ -303,7 +399,7 @@ if cap.isOpened():
             if key == 27: #key "esc"
                 break
 
-                
+    
 
          #↑↑↑↑↑↑——————————Write Program Above——————————↑↑↑↑↑↑
 

@@ -6,8 +6,8 @@ import re
 
 background_colour = (255,255,255)
 table_colour = (202,164,116)
-(width, height) = (2270, 520)
-
+(width, height) = (1050, 200) #108
+# 2762 * 2 /10
 #TCP IP Setup
 tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('Socket created')
