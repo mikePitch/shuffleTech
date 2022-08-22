@@ -323,6 +323,7 @@ if cap.isOpened():
             return screen
 
         def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
+            global shotCount
             pygame.draw.rect(screen, table_colour, pygame.Rect(0,10,1050,180))
             blueScore = 0
             RedScore = 0 
@@ -362,10 +363,23 @@ if cap.isOpened():
             pygame.draw.line(screen, (0,0,0), (220,10),(220,190), 1)
             pygame.draw.line(screen, (0,0,0), (350,10),(350,190), 1)
             pygame.draw.line(screen, (0,0,0), (450,10),(450,190), 1)
+
+            font = pygame.font.SysFont(None, 24)
+            blueScoreText = font.render('blueScore: ' +  str(blueScore), True, (0,0,0))
+            screen.blit(blueScoreText, (900,20))
+            redScoreText = font.render('redScore:' +  str(RedScore), True, (0,0,0))
+            screen.blit(redScoreText, (900,50))
+            blueScoreText = font.render('Turn Number:' + str(shotCount), True, (0,0,0))
+            screen.blit(blueScoreText, (900,80))
+
             pygame.display.flip()
                 
             print ("Blue Score: " + str(blueScore))
             print ("Red Score: " + str(RedScore))
+
+            # font = pygame.font.SysFont(None, 24)
+            # img = font.render('hello', True, (0,0,0))
+            # screen.blit(img, (20, 20))
 
 
         pygame.init()
