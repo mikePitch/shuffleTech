@@ -45,7 +45,7 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 caplight = cv2.VideoCapture(1)
 
 #check if connection with camera is successfully
@@ -244,8 +244,11 @@ if cap.isOpened():
                         centresBlue.append(appendString)
                         pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
                         pygameArrayBlue.append(pygameArrayBlueString)
+
+                    
             
                 #show Frame
+                cv2.imshow("input", frame)
                 cv2.imshow("flatframe", flatFrameClean)
                 cv2.imshow("puckframe", flatFrame)
                 cv2.imshow("redMask", maskRed)
