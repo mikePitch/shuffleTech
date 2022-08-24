@@ -6,7 +6,7 @@ import time
 
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(2)
 
 #check if connection with camera is successfully
 if cap.isOpened():
