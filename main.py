@@ -45,7 +45,7 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(3)
 caplight = cv2.VideoCapture(1)
 
 
