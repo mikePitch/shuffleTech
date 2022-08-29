@@ -258,12 +258,12 @@ def puckDetection(key, tick,GameScreen,tabCorners):
             
         # API THREAD                     
         try:
-            if slowDown == 3:
-                print("Attempting Thread")
-                # thread1 = Thread(target = CallAPI())
-                argss = (centresBlue,centresRed)
-                start_new_thread(CallAPI,argss)
-                slowDown = 0
+            # if slowDown == 3:
+            print("Attempting Thread")
+            # thread1 = Thread(target = CallAPI())
+            argss = (centresBlue,centresRed)
+            start_new_thread(CallAPI,argss)
+            slowDown = 0
         except Exception as e:
             print("An error occurred in the API thread: " + str(e))
             
