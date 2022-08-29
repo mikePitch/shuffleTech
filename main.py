@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import time
 import pygame
+import pyfirmata
 
 from _thread import *
 from requests.structures import CaseInsensitiveDict
@@ -45,8 +46,8 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(3)
-caplight = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(1)
+# caplight = cv2.VideoCapture(3)
 
 
 def findCornermarkers():
@@ -132,7 +133,13 @@ def breakBeamLogic(a, b):
 
 #————————————Start puck detection on s key—————————————————
 def puckDetection(key, tick,GameScreen,tabCorners):
-
+    # End of round variables
+    global iteration, sumOfPoints, passTrigger, killRound
+    iteration = 0
+    passTrigger = 0
+    sumOfPoints = 0
+    killRound = False 
+    
     tabCorners[0] = tabCorners[0].replace("(", "")
     tabCorners[0] = tabCorners[0].replace(")", "")
     tabCorners[1] = tabCorners[1].replace("(", "")
@@ -148,6 +155,8 @@ def puckDetection(key, tick,GameScreen,tabCorners):
     bottomRight = tuple(map(int, tabCorners[3].split(', ')))
     slowDown = 0
     while True:
+        if killRound:
+            return 1
         # print("Game tick: " + str(tick))
         tick += 1
         slowDown = slowDown + 1
@@ -255,30 +264,80 @@ def puckDetection(key, tick,GameScreen,tabCorners):
 
             #break loop
         key = cv2.waitKey(30)
+        
+        if shotCount >= 8:
+            print ('e ')
+            # End of round thread                     
+            try:
+                print("Attempting End of round Thread")
+                argss = (pygameArrayRed,pygameArrayBlue)
+                start_new_thread(endOfRound,argss)
+            
+            except Exception as e:
+                print("An error occurred in the end of round thread: " + str(e))
             
         # API THREAD                     
         try:
             # if slowDown == 3:
-            print("Attempting Thread")
+            # print("Attempting Thread")
             # thread1 = Thread(target = CallAPI())
             argss = (centresBlue,centresRed)
-            start_new_thread(CallAPI,argss)
+            # start_new_thread(CallAPI,argss)
             slowDown = 0
         except Exception as e:
             print("An error occurred in the API thread: " + str(e))
             
-        # BEAM DETECTION THREAD
-        try: 
-            # print("Attempting Beam Thread") 
-            argss = ("BeamThread", "BeamMe")
-            start_new_thread(breakBeamLogic,argss)
-            slowDown = 0
-        except Exception as e:
-            print("An error occurred in the Beam thread: " + str(e))
+        # BEAM DETECTION THREAD 
+        # NO LONGER IN USE
+        # try: 
+        #     # print("Attempting Beam Thread") 
+        #     argss = ("BeamThread", "BeamMe")
+        #     start_new_thread(breakBeamLogic,argss)
+        #     slowDown = 0
+        # except Exception as e:
+        #     print("An error occurred in the Beam thread: " + str(e))
         
         if key == 27:
             break
 #——————————————End Of Puck Detection———————————————— 
+
+
+def endOfRound(pygameArrayRed,pygameArrayBlue): 
+    global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound
+    killRound = False
+    arbitraryNumberOfGameTicks = 30
+    # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
+    
+    if passTrigger == 0:
+        passSumOfValues = sumOfPoints
+        
+    sumOfPoints = 0
+    
+    for x in pygameArrayRed:
+        xpos = x.split(",")[0]
+        ypos = x.split(",")[1]
+        sumOfPoints = sumOfPoints + int(xpos) + int(ypos)
+    
+    for x in pygameArrayBlue:
+        xpos = x.split(",")[0]
+        ypos = x.split(",")[1]
+        sumOfPoints = sumOfPoints + int(xpos) + int(ypos)
+    
+    print("Sum of points this tick: " + str(sumOfPoints))
+    print("Desired sum of game ticks: " + str(passSumOfValues))
+    
+    # checks if the sum is within the +-10 range
+    if (passSumOfValues - 10) <= sumOfPoints <= (passSumOfValues + 10):
+        print("No Movement Detected. Tick: " + str(passTrigger) )
+        passTrigger += 1
+        if passTrigger >= arbitraryNumberOfGameTicks: 
+            # Success the pucks have stopped
+            
+            killRound = True 
+    else: 
+        passTrigger = 0 
+        print("Pucks still moving mate")
+    
 
 def sendCornerLocations(tabCorners):
     print(tabCorners[0])
@@ -384,13 +443,6 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
 
     pygame.display.flip()
         
-    print ("Blue Score: " + str(blueScore))
-    print ("Red Score: " + str(RedScore))
-
-    # font = pygame.font.SysFont(None, 24)
-    # img = font.render('hello', True, (0,0,0))
-    # screen.blit(img, (20, 20))
-    
 def tableCalibration(tableCorners):
     puckLocationsFile = open("tableLocation.txt","w")
     tc = '-'.join(str(v) for v in tableCorners)
@@ -403,23 +455,69 @@ def readPuckFile():
     tabCorners = tc.split("-")
     return tabCorners
     
+def arduino_switch(aa,a):
+    global shotCount
+    shotCount = 0
+    print("Successfully entered arduino thread")
+    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
 
+    it = pyfirmata.util.Iterator(board)
+    it.start()
+
+    switchPin = board.digital[2]
+    switchPin.mode = pyfirmata.INPUT
+    
+    time.sleep(1)
+
+    while True:
+        sw = switchPin.read()
+        if sw is True:
+            board.digital[13].write(1)
+            shotCount += 1
+            print('Shot Number: ' + str(shotCount))
+
+            while True:
+                sw = switchPin.read()
+                if sw is False:
+                    break
+
+        else:
+            board.digital[13].write(0)
+
+    
+        
 def main():
     global shotCount
+    shotCount = 0
+    # Arduino Thread
+    try:
+        print("Attempting Arduino Thread")
+        # print ("attempting to enter turn thread")
+
+        argss = (0, 0)
+        start_new_thread(arduino_switch,argss)
+        
+        
+    except Exception as e:
+        print("An error occurred in the Arduino thread: " + str(e))
+        
     #check if connection with camera is successfully
     if cap.isOpened():
         ret, frame = cap.read()  #capture a frame from live video
         #check whether frame is successfully captured
         if ret:
+            
+            
+                
             print("Success : Captured frame")
             flatFrame = frame
             pygame.init()
             while True:
-                shotCount = 0
+                
                 ret, frame = cap.read() 
-                ret, frameCapLight = caplight.read() 
+                # ret, frameCapLight = caplight.read() 
                 cv2.imshow("Frame", frame)
-                cv2.imshow("Frame2", frameCapLight)
+                # cv2.imshow("Frame2", frameCapLight)
                 key = cv2.waitKey(30)
                 if key == 97: #key "a"
                     tabCorners = findCornermarkers()
@@ -433,7 +531,15 @@ def main():
                     
                     GameScreen = pygameInit()
                     tick = 0
-                    puckDetection(key, tick, GameScreen,tabCorners) 
+                    round = 1 
+                    while True:
+                        shotCount = 0
+                        print ("Round: " + str(round))
+                        print("Shot Count: " + str(shotCount))
+                        round = round + puckDetection(key, tick, GameScreen,tabCorners) 
+                        time.sleep(1)
+                        
+                        
                 if key == 100: #key "d"
                     #send table corners to xano
                     print("d pressed")
@@ -448,9 +554,27 @@ def main():
     else:
         print("Cannot open camera")
 
+def menu():
+    start = False
+    print('1: Menu')
+    print('2: Skip Main - Arduino Set Up')
+    while not start:
+        i = input('Select Option (1-2): ')
+        if i == '1':
+            start = True
+            main()
+        elif i == '2': 
+            start = True
+            arduino_switch(0,0)
+        else:
+            print("Not valid input")
 
 
-main()
+
+menu()
+
+
+
 cap.release()
 cv2.destroyAllWindows()
 
