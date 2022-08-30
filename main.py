@@ -46,8 +46,13 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
+<<<<<<< Updated upstream
 cap = cv2.VideoCapture(1)
 # caplight = cv2.VideoCapture(3)
+=======
+cap = cv2.VideoCapture(0)
+caplight = cv2.VideoCapture(1)
+>>>>>>> Stashed changes
 
 
 def findCornermarkers():
