@@ -45,14 +45,13 @@ topRight = [737,51]
 bottomLeft = [426,711]
 bottomRight = [872,695]
 
-#Create an object to hold reference to camera video capturing
-<<<<<<< Updated upstream
+
 cap = cv2.VideoCapture(1)
 # caplight = cv2.VideoCapture(3)
-=======
-cap = cv2.VideoCapture(0)
-caplight = cv2.VideoCapture(1)
->>>>>>> Stashed changes
+# =======
+# cap = cv2.VideoCapture(0)
+
+
 
 
 def findCornermarkers():
@@ -464,7 +463,7 @@ def arduino_switch(aa,a):
     global shotCount
     shotCount = 0
     print("Successfully entered arduino thread")
-    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
 
     it = pyfirmata.util.Iterator(board)
     it.start()
