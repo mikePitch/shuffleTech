@@ -162,10 +162,9 @@ def puckDetection(key, tick,GameScreen,tabCorners):
         if killRound:
             if Blue > Red:
                 BlueRounds += 1 
-                print("BLUE WINS!!")
             else: 
                 RedRounds += 1 
-                print("RED WINS!!")      
+   
             return 1
         # print("Game tick: " + str(tick))
         tick += 1
@@ -312,7 +311,7 @@ def puckDetection(key, tick,GameScreen,tabCorners):
 
 
 def endOfRound(pygameArrayRed,pygameArrayBlue): 
-    global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound
+    global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound, RedRounds, BlueRounds
     killRound = False
     arbitraryNumberOfGameTicks = 15
     # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
@@ -383,7 +382,7 @@ def pygameInit():
     return screen
 
 def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
-    global shotCount
+    global shotCount, killRound, Blue, Red 
     pygame.draw.rect(screen, (255,255,255), pygame.Rect(0,0,1350,200))
     pygame.draw.rect(screen, table_colour, pygame.Rect(0,10,1350,180))
     blueScore = 0
@@ -443,6 +442,7 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
     
 
     font = pygame.font.SysFont(None, 24)
+    Bigfont = pygame.font.SysFont(None, 48)
     blueScoreText = font.render('blueScore: ' +  str(blueScore), True, (0,0,0))
     screen.blit(blueScoreText, (900,20))
     redScoreText = font.render('redScore:' +  str(RedScore), True, (0,0,0))
@@ -450,7 +450,24 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
     blueScoreText = font.render('Turn Number:' + str(shotCount), True, (0,0,0))
     screen.blit(blueScoreText, (900,80))
 
-    global Blue, Red
+    RedRoundsText = font.render('Red Rounds:' + str(RedRounds), True, (0,0,0))
+    screen.blit(RedRoundsText, (25,25))
+    BlueRoundsText = font.render('Blue Rounds:' + str(BlueRounds), True, (0,0,0))
+    screen.blit(BlueRoundsText, (25,45))
+    
+    if killRound: 
+        if Blue > Red:
+            WinMessage = font.render('BLUE WINS 🥶' , True, (0,0,255))
+            screen.blit(WinMessage, (600,80))
+            pygame.display.flip()
+            time.sleep(3)
+        else:
+            WinMessage = font.render('RED WINS 🥵' , True, (255,0,0))
+            screen.blit(WinMessage, (600,80))
+            pygame.display.flip()
+            time.sleep(3)
+
+    
     Blue = blueScore
     Red = RedScore
     pygame.display.flip()
@@ -484,17 +501,15 @@ def arduino_switch(aa,a):
     while True:
         sw = switchPin.read()
         if sw is True:
-            board.digital[13].write(1)
             shotCount += 1
-            print('Shot Number: ' + str(shotCount))
+            # print('Shot Number: ' + str(shotCount))
 
             while True:
                 sw = switchPin.read()
                 if sw is False:
                     break
 
-        else:
-            board.digital[13].write(0)
+
 
     
         
