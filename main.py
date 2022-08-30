@@ -138,7 +138,7 @@ def breakBeamLogic(a, b):
 #————————————Start puck detection on s key—————————————————
 def puckDetection(key, tick,GameScreen,tabCorners):
     # End of round variables
-    global iteration, sumOfPoints, passTrigger, killRound
+    global iteration, sumOfPoints, passTrigger, killRound, BlueScore, RedScore, BlueRounds, RedRounds
     iteration = 0
     passTrigger = 0
     sumOfPoints = 0
@@ -160,6 +160,12 @@ def puckDetection(key, tick,GameScreen,tabCorners):
     slowDown = 0
     while True:
         if killRound:
+            if Blue > Red:
+                BlueRounds += 1 
+                print("BLUE WINS!!")
+            else: 
+                RedRounds += 1 
+                print("RED WINS!!")      
             return 1
         # print("Game tick: " + str(tick))
         tick += 1
@@ -270,7 +276,6 @@ def puckDetection(key, tick,GameScreen,tabCorners):
         key = cv2.waitKey(30)
         
         if shotCount >= 8:
-            print ('e ')
             # End of round thread                     
             try:
                 print("Attempting End of round Thread")
@@ -309,7 +314,7 @@ def puckDetection(key, tick,GameScreen,tabCorners):
 def endOfRound(pygameArrayRed,pygameArrayBlue): 
     global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound
     killRound = False
-    arbitraryNumberOfGameTicks = 30
+    arbitraryNumberOfGameTicks = 15
     # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
     
     if passTrigger == 0:
@@ -445,6 +450,9 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
     blueScoreText = font.render('Turn Number:' + str(shotCount), True, (0,0,0))
     screen.blit(blueScoreText, (900,80))
 
+    global Blue, Red
+    Blue = blueScore
+    Red = RedScore
     pygame.display.flip()
         
 def tableCalibration(tableCorners):
@@ -491,8 +499,10 @@ def arduino_switch(aa,a):
     
         
 def main():
-    global shotCount
+    global shotCount, RedRounds, BlueRounds
     shotCount = 0
+    RedRounds = 0
+    BlueRounds = 0
     # Arduino Thread
     try:
         print("Attempting Arduino Thread")
@@ -539,6 +549,8 @@ def main():
                     while True:
                         shotCount = 0
                         print ("Round: " + str(round))
+                        print("Red: " + str(RedRounds))
+                        print("Blue: " + str (BlueRounds))
                         print("Shot Count: " + str(shotCount))
                         round = round + puckDetection(key, tick, GameScreen,tabCorners) 
                         time.sleep(1)
