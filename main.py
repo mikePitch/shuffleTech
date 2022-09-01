@@ -46,10 +46,12 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 
-cap = cv2.VideoCapture(1)
-# caplight = cv2.VideoCapture(3)
-# =======
-# cap = cv2.VideoCapture(0)
+# Mike
+# cap = cv2.VideoCapture(1)
+
+# Caf
+cap = cv2.VideoCapture(0)
+
 
 
 
@@ -382,11 +384,15 @@ def pygameInit():
     return screen
 
 def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
-    global shotCount, killRound, Blue, Red 
+    global shotCount
     pygame.draw.rect(screen, (255,255,255), pygame.Rect(0,0,1350,200))
     pygame.draw.rect(screen, table_colour, pygame.Rect(0,10,1350,180))
+    screen.blit(tableImage, (0,0))
     blueScore = 0
     RedScore = 0 
+    
+    bluePuckImage = pygame.image.load('Assets/BluePuck.png')
+    redPuckImage = pygame.image.load('Assets/RedPuck.png')
     
     line5 = 165 * 0.3
     line4 = 524 * 0.3
@@ -412,7 +418,11 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
             
             # 2762
                 
-        pygame.draw.circle(screen, (255,0,0),[int(drawY), int(drawX + 10)], 9, 0) 
+        # pygame.draw.circle(screen, (255,0,0),[int(drawY), int(drawX + 10)], 9, 0) 
+        screen.blit(redPuckImage, (drawY,drawX))
+
+        
+        
     for x in pygameArrayBlue:
         xpos = x.split(",")[0]
         ypos = x.split(",")[1]
@@ -430,15 +440,18 @@ def pygameLoop(pygameArrayRed,pygameArrayBlue, screen):
         elif drawY < line1:
             blueScore += 1
             
-        pygame.draw.circle(screen, (0,0,255),[int(drawY ), int(drawX + 10)], 9, 0)     
+        # pygame.draw.circle(screen, (0,0,255),[int(drawY ), int(drawX + 10)], 9, 0)     
+        screen.blit(bluePuckImage, (drawY,drawX))
+        
+        
     
     
     # Line Drawing
-    pygame.draw.line(screen, (0,0,0), (line1,10),(line1,190), 1)
-    pygame.draw.line(screen, (0,0,0), (line2,10),(line2,190), 1)
-    pygame.draw.line(screen, (0,0,0), (line3,10),(line3,190), 1)
-    pygame.draw.line(screen, (0,0,0), (line4,10),(line4,190), 1)
-    pygame.draw.line(screen, (0,0,0), (line5,10),(line5,190), 1)
+    # pygame.draw.line(screen, (0,0,0), (line1,10),(line1,190), 1)
+    # pygame.draw.line(screen, (0,0,0), (line2,10),(line2,190), 1)
+    # pygame.draw.line(screen, (0,0,0), (line3,10),(line3,190), 1)
+    # pygame.draw.line(screen, (0,0,0), (line4,10),(line4,190), 1)
+    # pygame.draw.line(screen, (0,0,0), (line5,10),(line5,190), 1)
     
 
     font = pygame.font.SysFont(None, 24)
@@ -488,7 +501,7 @@ def arduino_switch(aa,a):
     global shotCount
     shotCount = 0
     print("Successfully entered arduino thread")
-    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
 
     it = pyfirmata.util.Iterator(board)
     it.start()
@@ -524,7 +537,7 @@ def main():
         # print ("attempting to enter turn thread")
 
         argss = (0, 0)
-        start_new_thread(arduino_switch,argss)
+        # start_new_thread(arduino_switch,argss)
         
         
     except Exception as e:
