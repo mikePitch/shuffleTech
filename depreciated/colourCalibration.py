@@ -27,7 +27,7 @@ def clickPoint(event, x, y, flags, param):
         print("HSV Value at ({},{}):{} ".format(x,y,colorsHSV))
         print(colorsHSV)
 # Read an image
-colourCalVid = cv2.VideoCapture(0)
+colourCalVid = cv2.VideoCapture(1)
 ret, ccFrame = colourCalVid.read()
 
 
@@ -43,6 +43,7 @@ while (True):
     while (True):
         cv2.imshow('Select_Puck_Colour', ccFrame)
         ccvHSV = cv2.cvtColor(ccFrame, cv2.COLOR_BGR2HSV)
+
         image = ccvHSV
         if cv2.waitKey(10) & 0xFF == 32:
             break

@@ -115,26 +115,26 @@ def CallAPI(centresBlue, centresRed):
     resp = requests.post(url, headers=headers, data=data)
     return(resp)
         
-def breakBeamLogic(a, b):
-    global shotCount
-    # print("Beam thread created")
-    ret, frameCapLight = caplight.read() #Captures Break Beam Camera
-    roiLight = frameCapLight[530: 570,530: 720]
-    blurLight = cv2.blur(roiLight,(1000,1000))
-    average_color_row = np.average(blurLight, axis=0)
-    average_color = np.average(average_color_row, axis=0)
-    redInt = int(average_color[2])
-    # cv2.imshow("frameligh", frameCapLight)
+# def breakBeamLogic(a, b):
+#     global shotCount
+#     # print("Beam thread created")
+#     ret, frameCapLight = caplight.read() #Captures Break Beam Camera
+#     roiLight = frameCapLight[530: 570,530: 720]
+#     blurLight = cv2.blur(roiLight,(1000,1000))
+#     average_color_row = np.average(blurLight, axis=0)
+#     average_color = np.average(average_color_row, axis=0)
+#     redInt = int(average_color[2])
+#     # cv2.imshow("frameligh", frameCapLight)
     
-    # print(redInt)
-    if redInt < 255:
-        shotCount += 1 
-        print("Shot Count: " + str(shotCount))
-        time.sleep(0.5)
+#     # print(redInt)
+#     if redInt < 255:
+#         shotCount += 1 
+#         print("Shot Count: " + str(shotCount))
+#         time.sleep(0.5)
         
 
-    # cv2.imshow("roiLight", roiLight)
-    # cv2.imshow("blurLight", blurLight)
+#     # cv2.imshow("roiLight", roiLight)
+#     # cv2.imshow("blurLight", blurLight)
     
 
 #————————————Start puck detection on s key—————————————————
