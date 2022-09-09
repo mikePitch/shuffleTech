@@ -495,6 +495,15 @@ def arduino_switch(aa,a):
     switchPin.mode = pyfirmata.INPUT
     
     time.sleep(1)
+    
+    
+    url = "https://elatedtwist.backendless.app/api/services/Game/shotPlayed"
+    headers = CaseInsensitiveDict()
+    headers["Content-Type"] = "application/json"
+    d = "3D25FC35-B227-4157-B084-B701A48E1DF7"   
+    o = requests.post(url, headers=headers,data=d)
+    requests.post(url, headers=headers,data=d)
+    
 
     while True:
         sw = switchPin.read()
