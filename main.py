@@ -201,11 +201,19 @@ def puckDetection(key, tick,GameScreen,tabCorners):
 
         #——————————————Red Mask————————————————
         #set the lower and upper bounds for the red hue (red hsv wraps)
-        lower_red = np.array([0,160,160])
+        # lower_red = np.array([0,160,160])
+        # upper_red = np.array([10,255,255])
+
+        # lower_red2 = np.array([170,160,160])
+        # upper_red2 = np.array([180,255,255])
+        
+        
+        lower_red = np.array([0,120,200])
         upper_red = np.array([10,255,255])
 
-        lower_red2 = np.array([170,160,160])
+        lower_red2 = np.array([170,120,200])
         upper_red2 = np.array([180,255,255])
+
 
         #create a mask for red colour using inRange function
         redMask2 = cv2.inRange(roi, lower_red2, upper_red2)
@@ -241,8 +249,10 @@ def puckDetection(key, tick,GameScreen,tabCorners):
 
         # #——————————————Blue Mask————————————————     
         #set the lower and upper bounds for the blue hue (red hsv wraps)
-        lower_blue = np.array([100,80,100])
-        upper_blue = np.array([140,200,255])
+        # lower_blue = np.array([100,80,100])
+        # upper_blue = np.array([140,200,255])
+        lower_blue = np.array([80,0,120])
+        upper_blue = np.array([150,220,240])
 
         #create a mask for blue colour using inRange function
         maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
