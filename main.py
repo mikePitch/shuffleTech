@@ -1,11 +1,14 @@
 #import things
+from ast import While
 from glob import glob
+from multiprocessing.connection import wait
 import requests
 import cv2
 import numpy as np
 import time
 import pygame
 import pyfirmata
+import json
 
 from _thread import *
 from requests.structures import CaseInsensitiveDict
@@ -51,10 +54,6 @@ bottomRight = [872,695]
 
 # Caf
 cap = cv2.VideoCapture(0)
-
-
-
-
 
 def findCornermarkers():
     print("Finding Table Corner Locations")
@@ -164,9 +163,11 @@ def puckDetection(key, tick,GameScreen,tabCorners):
         if killRound:
             if Blue > Red:
                 BlueRounds += 1 
+                time.sleep(1)
                 print("BLUE WINS!!")
             else: 
                 RedRounds += 1 
+                time.sleep(1)
                 print("RED WINS!!")      
             return 1
         # print("Game tick: " + str(tick))
@@ -512,7 +513,8 @@ def arduino_switch(aa,a):
 
     
         
-def main():
+def main(a):
+    cap = cv2.VideoCapture(0)
     global shotCount, RedRounds, BlueRounds
     shotCount = 0
     RedRounds = 0
@@ -523,7 +525,7 @@ def main():
         # print ("attempting to enter turn thread")
 
         argss = (0, 0)
-        # start_new_thread(arduino_switch,argss)
+        start_new_thread(arduino_switch,argss)
         
         
     except Exception as e:
@@ -575,6 +577,38 @@ def main():
                     print("d pressed")
                 if key == 27: #key "esc"
                     break
+                
+                if a == 1: 
+                    #start Looking for pucks
+                    print("Puck detection Initiallized")
+                    tabCorners = readPuckFile()
+                    
+                    GameScreen = pygameInit()
+                    tick = 0
+                    round = 1 
+                    while True:
+                        shotCount = 0
+                        print ("Round: " + str(round))
+                        print("Red: " + str(RedRounds))
+                        print("Blue: " + str (BlueRounds))
+                        print("Shot Count: " + str(shotCount))
+                        round = round + puckDetection(key, tick, GameScreen,tabCorners) 
+                        
+                        
+                        url = "https://elatedtwist.backendless.app/api/data/table"
+                        headers = CaseInsensitiveDict()
+                        headers["Content-Type"] = "application/json"
+                            
+                        resp = requests.get(url, headers=headers)
+                        
+                        parsed = json.loads(resp.content)
+                        
+                        if str(parsed[0]['state']) == "0":
+                            print("Going to Sleep")
+                            cap.release()
+                            cv2.destroyAllWindows()
+                            pygame.quit()
+                            sleepyMain()
             #↑↑↑↑↑↑——————————Write Program Above——————————↑↑↑↑↑↑
 
         #print error if frame capturing was unsuccessful
@@ -583,19 +617,48 @@ def main():
     # print error if the connection with camera is unsuccessful
     else:
         print("Cannot open camera")
+        
+        
+def sleepyMain():
+    sleep = True
+    while sleep:
+        print("Waiting for Backendless to wake me up")
+        
+        url = "https://elatedtwist.backendless.app/api/data/table"
+        headers = CaseInsensitiveDict()
+        headers["Content-Type"] = "application/json"
+            
+        resp = requests.get(url, headers=headers)
+        
+        parsed = json.loads(resp.content)
+        
+        if str(parsed[0]['state']) == "1":
+            sleep = False
+            print("Table: " + str(parsed[0]['tableNumber']) + " has awoken.")
+            
+            main(1)
+        else: 
+            print('zzzzzz')
+            time.sleep(2)
+    
+
+        
 
 def menu():
     start = False
     print('1: Menu')
     print('2: Skip Main - Arduino Set Up')
+    print('3: Enter Sleep State - Wait for startup')
     while not start:
-        i = input('Select Option (1-2): ')
+        i = input('Select Option (1-3): ')
         if i == '1':
             start = True
-            main()
+            main(0)
         elif i == '2': 
             start = True
             arduino_switch(0,0)
+        elif i == '3':
+            sleepyMain()
         else:
             print("Not valid input")
 
