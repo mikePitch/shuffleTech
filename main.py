@@ -98,7 +98,7 @@ def findCornermarkers():
 
 
 def CallAPI(centresBlue, centresRed):
-    print('API Thread Running')
+    # print('API Thread Running')
     url = "https://elatedtwist.backendless.app/api/data/PuckLocations"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
@@ -109,14 +109,14 @@ def CallAPI(centresBlue, centresRed):
     blueJSON = '{"locations":[' + blue + ']}'
     redJSON = '{"locations":[' + red + ']}'
 
-    data = '{"centresBlue1":' + blueJSON + ', "centresRed1": ' + redJSON + '}'
+    data = '{"TableID": 1, "centresBlue1":' + blueJSON + ', "centresRed1": ' + redJSON + '}'
 
     resp = requests.post(url, headers=headers, data=data)
     return(resp)
         
 def breakBeamLogic(a, b):
     global shotCount
-    # print("Beam thread created")
+    # print("Beam thread created")`1`
     ret, frameCapLight = caplight.read() #Captures Break Beam Camera
     roiLight = frameCapLight[530: 570,530: 720]
     blurLight = cv2.blur(roiLight,(1000,1000))
@@ -304,7 +304,7 @@ def puckDetection(key, tick,GameScreen,tabCorners):
             # print("Attempting Thread")
             # thread1 = Thread(target = CallAPI())
             argss = (centresBlue,centresRed)
-            # start_new_thread(CallAPI,argss)
+            start_new_thread(CallAPI,argss)
             slowDown = 0
         except Exception as e:
             print("An error occurred in the API thread: " + str(e))
@@ -507,12 +507,7 @@ def arduino_switch(aa,a):
     time.sleep(1)
     
     
-    url = "https://elatedtwist.backendless.app/api/services/Game/shotPlayed"
-    headers = CaseInsensitiveDict()
-    headers["Content-Type"] = "application/json"
-    d = "3D25FC35-B227-4157-B084-B701A48E1DF7"   
-    o = requests.post(url, headers=headers,data=d)
-    requests.post(url, headers=headers,data=d)
+   
     
 
     while True:
@@ -521,6 +516,12 @@ def arduino_switch(aa,a):
             board.digital[13].write(1)
             shotCount += 1
             print('Shot Number: ' + str(shotCount))
+            url = "https://elatedtwist.backendless.app/api/services/Game/shotPlayed"
+            headers = CaseInsensitiveDict()
+            headers["Content-Type"] = "application/json"
+            d = "3D25FC35-B227-4157-B084-B701A48E1DF7"   
+            o = requests.post(url, headers=headers,data=d)
+            print(o.status_code)
 
             while True:
                 sw = switchPin.read()
