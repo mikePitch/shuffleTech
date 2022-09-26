@@ -16,10 +16,6 @@ from requests.structures import CaseInsensitiveDict
 
 global shotCount
 
-
-
-
-
 # PYGAME Setup
 
 background_colour = (255,255,255)
@@ -29,8 +25,6 @@ table_colour = (202,164,116)
 
 puckX = 300
 puckY = 300
-
-
 
 #Set Variables
 #dimensions of table in mm
@@ -53,14 +47,10 @@ bottomRight = [872,695]
 
 
 # Mike
-cap = cv2.VideoCapture(2)
+# cap = cv2.VideoCapture(2)
 
 # Caf
-# cap = cv2.VideoCapture(0)
-
-
-    
-
+cap = cv2.VideoCapture(0)
 
 def findCornermarkers():
     print("Finding Table Corner Locations")
@@ -668,6 +658,61 @@ def sleepyMain():
             print('zzzzzz')
             time.sleep(2)
     
+    
+def colorCal():
+    # Read an image
+    colourCalVid = cv2.VideoCapture(0)
+    ret, ccFrame = colourCalVid.read()   
+    
+    def clickPoint(event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONUP :  # checks mouse click
+            colorsHSV = image[y, x]
+        
+            print("HSV Value at ({},{}):{} ".format(x,y,colorsHSV))
+            print(colorsHSV)
+            print("")
+    
+    cv2.namedWindow('Select_Puck_Colour')
+    cv2.setMouseCallback('Select_Puck_Colour', clickPoint)
+
+    if colourCalVid.isOpened():
+        ret, ccFrame = colourCalVid.read()  #capture a frame from live video
+        #check whether frame is successfully captured
+        if ret:       
+            print("Success : Captured frame")
+            flatFrame = ccFrame
+            while True:
+                cv2.imshow('Select_Puck_Colour', ccFrame)
+                ccvHSV = cv2.cvtColor(ccFrame, cv2.COLOR_BGR2HSV)
+                
+                ret, ccFrame = cap.read() 
+                image = ccvHSV
+                # ret, frameCapLight = caplight.read() 
+                if cv2.waitKey(10) & 0xFF == 32:
+                    break
+
+                if cv2.waitKey(10) & 0xFF == 27:
+                    break
+                
+                # cv2.imshow("Frame", ccFrame)
+                # cv2.imshow("Frame2", frameCapLight)
+                key = cv2.waitKey(30)
+                
+                if key == 27: #key "esc"
+                    break
+            
+    # if esc is pressed, close all windows.
+    cv2.destroyAllWindows()
+    
+   
+                
+
+
+    
+     
+ 
+    
+
 
         
 
@@ -676,6 +721,7 @@ def menu():
     print('1: Menu')
     print('2: Skip Main - Arduino Set Up')
     print('3: Enter Sleep State - Wait for startup')
+    print('4: Enter Colour Cal')
     while not start:
         i = input('Select Option (1-3): ')
         if i == '1':
@@ -686,6 +732,8 @@ def menu():
             arduino_switch(0,0)
         elif i == '3':
             sleepyMain()
+        elif i == '4':
+            colorCal()
 
         else:
             print("Not valid input")

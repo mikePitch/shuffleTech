@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 redLowerHue = 170
 redUpperHue = 10

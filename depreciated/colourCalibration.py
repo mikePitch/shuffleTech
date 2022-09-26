@@ -27,7 +27,7 @@ def clickPoint(event, x, y, flags, param):
         print("HSV Value at ({},{}):{} ".format(x,y,colorsHSV))
         print(colorsHSV)
 # Read an image
-colourCalVid = cv2.VideoCapture(1)
+colourCalVid = cv2.VideoCapture(0)
 ret, ccFrame = colourCalVid.read()
 
 
