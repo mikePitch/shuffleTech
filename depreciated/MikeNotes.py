@@ -1,12 +1,13 @@
 #------------------------------------------------
 """
 List of things we need
-    [ ]Computer - Windows or linux
-    [ ]Industrial Camera
-    [ ]Through Beam Photoelectric Sensor
-    [ ]Digital io module
-    [ ]TV
-    [ ]Touch Screen
+    [y]Computer - Windows or linux
+    [n]Industrial Camera
+    [y]Oak camera
+    [y]Through Beam Photoelectric Sensor
+    [y]Digital io module
+    [y]TV
+    [n]Touch Screen
 
 On Machine
     Dependecies

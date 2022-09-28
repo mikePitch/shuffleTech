@@ -47,10 +47,10 @@ bottomRight = [872,695]
 
 
 # Mike
-# cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(2)
 
 # Caf
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
 
 def findCornermarkers():
     print("Finding Table Corner Locations")
@@ -119,7 +119,7 @@ def puckDetection(key, tick,tabCorners):
     # End of round variables
     global iteration, sumOfPoints, passTrigger, killRound, BlueScore, RedScore, BlueRounds, RedRounds
     iteration = 0
-    passTrigger = 0
+    passTrigger = 0 
     sumOfPoints = 0
     killRound = False 
     
