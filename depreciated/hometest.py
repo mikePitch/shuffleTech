@@ -24,7 +24,7 @@ bottomLeft = [426,711]
 bottomRight = [872,695]
 
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture("shuffle_video.mpeg")
+cap = cv2.VideoCapture(0)
 
 #check if connection with camera is successfully
 if cap.isOpened():
