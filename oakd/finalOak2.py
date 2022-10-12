@@ -11,6 +11,7 @@ import pyfirmata
 import json
 import depthai as dai
 
+
 from _thread import *
 from requests.structures import CaseInsensitiveDict
 
@@ -46,6 +47,7 @@ camRgb.video.link(xoutVideo.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
     controlQueue = device.getInputQueue('control')
+    # controlQueue = device.tryGetAll()
 
   
     ctrl = dai.CameraControl()
@@ -224,7 +226,7 @@ with dai.Device(pipeline) as device:
             lower_red = np.array([0,100,150])
             upper_red = np.array([5,200,255])
 
-            lower_red2 = np.array([165,100,140])
+            lower_red2 = np.array([160,60,120])
             upper_red2 = np.array([180,200,255])
 
 
@@ -265,7 +267,7 @@ with dai.Device(pipeline) as device:
             # lower_blue = np.array([100,80,100])
             # upper_blue = np.array([140,200,255])
             lower_blue = np.array([90,100,120])
-            upper_blue = np.array([120,200,250])
+            upper_blue = np.array([120,250,250])
 
             #create a mask for blue colour using inRange function
             maskBlue = cv2.inRange(roi, lower_blue, upper_blue)

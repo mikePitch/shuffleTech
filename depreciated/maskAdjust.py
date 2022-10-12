@@ -4,8 +4,11 @@ import cv2
 from cv2 import imshow
 import numpy as np
 
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
 #Create an object to hold reference to camera video capturing
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 
 #check if connection with camera is successfully
 if cap.isOpened():
@@ -15,13 +18,83 @@ if cap.isOpened():
         #print success if frame capturing was successful
         print("Success : Captured frame")
 
-        while True:
-            ret, frame = cap.read() 
-            cv2.imshow("Frame", frame)
+        def puckDetection():
 
-            key = cv2.waitKey(30)
-            if key == 27:
-                break
+            lrh = 15
+            lrs = 1
+            lrv = 1
+            urh = 95
+            urs = 255
+            urv = 255
+
+
+            while True:
+                ret, frame = cap.read() 
+                frameHSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+                lower_red = np.array([lrh,lrs,lrv])
+                upper_red = np.array([urh,urs,urv])
+
+                maskRed = cv2.inRange(frameHSV, lower_red, upper_red)
+
+
+                cv2.imshow("Frame", frameHSV)
+                cv2.imshow("Mask", maskRed)
+
+                
+
+                key = cv2.waitKey(10)
+                if key == ord('q'):
+                    break
+
+                elif key in [ord('1'), ord('2'), ord('3')]:
+                    if key == ord('1'): editMask = "H"
+                    if key == ord('2'): editMask = "S"
+                    if key == ord('3'): editMask = "V"
+                    print("Editing", editMask, "press [ or ] ")
+
+                
+
+                elif key in [ord('['), ord(']'), ord('-'), ord('=')]:
+                    editUpperRange = False
+                    if key in [ord('='), ord(']')]: 
+                        change = 1
+                        if key == ord('='):
+                            editUpperRange = True
+
+                    if key in [ord('-'), ord('[')]: 
+                        change = -1
+                        if key == ord('-'):
+                            editUpperRange = True
+                    
+
+
+                    if editMask == "H":
+                        if editUpperRange == False:
+                            lrh = clamp(lrh + change, 0, 180)
+                            print("lrh:", lrh)
+                        else:
+                            urh = clamp(urh + change, 0, 180)
+                            print("urh:", urh)
+                    if editMask == "S":
+                        lrs = clamp(lrs + change, 0, 255)
+                        print("lrs:", lrs)
+                    if editMask == "V":
+                        lrv = clamp(lrv + change, 0, 255)
+                        print("lrv:", lrv)
+
+                # elif key == ord('a'):
+                #     lrh = clamp(lrh +1, 0, 180)
+                #     print("lrh:", lrh)
+
+                # elif key == ord('z'):
+                #     lrh = clamp(lrh -1, 0, 180)
+                #     print("lrh:", lrh)
+
+        puckDetection()
+
+
+
         #↓↓↓↓↓↓——————————Write Program In Below——————————↓↓↓↓↓↓
 
         # #set Variables
