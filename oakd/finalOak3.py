@@ -18,11 +18,10 @@ from requests.structures import CaseInsensitiveDict
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
-
-
-
 global shotCount
-#oakd Set up
+
+
+#-----------------oakd Set up-----------------
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -61,44 +60,44 @@ while not cameraFound:
         print("Camera Device error: " + str(e))
             
 
-controlQueue = device.getInputQueue('control')
-ctrl = dai.CameraControl()
-ctrl.setManualFocus(30)
+def cameraSettings():
+    controlQueue = device.getInputQueue('control')
 
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setManualFocus(30)
+    controlQueue.send(ctrl)
 
-ctrl = dai.CameraControl()
-ctrl.setManualExposure(13000, 400)
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setManualExposure(13000, 400)
+    controlQueue.send(ctrl)
 
 
-effect_mode = dai.CameraControl.EffectMode.NEGATIVE
-ctrl = dai.CameraControl()
-ctrl.setEffectMode(effect_mode)
-controlQueue.send(ctrl)
+    effect_mode = dai.CameraControl.EffectMode.NEGATIVE
+    ctrl = dai.CameraControl()
+    ctrl.setEffectMode(effect_mode)
+    controlQueue.send(ctrl)
 
-ctrl = dai.CameraControl()
-ctrl.setLumaDenoise(4)
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setLumaDenoise(4)
+    controlQueue.send(ctrl)
 
-ctrl = dai.CameraControl()
-ctrl.setChromaDenoise(0)
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setChromaDenoise(0)
+    controlQueue.send(ctrl)
 
-ctrl = dai.CameraControl()
-ctrl.setSaturation(4)
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setSaturation(4)
+    controlQueue.send(ctrl)
 
-ctrl = dai.CameraControl()
-ctrl.setManualWhiteBalance(4600)
-controlQueue.send(ctrl)
+    ctrl = dai.CameraControl()
+    ctrl.setManualWhiteBalance(4600)
+    controlQueue.send(ctrl)
 
+cameraSettings()
   
 video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
 #end of oakd setup
-
-
 
 # PYGAME Setup
 
