@@ -756,18 +756,6 @@ def colorCal():
     # if esc is pressed, close all windows.
     cv2.destroyAllWindows()
     
-
-                
-
-
-    
-    
-
-    
-
-
-        
-
 def menu():
     start = False
     print('1: Menu')
