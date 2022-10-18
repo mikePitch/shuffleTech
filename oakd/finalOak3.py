@@ -180,9 +180,14 @@ def findCornermarkers():
 
 def CallAPI(centresBlue, centresRed):
     # print('API Thread Running')
-    url = "https://elatedtwist.backendless.app/api/data/PuckLocations"
+    url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
+    
+    header ={
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
         
     blue = ",".join(centresBlue)
     red = ",".join(centresRed)
@@ -190,7 +195,7 @@ def CallAPI(centresBlue, centresRed):
     blueJSON = '{"locations":[' + blue + ']}'
     redJSON = '{"locations":[' + red + ']}'
 
-    data = '{"TableID": 1, "centresBlue1":' + blueJSON + ', "centresRed1": ' + redJSON + '}'
+    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + '}'
 
     resp = requests.post(url, headers=headers, data=data)
     return(resp)
@@ -518,7 +523,9 @@ def arduino_switch(aa,a):
     global shotCount
     shotCount = 0
     print("Successfully entered arduino thread")
-    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    
 
     it = pyfirmata.util.Iterator(board)
     it.start()
