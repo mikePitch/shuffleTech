@@ -19,6 +19,7 @@
 		<script>
       // Our Javascript will go here.
       const scene = new THREE.Scene();
+ 
       //Add Renderer
       const renderer = new THREE.WebGLRenderer();
       var container = document.getElementById('scene');
@@ -30,27 +31,37 @@
 
       //Geometries
       const puckCylinder = new THREE.CylinderGeometry( 30, 30, 20, 8, 2 );
+      const puckCoreCylinder = new THREE.CylinderGeometry( 28, 28, 18, 8, 2 );
       const tableGeometry = new THREE.BoxGeometry( 600, 100, 4500, 10, 2, 60  );
-      const tableCoreGeometry = new THREE.BoxGeometry( 580, 80, 4480 );
+      const tableCoreGeometry = new THREE.BoxGeometry( 598, 98, 4498 );
+      const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 80, 8, 2 );
 
       const tableWireframe = new THREE.WireframeGeometry( tableGeometry );
 
       //Materials
       const bpMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
+      const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
 
       const rpMaterial = new THREE.MeshBasicMaterial( {color: 0xfc0352, wireframe: true} );
 
-      const tableCoreMat = new THREE.MeshPhongMaterial( {color: 0x00ff00} );
+      const tableCoreMat = new THREE.MeshPhongMaterial( {color: 0x002200} );
+      const bpCoreMat = new THREE.MeshPhongMaterial( {color: 0x03b1fc} );
 
       
 
       const table = new THREE.LineSegments( tableWireframe );
       table.material.depthTest = false;
-      table.material.opacity = .2;
+      table.material.opacity = .1;
       table.material.transparent = true;
 
       //Meshes
-      const bp1 = new THREE.Mesh( puckCylinder, bpMaterial );
+
+      const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
+
+      var bp1 = new THREE.Group();
+        bp1.add( new THREE.Mesh( puckCylinder, bpMaterial ) );
+        bp1.add( new THREE.Mesh( puckCoreCylinder, bpCoreMat ) );
+      // const bp1 = new THREE.Mesh( puckCylinder, bpMaterial );
       const bp2 = new THREE.Mesh( puckCylinder, bpMaterial );
       const bp3 = new THREE.Mesh( puckCylinder, bpMaterial );
       const bp4 = new THREE.Mesh( puckCylinder, bpMaterial );
@@ -64,7 +75,7 @@
 
       //Lighting
       const lightAmb = new THREE.AmbientLight( 0x404040 ); // soft white light
-      const lightPoint = new THREE.PointLight( 0xffffff, 1, 100000, 2 );
+      const lightPoint = new THREE.PointLight( 0xffffff, .6, 100000, 2 );
       const directionalLight = new THREE.SpotLight( 0xffffff, 0.5 );
       scene.add( directionalLight );
       scene.add( lightPoint );
@@ -83,6 +94,7 @@
 
       //Scene
       scene.add( table );
+      scene.add( puckPointer );
       scene.add( tableCore );
       scene.add(bp1, bp2, bp3, bp4, rp1, rp2, rp3, rp4 );
 
@@ -98,7 +110,7 @@
       rp4.position.set(10000, 0, 0);
 
       table.position.set(300, -50, 2250);
-      tableCore.position.set(290, -40, 2240);
+      tableCore.position.set(299, -49, 2249);
 
 
 
@@ -119,6 +131,10 @@
         rp2.position.set(10000, 0, 0);
         rp3.position.set(10000, 0, 0);
         rp4.position.set(10000, 0, 0);
+        
+        const bpBest = [];
+        const rpBest = [];
+        
 
 
         let bpJSON = true;
@@ -126,7 +142,10 @@
 
         if (bpJSON) {
           // const bpObj = JSON.parse(bpJSON);
-          const bpObj = {"locations":[{"puck":[68,520,1]},{"puck":[18,220,1]},{"puck":[10,890,1]}]};
+          const bpObj = {"locations":[{"puck":[68,10,1]},{"puck":[68,520,1]},{"puck":[18,220,1]},{"puck":[10,890,1]}]};
+
+          const bpxv = [];
+          const bpyv = [];
           
           for (let i = 0; i < bpObj.locations.length; i++) {
             var bpx = 0;
@@ -134,18 +153,33 @@
             bpx = bpObj.locations[i].puck[0];
             bpy = bpObj.locations[i].puck[1];
             if (i == 0){
-              bp1.position.set(bpx, 0, bpy);
+              bp1.position.set(bpx, 10, bpy);
             }
             if (i == 1){
-              bp2.position.set(bpx, 0, bpy);
+              bp2.position.set(bpx, 10, bpy);
             }
             if (i == 2){
-              bp3.position.set(bpx, 0, bpy);
+              bp3.position.set(bpx, 10, bpy);
             }
             if (i == 3){
-              bp4.position.set(bpx, 0, bpy);
+              bp4.position.set(bpx, 10, bpy);
             }
+            bpxv.push(bpx);
+            bpyv.push(bpy);
           } 
+
+          //add arrow to best red shot
+          console.log(bpyv);
+          const bplowY = Math.min(...bpyv);
+          const bplowYindex = bpyv.indexOf(bplowY);
+
+          const bplowX = bpxv[bplowYindex];
+          // console.log(bplowX);
+          // console.log(bplowY);
+          bpBest.push(bplowX);
+          bpBest.push(bplowY);
+
+          
         }
 
         let rpJSON = true;
@@ -154,26 +188,58 @@
         if (rpJSON) {
           // const rpObj = JSON.parse(rpJSON);
           const rpObj = {"locations":[{"puck":[68,420,1]},{"puck":[18,120,1]},{"puck":[10,390,1]}]};
-          
+
+          const rpxv = [];
+          const rpyv = [];
+
           for (let i = 0; i < rpObj.locations.length; i++) {
             var rpx = 0;
             var rpy = 0;
             rpx = rpObj.locations[i].puck[0];
             rpy = rpObj.locations[i].puck[1];
             if (i == 0){
-              rp1.position.set(rpx, 0, rpy);
+              rp1.position.set(rpx, 10, rpy);
             }
             if (i == 1){
-              rp2.position.set(rpx, 0, rpy);
+              rp2.position.set(rpx, 10, rpy);
             }
             if (i == 2){
-              rp3.position.set(rpx, 0, rpy);
+              rp3.position.set(rpx, 10, rpy);
             }
             if (i == 3){
-              rp4.position.set(rpx, 0, rpy);
+              rp4.position.set(rpx, 10, rpy);
             }
+            rpxv.push(rpx);
+            rpyv.push(rpy);
           } 
+
+          //add arrow to best red shot
+          console.log(rpyv);
+          const lowY = Math.min(...rpyv);
+          const lowYindex = rpyv.indexOf(lowY);
+
+          const lowX = rpxv[lowYindex];
+
+          rpBest.push(lowX);
+          rpBest.push(lowY);
+
+          
+          // console.log(lowX);
+          // console.log(lowY);
+
         }
+        console.log(rpBest);
+        console.log(bpBest);
+
+        if (rpBest[1]<bpBest[1]){
+          puckPointer.position.set(rpBest[0], 80, rpBest[1]);
+        }
+
+        else{
+          puckPointer.position.set(bpBest[0], 80, bpBest[1]);
+        }
+
+
         
 
         renderer.render( scene, camera );
