@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+    <div id=container style="width: 100%; height: 100vh">
+      <div id="scene" style="
+      width: 100%;
+      height: 100%">
+      </div>
+
+    </div>
+		<script>
+      // Our Javascript will go here.
+      const scene = new THREE.Scene();
+        // const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 10000 );
+
+        const renderer = new THREE.WebGLRenderer();
+        // renderer.setSize( window.innerWidth, window.innerHeight );
+        // document.body.appendChild( renderer.domElement );
+
+
+          //Add Renderer
+
+         var container = document.getElementById('scene');
+         var w = container.offsetWidth;
+         var h = container.offsetHeight;
+         renderer.setSize(w, h);
+         container.appendChild(renderer.domElement);
+         const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
+
+
+        // const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        // const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        // const cube = new THREE.Mesh( geometry, material );
+        // scene.add( cube );
+
+        const geometry = new THREE.BoxGeometry( 600, 100, 4500, 10, 2, 90  );
+        const wireframe = new THREE.WireframeGeometry( geometry );
+        const table = new THREE.LineSegments( wireframe );
+        table.material.depthTest = false;
+        table.material.opacity = .25;
+        table.material.transparent = true;
+
+        const puckCylinder = new THREE.CylinderGeometry( 30, 30, 20, 8, 2 );
+        const bpMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
+        const rpMaterial = new THREE.MeshBasicMaterial( {color: 0xfc0352, wireframe: true} );
+
+        const bp1 = new THREE.Mesh( puckCylinder, bpMaterial );
+        const bp2 = new THREE.Mesh( puckCylinder, bpMaterial );
+        const bp3 = new THREE.Mesh( puckCylinder, bpMaterial );
+        const bp4 = new THREE.Mesh( puckCylinder, bpMaterial );
+
+
+        const rp1 = new THREE.Mesh( puckCylinder, rpMaterial );
+        const rp2 = new THREE.Mesh( puckCylinder, rpMaterial );
+        const rp3 = new THREE.Mesh( puckCylinder, rpMaterial );
+        const rp4 = new THREE.Mesh( puckCylinder, rpMaterial );
+
+
+        scene.add( table );
+        scene.add(bp1, bp2, bp3, bp4, rp1, rp2, rp3, rp4 );
+        bp1.position.set(10000, 0, 0);
+        bp2.position.set(10000, 0, 0);
+        bp3.position.set(10000, 0, 0);
+        bp4.position.set(10000, 0, 0);
+
+        rp1.position.set(10000, 0, 0);
+        rp2.position.set(10000, 0, 0);
+        rp3.position.set(10000, 0, 0);
+        rp4.position.set(10000, 0, 0);
+
+        table.position.set(300, -50, 2250);
+
+        camera.position.x = 1700;
+        camera.position.y = 1000;
+        camera.position.z = 0;
+        camera.lookAt(300, -200, 1200);
+        
+
+        // const bpObj = JSON.parse(bpJSON);
+        
+        
+        function animate() {
+          
+          
+          requestAnimationFrame( animate );
+          
+          bp1.position.set(10000, 0, 0);
+          bp2.position.set(10000, 0, 0);
+          bp3.position.set(10000, 0, 0);
+          bp4.position.set(10000, 0, 0);
+
+          rp1.position.set(10000, 0, 0);
+          rp2.position.set(10000, 0, 0);
+          rp3.position.set(10000, 0, 0);
+          rp4.position.set(10000, 0, 0);
+
+
+          // let bpJSON = true;
+          let bpJSON = component.bluePucks;
+          console.log(bpJSON);
+          if (bpJSON) {
+            console.log ("in if");
+            const bpObj = JSON.parse(bpJSON);
+            // const bpObj = {"locations":[{"puck":[68,520,1]},{"puck":[18,220,1]},{"puck":[10,890,1]}]};
+            
+            for (let i = 0; i < bpObj.locations.length; i++) {
+              var bpx = 0;
+              var bpy = 0;
+              bpx = bpObj.locations[i].puck[0];
+              bpy = bpObj.locations[i].puck[1];
+              if (i == 0){
+                bp1.position.set(bpx, 0, bpy);
+              }
+              if (i == 1){
+                bp2.position.set(bpx, 0, bpy);
+              }
+              if (i == 2){
+                bp3.position.set(bpx, 0, bpy);
+              }
+              if (i == 3){
+                bp4.position.set(bpx, 0, bpy);
+              }
+            } 
+          }
+
+          // let rpJSON = true;
+          let rpJSON = component.redPucks;
+          console.log(rpJSON);
+          if (rpJSON) {
+            console.log ("in if");
+            const rpObj = JSON.parse(rpJSON);
+            // const rpObj = {"locations":[{"puck":[68,420,1]},{"puck":[18,120,1]},{"puck":[10,390,1]}]};
+            
+            for (let i = 0; i < rpObj.locations.length; i++) {
+              var rpx = 0;
+              var rpy = 0;
+              rpx = rpObj.locations[i].puck[0];
+              rpy = rpObj.locations[i].puck[1];
+              if (i == 0){
+                rp1.position.set(rpx, 0, rpy);
+              }
+              if (i == 1){
+                rp2.position.set(rpx, 0, rpy);
+              }
+              if (i == 2){
+                rp3.position.set(rpx, 0, rpy);
+              }
+              if (i == 3){
+                rp4.position.set(rpx, 0, rpy);
+              }
+            } 
+          }
+          
+
+          renderer.render( scene, camera );
+        }
+        animate();
+
+		</script>
+	</body>
+</html>

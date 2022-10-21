@@ -523,8 +523,8 @@ def arduino_switch(aa,a):
     global shotCount
     shotCount = 0
     print("Successfully entered arduino thread")
-    # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    # board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
     
 
     it = pyfirmata.util.Iterator(board)
