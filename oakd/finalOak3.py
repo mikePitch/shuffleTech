@@ -183,7 +183,7 @@ def CallAPI(centresBlue, centresRed):
     url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
-    
+    global shotPlayed
     header ={
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -195,7 +195,10 @@ def CallAPI(centresBlue, centresRed):
     blueJSON = '{"locations":[' + blue + ']}'
     redJSON = '{"locations":[' + red + ']}'
 
-    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + '}'
+    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": ' + shotPlayed + '}'
+    
+    if shotPlayed:
+        shotPlayed = False
 
     resp = requests.post(url, headers=headers, data=data)
     return(resp)
@@ -521,6 +524,7 @@ def readPuckFile():
     
 def arduino_switch(aa,a):
     global shotCount
+    global shotPlayed
     shotCount = 0
     print("Successfully entered arduino thread")
     board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
@@ -540,6 +544,7 @@ def arduino_switch(aa,a):
         if sw is True:
             # board.digital[13].write(1)
             shotCount += 1
+            shotPlayed = False
             print('Shot Number: ' + str(shotCount))
             url = "https://elatedtwist.backendless.app/api/services/Game/shotPlayed"
             headers = CaseInsensitiveDict()
@@ -559,7 +564,8 @@ def arduino_switch(aa,a):
         
 def main(a):
     # cap = cv2.VideoCapture(0)
-    global shotCount, RedRounds, BlueRounds
+    global shotCount, RedRounds, BlueRounds, shotPlayed
+    shotPlayed = False
     shotCount = 0
     RedRounds = 0
     BlueRounds = 0
