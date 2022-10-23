@@ -9,6 +9,10 @@
 	</head>
 	<body>
 		<script src="js/three.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js"></script>
+    <script src="js/rhill-voronoi-core.js"></script>
+
     <div id=container style="width: 100%; height: 100vh">
       <div id="scene" style="
       width: 100%;
@@ -17,8 +21,13 @@
 
     </div>
 		<script>
+
+
+
+      
       // Our Javascript will go here.
       const scene = new THREE.Scene();
+
  
       //Add Renderer
       const renderer = new THREE.WebGLRenderer();
@@ -27,90 +36,133 @@
       var h = container.offsetHeight;
       renderer.setSize(w, h);
       container.appendChild(renderer.domElement);
+      
+      
+
+      //Camera
       const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
+      camera.position.x = 1000;
+      camera.position.y = 1000;
+      camera.position.z = -500;
 
-      //Geometries
-      const puckCylinder = new THREE.CylinderGeometry( 30, 30, 20, 8, 2 );
-      const puckCoreCylinder = new THREE.CylinderGeometry( 28, 28, 18, 8, 2 );
-      const tableGeometry = new THREE.BoxGeometry( 600, 100, 4500, 10, 2, 60  );
-      const tableCoreGeometry = new THREE.BoxGeometry( 598, 98, 4498 );
-      const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 80, 8, 2 );
+      //controls
+      var controls = new THREE.OrbitControls(camera, container);
 
-      const tableWireframe = new THREE.WireframeGeometry( tableGeometry );
+      //Lights
+      const lightAmb = new THREE.AmbientLight( 0x404040, 1 ); // soft white light
+      const lightPoint = new THREE.PointLight( 0xffffff, 2, 100000, 2 );
 
-      //Materials
-      const bpMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
-      const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
+      scene.add( lightPoint );
+      lightPoint.position.set( -1000, 550, -2250 );
 
-      const rpMaterial = new THREE.MeshBasicMaterial( {color: 0xfc0352, wireframe: true} );
-
-      const tableCoreMat = new THREE.MeshPhongMaterial( {color: 0x002200} );
-      const bpCoreMat = new THREE.MeshPhongMaterial( {color: 0x03b1fc} );
+      scene.add( lightAmb );
 
       
 
-      const table = new THREE.LineSegments( tableWireframe );
-      table.material.depthTest = false;
-      table.material.opacity = .1;
-      table.material.transparent = true;
+      //Table
+      const tableGeometry = new THREE.BoxGeometry( 600, 100, 4500, 10, 2, 60  );
+      const tableCoreGeometry = new THREE.BoxGeometry( 598, 98, 4498 );
 
-      //Meshes
-
-      const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
-
-      var bp1 = new THREE.Group();
-        bp1.add( new THREE.Mesh( puckCylinder, bpMaterial ) );
-        bp1.add( new THREE.Mesh( puckCoreCylinder, bpCoreMat ) );
-      // const bp1 = new THREE.Mesh( puckCylinder, bpMaterial );
-      const bp2 = new THREE.Mesh( puckCylinder, bpMaterial );
-      const bp3 = new THREE.Mesh( puckCylinder, bpMaterial );
-      const bp4 = new THREE.Mesh( puckCylinder, bpMaterial );
-
-      const rp1 = new THREE.Mesh( puckCylinder, rpMaterial );
-      const rp2 = new THREE.Mesh( puckCylinder, rpMaterial );
-      const rp3 = new THREE.Mesh( puckCylinder, rpMaterial );
-      const rp4 = new THREE.Mesh( puckCylinder, rpMaterial );
+      const tableCoreMat = new THREE.MeshPhongMaterial( {color: 0x000000} );
+      const tableMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, wireframe: true} );
 
       const tableCore = new THREE.Mesh( tableCoreGeometry, tableCoreMat );
+      const tableOuter = new THREE.Mesh( tableGeometry, tableMaterial );
 
-      //Lighting
-      const lightAmb = new THREE.AmbientLight( 0x404040 ); // soft white light
-      const lightPoint = new THREE.PointLight( 0xffffff, .6, 100000, 2 );
-      const directionalLight = new THREE.SpotLight( 0xffffff, 0.5 );
-      scene.add( directionalLight );
-      scene.add( lightPoint );
-      lightPoint.position.set( -1000, 550, -2250 );
-      scene.add( lightAmb );
- 
+      scene.add( tableOuter, tableCore );
+
+      tableOuter.position.set(300, -50, 2250);
+      tableCore.position.set(299, -50, 2249);
 
 
 
 
-      //Camera
-      camera.position.x = 1700;
-      camera.position.y = 1000;
-      camera.position.z = 0;
-      camera.lookAt(300, -200, 1200);
+      //Pucks
+      const puckCylinder = new THREE.CylinderGeometry( 30, 30, 20, 8, 2 );
+      const puckCoreCylinder = new THREE.CylinderGeometry( 28, 28, 18, 8, 2 );
+
+      //Red Puck
+      const rpMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, wireframe: true} );
+      const rpCoreMat = new THREE.MeshPhongMaterial( {color: 0xfc0352} );
+      //Create Red Pucks
+      var rp1 = new THREE.Group();
+      var rp2 = new THREE.Group();
+      var rp3 = new THREE.Group();
+      var rp4 = new THREE.Group();
+      const allRedPucks = [rp1, rp2, rp3, rp4];
+      for (let i = 0; i < allRedPucks.length; i++) {
+        allRedPucks[i].add( new THREE.Mesh( puckCylinder, rpMaterial ) );
+        allRedPucks[i].add( new THREE.Mesh( puckCoreCylinder, rpCoreMat ) );
+      }
+
+        
+
+      //Blue Puck
+      const bpMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
+      const bpCoreMat = new THREE.MeshPhongMaterial( {color: 0x03b1fc} );
+      //create Blue Pucks
+      var bp1 = new THREE.Group();
+      var bp2 = new THREE.Group();
+      var bp3 = new THREE.Group();
+      var bp4 = new THREE.Group();
+      const allBluePucks = [bp1, bp2, bp3, bp4];
+      for (let i = 0; i < allBluePucks.length; i++) {
+        allBluePucks[i].add( new THREE.Mesh( puckCylinder, bpMaterial ) );
+        allBluePucks[i].add( new THREE.Mesh( puckCoreCylinder, bpCoreMat ) );
+      }
+
+
+
+      const allPucks = allBluePucks.concat(allRedPucks);
+      for (let i = 0; i < allPucks.length; i++) {
+        scene.add(allPucks[i]);
+        allPucks[i].position.set(10000, 0, 0);
+      }
+
+
+
+
+      //Lines
+      const scoreLines = [60,165,524,1054,1768,2762]; // y value of lines
+      const lineGeometries = [];
+      for (let i = 0; i < scoreLines.length; i++) {
+        const points = [];
+        const lineY = scoreLines[i];
+        points.push( new THREE.Vector3( 0, 1, lineY ) );
+        points.push( new THREE.Vector3( 600, 1, lineY ) );
+        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+        lineGeometries.push(geometry);
+      } 
+      const material = new THREE.LineBasicMaterial( { 	color: 0x00ffff } );
+      for (let i = 0; i < lineGeometries.length; i++) {
+        const line = new THREE.Line( lineGeometries[i], material );
+        scene.add( line ); //adding each line to the scene
+      } 
+
+
+      //Markers
+      const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 80, 8, 2 );
+      const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
+      const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
+      scene.add( puckPointer );
+
 
       //Scene
-      scene.add( table );
-      scene.add( puckPointer );
-      scene.add( tableCore );
-      scene.add(bp1, bp2, bp3, bp4, rp1, rp2, rp3, rp4 );
 
 
-      bp1.position.set(10000, 0, 0);
-      bp2.position.set(10000, 0, 0);
-      bp3.position.set(10000, 0, 0);
-      bp4.position.set(10000, 0, 0);
 
-      rp1.position.set(10000, 0, 0);
-      rp2.position.set(10000, 0, 0);
-      rp3.position.set(10000, 0, 0);
-      rp4.position.set(10000, 0, 0);
 
-      table.position.set(300, -50, 2250);
-      tableCore.position.set(299, -49, 2249);
+
+
+      //gui
+      var gui = new dat.GUI();
+      gui.add(lightPoint, 'intensity', 0, 10, 0.01);
+      gui.add( camera.position , 'z', -10000, 10000 ).step(10)
+      gui.add( camera.position , 'x', -10000, 10000 ).step(10)
+      gui.add( camera.position , 'y', -10000, 10000 ).step(10)
+
+
+
 
 
 
@@ -121,6 +173,8 @@
         
         
         requestAnimationFrame( animate );
+
+        camera.lookAt(300, -200, 1200);
         
         bp1.position.set(10000, 0, 0);
         bp2.position.set(10000, 0, 0);
@@ -142,7 +196,7 @@
 
         if (bpJSON) {
           // const bpObj = JSON.parse(bpJSON);
-          const bpObj = {"locations":[{"puck":[68,10,1]},{"puck":[68,520,1]},{"puck":[18,220,1]},{"puck":[10,890,1]}]};
+          const bpObj = {"locations":[{"puck":[518,10,1]},{"puck":[238,820,1]},{"puck":[180,220,1]},{"puck":[94,1890,1]}]};
 
           const bpxv = [];
           const bpyv = [];
@@ -187,7 +241,7 @@
 
         if (rpJSON) {
           // const rpObj = JSON.parse(rpJSON);
-          const rpObj = {"locations":[{"puck":[68,420,1]},{"puck":[18,120,1]},{"puck":[10,390,1]}]};
+          const rpObj = {"locations":[{"puck":[468,420,1]},{"puck":[218,1420,1]},{"puck":[40,390,1]}]};
 
           const rpxv = [];
           const rpyv = [];
@@ -212,6 +266,58 @@
             rpxv.push(rpx);
             rpyv.push(rpy);
           } 
+
+
+          //veronoi
+
+          // var sites = [{x:300,y:300}, {x:100,y:100}, {x:200,y:500}, {x:250,y:450}, {x:600,y:150}];
+          // // xl, xr means x left, x right
+          // // yt, yb means y top, y bottom
+          // var bbox = {xl:0, xr:600, yt:0, yb:3500};
+          // var voronoi = new Voronoi();
+          // // pass an object which exhibits xl, xr, yt, yb properties. The bounding
+          // // box will be used to connect unbound edges, and to close open cells
+          // result = voronoi.compute(sites, bbox);
+          // // render, further analyze, etc.
+
+
+          var sites = [ {x: 200, y: 200}, {x: 50, y: 250}, {x: 400, y: 100} ];
+
+
+
+
+
+
+
+          var voronoi = new Voronoi();
+          var bbox = {xl:0, xr:600, yt:0, yb:3500};
+          var diagram = voronoi.compute(sites, bbox);
+          console.log(sites);
+
+          var voronoiPoints = diagram.vertices;
+          var voronoiPointsGeom = new THREE.BufferGeometry().setFromPoints(voronoiPoints);
+          var voronoiPointsMat = new THREE.PointsMaterial({color: "magenta", size: 3});
+          var voronoiPoints = new THREE.Points(voronoiPointsGeom, voronoiPointsMat);
+          scene.add(voronoiPoints);
+
+          var voronoiLinesPoints = [];
+          var voronoiLinesColors = [];
+          diagram.edges.forEach(ed => { 
+              voronoiLinesPoints.push(ed.va.x, ed.va.y, 0, ed.vb.x, ed.vb.y, 0, ed.va.x, ed.va.y, 10, ed.vb.x, ed.vb.y, 10);
+              voronoiLinesColors.push(1, 1, 0, 1, 1, 0, 0, 0.25, 0.25, 0, 0.25, 0.25);
+          });
+          var voronoiLinesGeom = new THREE.BufferGeometry();
+          voronoiLinesGeom.setAttribute("position", new THREE.Float32BufferAttribute(voronoiLinesPoints, 3));
+          voronoiLinesGeom.setAttribute("color", new THREE.Float32BufferAttribute(voronoiLinesColors, 3));
+          var voronoiLinesMat = new THREE.LineBasicMaterial({vertexColors: true});
+          var voronoiLines = new THREE.LineSegments(voronoiLinesGeom, voronoiLinesMat);
+          scene.add(voronoiLines);
+
+          
+
+          // console.log(result)
+
+
 
           //add arrow to best red shot
           console.log(rpyv);
