@@ -178,16 +178,25 @@ def findCornermarkers():
     return tableCorners
 
 
-def CallAPI(centresBlue, centresRed):
+def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
     # print('API Thread Running')
     url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
-    global shotPlayed
-    header ={
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+    global shotPlayed, shotFinished, shotActive, sumOfPoints
+    if shotPlayed:
+        print("Shot played")
+        shotActive = True
+    
+    if shotActive and not shotFinished:                 
+        try:
+            # print("Attempting End of round Thread")
+            argss = (pygameArrayRed,pygameArrayBlue)
+            start_new_thread(endOfRound,argss)
+        
+        except Exception as e:
+            print("An error occurred in the end of round thread: " + str(e)) 
+       
         
     blue = ",".join(centresBlue)
     red = ",".join(centresRed)
@@ -195,12 +204,22 @@ def CallAPI(centresBlue, centresRed):
     blueJSON = '{"locations":[' + blue + ']}'
     redJSON = '{"locations":[' + red + ']}'
 
-    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": ' + shotPlayed + '}'
-    
+    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "' + str(shotPlayed) + '","shotFinished": "' + str(shotFinished) + '"}'
+    # print(data)
     if shotPlayed:
         shotPlayed = False
-
-    resp = requests.post(url, headers=headers, data=data)
+    if shotFinished:
+        shotFinished = False 
+        sumOfPoints = 0
+        shotActive = False
+        print("stopping")
+    
+    
+    resp = 0
+    if shotActive:
+        print("Sending Data")
+        resp = requests.post(url, headers=headers, data=data)
+    
     return(resp)
         
 
@@ -209,7 +228,8 @@ def CallAPI(centresBlue, centresRed):
 #————————————Start puck detection on s key—————————————————
 def puckDetection(key, tick,tabCorners):
     # End of round variables
-    global iteration, sumOfPoints, passTrigger, killRound, BlueScore, RedScore, BlueRounds, RedRounds
+    global iteration, sumOfPoints, passTrigger, killRound, BlueRounds, RedRounds
+    
     iteration = 0
     passTrigger = 0 
     sumOfPoints = 0
@@ -235,8 +255,8 @@ def puckDetection(key, tick,tabCorners):
     
 
     while True:
-        if killRound:  
-            return 1
+        # if killRound:  
+        #     return 1
         # print("Game tick: " + str(tick))
         tick += 1
         slowDown = slowDown + 1
@@ -421,22 +441,22 @@ def puckDetection(key, tick,tabCorners):
             #break loop
         key = cv2.waitKey(30)
         
-        if shotCount >= 8:
-            # End of round thread                     
-            try:
-                print("Attempting End of round Thread")
-                argss = (pygameArrayRed,pygameArrayBlue)
-                start_new_thread(endOfRound,argss)
+        # if shotCount >= 8:
+        #     # End of round thread                     
+        #     try:
+        #         print("Attempting End of round Thread")
+        #         argss = (pygameArrayRed,pygameArrayBlue)
+        #         start_new_thread(endOfRound,argss)
             
-            except Exception as e:
-                print("An error occurred in the end of round thread: " + str(e))
+        #     except Exception as e:
+        #         print("An error occurred in the end of round thread: " + str(e))
             
         # API THREAD                     
         try:
             # if slowDown == 3:
             # print("Attempting Thread")
             # thread1 = Thread(target = CallAPI())
-            argss = (centresBlue,centresRed)
+            argss = (centresBlue,centresRed,pygameArrayRed,pygameArrayBlue)
             start_new_thread(CallAPI,argss)
             slowDown = 0
         except Exception as e:
@@ -457,8 +477,9 @@ def puckDetection(key, tick,tabCorners):
 #——————————————End Of Puck Detection———————————————— 
 
 
+# No longer detects end of round. Now just detects end of turn. end of round handled on the backendless side
 def endOfRound(pygameArrayRed,pygameArrayBlue): 
-    global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound
+    global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound, shotFinished
     killRound = False
     arbitraryNumberOfGameTicks = 5
     # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
@@ -478,37 +499,38 @@ def endOfRound(pygameArrayRed,pygameArrayBlue):
         ypos = x.split(",")[1]
         sumOfPoints = sumOfPoints + int(xpos) + int(ypos)
     
-    print("Sum of points this tick: " + str(sumOfPoints))
-    print("Desired sum of game ticks: " + str(passSumOfValues))
+    # print("Sum of points this tick: " + str(sumOfPoints))
+    # print("Desired sum of game ticks: " + str(passSumOfValues))
     
     # checks if the sum is within the +-10 range
     if (passSumOfValues - 10) <= sumOfPoints <= (passSumOfValues + 10):
-        print("No Movement Detected. Tick: " + str(passTrigger) )
+        # print("No Movement Detected. Tick: " + str(passTrigger) )
         passTrigger += 1
         if passTrigger >= arbitraryNumberOfGameTicks: 
             # Success the pucks have stopped
             
             killRound = True 
+            shotFinished = True
     else: 
         passTrigger = 0 
-        print("Pucks still moving mate")
+        # print("Pucks still moving mate")
     
 
-def sendCornerLocations(tabCorners):
-    print(tabCorners[0])
+# def sendCornerLocations(tabCorners):
+#     print(tabCorners[0])
 
-    topLeft = str(tabCorners[0])
-    topRight = str(tabCorners[1])
-    bottomLeft = str(tabCorners[2])
-    bottomRight = str(tabCorners[3])
+#     topLeft = str(tabCorners[0])
+#     topRight = str(tabCorners[1])
+#     bottomLeft = str(tabCorners[2])
+#     bottomRight = str(tabCorners[3])
 
-    url = 'https://xqmp-ydra-x0sy.a2.xano.io/api:0WTzvDfT/getCoods'
-    myobj = {'topLeft': topLeft,'topRight': topRight, 'bottomLeft': bottomLeft, 'bottomRight': bottomRight}
+#     url = 'https://xqmp-ydra-x0sy.a2.xano.io/api:0WTzvDfT/getCoods'
+#     myobj = {'topLeft': topLeft,'topRight': topRight, 'bottomLeft': bottomLeft, 'bottomRight': bottomRight}
 
-    x = requests.post(url, json = myobj)
-    print(x)
+#     x = requests.post(url, json = myobj)
+#     print(x)
 
-    print("sendCornerLocations() run")  
+#     print("sendCornerLocations() run")  
 
 def tableCalibration(tableCorners):
     puckLocationsFile = open("tableLocation.txt","w")
@@ -527,8 +549,8 @@ def arduino_switch(aa,a):
     global shotPlayed
     shotCount = 0
     print("Successfully entered arduino thread")
-    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    # board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem101')
     
 
     it = pyfirmata.util.Iterator(board)
@@ -544,14 +566,9 @@ def arduino_switch(aa,a):
         if sw is True:
             # board.digital[13].write(1)
             shotCount += 1
-            shotPlayed = False
+            shotPlayed = True
+            
             print('Shot Number: ' + str(shotCount))
-            url = "https://elatedtwist.backendless.app/api/services/Game/shotPlayed"
-            headers = CaseInsensitiveDict()
-            headers["Content-Type"] = "application/json"
-            d = "3D25FC35-B227-4157-B084-B701A48E1DF7"   
-            o = requests.post(url, headers=headers,data=d)
-            print(o.status_code)
 
             while True:
                 sw = switchPin.read()
@@ -564,14 +581,16 @@ def arduino_switch(aa,a):
         
 def main(a):
     # cap = cv2.VideoCapture(0)
-    global shotCount, RedRounds, BlueRounds, shotPlayed
+    global shotCount, RedRounds, BlueRounds, shotPlayed,shotFinished, shotActive
     shotPlayed = False
+    shotFinished = False
+    shotActive = False
     shotCount = 0
     RedRounds = 0
     BlueRounds = 0
     # Arduino Thread
     try:
-        print("Attempting Arduino Thread")
+        # print("Attempting Arduino Thread")
         # print ("attempting to enter turn thread")
         argss = (0, 0)
         start_new_thread(arduino_switch,argss) 
