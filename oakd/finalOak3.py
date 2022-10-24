@@ -487,7 +487,7 @@ def puckDetection(key, tick,tabCorners):
 def endOfRound(pygameArrayRed,pygameArrayBlue): 
     global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound, shotFinished
     killRound = False
-    arbitraryNumberOfGameTicks = 5
+    arbitraryNumberOfGameTicks = 10
     # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
     
     if passTrigger == 0:
@@ -556,8 +556,8 @@ def arduino_switch(aa,a):
     shotCount = 0
     print("Successfully entered arduino thread")
     # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
-    # board = pyfirmata.Arduino('COM3')
+    # board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    board = pyfirmata.Arduino('COM3')
     
 
     it = pyfirmata.util.Iterator(board)
