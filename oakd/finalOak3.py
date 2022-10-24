@@ -244,224 +244,227 @@ def puckDetection(key, tick,tabCorners):
     
 
     while True:
-        # if killRound:  
-        #     return 1
-        # print("Game tick: " + str(tick))
-        tick += 1
-        slowDown = slowDown + 1
-        # if key == 100: #key "d"
-        #read frame
-        frame = video.get().getCvFrame()
-
-        #refactor this ⬇︎⬇︎⬇︎⬇︎
-        #co-ordinates in 
-        #  of table corners
-        pts1 = np.float32([topLeft,topRight,bottomLeft,bottomRight])
-        #co-ordinates those points will be remapped to in flatFrame
-        pts2 = np.float32([[tablePadding,tablePadding],[tablePadding + tableWidth,tablePadding],[tablePadding,tablePadding + tableLength],[tablePadding + tableWidth,tablePadding + tableLength]])
-
-
-        #change perspective of frame
-        M = cv2.getPerspectiveTransform(pts1,pts2)
-        flatFrameClean = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
-        flatFrame = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
-        #refactor this ⬆︎⬆︎⬆︎⬆︎
-    
-        #———————————————Puck detection start————————————————————————
-
-        # convert to hsv colorspace
-        flatFrameHSV = cv2.cvtColor(flatFrame, cv2.COLOR_BGR2HSV)
-        # find the colors within the boundaries
-        roi = flatFrameHSV[0: 4500,0: 600]
-    
-
-        #——————————————Red Mask————————————————
-
-   
-        lower_red = np.array([75,0,0])
-        upper_red = np.array([100,255,255])
-
-        maskRed = cv2.inRange(roi, lower_red, upper_red)
-        
-        contoursRed, _ = cv2.findContours(maskRed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        centresRed = []
-        pygameArrayRed = []
-        
-        for cnt in contoursRed:
-
-            # hull = cv2.convexHull(cnt)
-            # Calculate area and remove small elements
-            area = cv2.contourArea(cnt)
-            
-            if area > 400:
-                cv2.drawContours(maskRed, [cnt], -1, (255,255, 255), -1)
-                cv2.drawContours(flatFrame, [cnt], -1, (0, 255, 0), 2)
-                # ellipse = cv2.fitEllipse(hull)
-                # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                x, y, w, h = cv2.boundingRect(cnt)
-
-                # moments = cv2.moments(cnt)
-                # appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
-                # appendString = appendString.replace('(','[')
-                # appendString = appendString.replace(')',']')
-                # centresRed.append(appendString)
-
-                # pygameArrayRedString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
-                # pygameArrayRed.append(pygameArrayRedString)
-
-        #red pucks white circles
-
-        #findWhites
-        lower_whites = np.array([0,0,0])
-        upper_whites = np.array([180,255,135])
-
-        #create a mask for white colour using inRange function
-        maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-
-        maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
-
-        contoursRedCenters, _ = cv2.findContours(maskRedCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        detections = []
-        for cnt2 in contoursRedCenters:
-            # hull2 = cv2.convexHull(cnt2)
-            # Calculate area and remove small elements
-            area = cv2.contourArea(cnt2)
-            if area > 80:
-                cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
-                # ellipse = cv2.fitEllipse(hull)
-                # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                x, y, w, h = cv2.boundingRect(cnt2)
-                detections.append([x, y, w, h])
-
-                moments = cv2.moments(cnt2)
-                appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
-                appendString = appendString.replace('(','[')
-                appendString = appendString.replace(')',']')
-                centresRed.append(appendString)
-
-                pygameArrayRedString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
-                pygameArrayRed.append(pygameArrayRedString)
-
-        # #——————————————Blue Mask————————————————     
-        #set the lower and upper bounds for the blue hue (red hsv wraps)
-        # lower_blue = np.array([100,80,100])
-        # upper_blue = np.array([140,200,255])
-        lower_blue = np.array([5,0,0])
-        upper_blue = np.array([39,255,255])
-
-        #create a mask for blue colour using inRange function
-        maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
-        contoursBlue, _ = cv2.findContours(maskBlue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        centresBlue = []
-        pygameArrayBlue = []
-        for cnt in contoursBlue:
-            # hull = cv2.convexHull(cnt)
-            # Calculate area and remove small elements
-            area = cv2.contourArea(cnt)
-            if area > 400:
-                cv2.drawContours(maskBlue, [cnt], -1, (255,255, 255), -1)
-
-                # # compute the center of the contour
-                # moments = cv2.moments(cnt)
-                # appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
-                # appendString = appendString.replace('(','[')
-                # appendString = appendString.replace(')',']')
-                # centresBlue.append(appendString)
-                # pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
-                # pygameArrayBlue.append(pygameArrayBlueString)
-                
-
-        #find hole in blue mask
-        #red pucks white circles
-
-        #findWhites
-        lower_whites = np.array([0,0,0])
-        upper_whites = np.array([180,255,135])
-
-        #create a mask for white colour using inRange function
-        maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-
-        maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
-
-        contoursBlueCenters, _ = cv2.findContours(maskBlueCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        detections = []
-        for cnt2 in contoursBlueCenters:
-            # hull2 = cv2.convexHull(cnt2)
-            # Calculate area and remove small elements
-            area = cv2.contourArea(cnt2)
-            if area > 80:
-                # cv2.drawContours(flatFrame, [hull2], -1, (0, 255, 0), 2)
-                cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
-                # ellipse = cv2.fitEllipse(hull)
-                # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                # x, y, w, h = cv2.boundingRect(hull2)
-                x, y, w, h = cv2.boundingRect(cnt2)
-                detections.append([x, y, w, h])
-
-                        # compute the center of the contour
-                moments = cv2.moments(cnt2)
-                appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
-                appendString = appendString.replace('(','[')
-                appendString = appendString.replace(')',']')
-                centresBlue.append(appendString)
-                pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
-                pygameArrayBlue.append(pygameArrayBlueString)
-
-
-
-
-    
-        #show actual maks not contours
-        # maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
-        # maskRed = cv2.inRange(roi, lower_red, upper_red)
-        # maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-        # maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
-        # maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
-
-        # print(centresBlue)
-        
-        cv2.imshow("flatframe", flatFrameClean)
-        cv2.imshow("puckframe", flatFrame)
-        cv2.imshow("redMask", maskRed)
-        cv2.imshow("Red Centers", maskRedCenters)
-        cv2.imshow("Blue Centers", maskBlueCenters)
-        cv2.imshow("blueMask", maskBlue)
-
-            #break loop
-        key = cv2.waitKey(30)
-        
-        # if shotCount >= 8:
-        #     # End of round thread                     
-        #     try:
-        #         print("Attempting End of round Thread")
-        #         argss = (pygameArrayRed,pygameArrayBlue)
-        #         start_new_thread(endOfRound,argss)
-            
-        #     except Exception as e:
-        #         print("An error occurred in the end of round thread: " + str(e))
-            
-        # API THREAD                     
         try:
-            # if slowDown == 3:
-            # print("Attempting Thread")
-            # thread1 = Thread(target = CallAPI())
-            argss = (centresBlue,centresRed,pygameArrayRed,pygameArrayBlue)
-            start_new_thread(CallAPI,argss)
-            slowDown = 0
-        except Exception as e:
-            print("An error occurred in the API thread: " + str(e))
+            # if killRound:  
+            #     return 1
+            # print("Game tick: " + str(tick))
+            tick += 1
+            slowDown = slowDown + 1
+            # if key == 100: #key "d"
+            #read frame
+            frame = video.get().getCvFrame()
+
+            #refactor this ⬇︎⬇︎⬇︎⬇︎
+            #co-ordinates in 
+            #  of table corners
+            pts1 = np.float32([topLeft,topRight,bottomLeft,bottomRight])
+            #co-ordinates those points will be remapped to in flatFrame
+            pts2 = np.float32([[tablePadding,tablePadding],[tablePadding + tableWidth,tablePadding],[tablePadding,tablePadding + tableLength],[tablePadding + tableWidth,tablePadding + tableLength]])
+
+
+            #change perspective of frame
+            M = cv2.getPerspectiveTransform(pts1,pts2)
+            flatFrameClean = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
+            flatFrame = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
+            #refactor this ⬆︎⬆︎⬆︎⬆︎
+        
+            #———————————————Puck detection start————————————————————————
+
+            # convert to hsv colorspace
+            flatFrameHSV = cv2.cvtColor(flatFrame, cv2.COLOR_BGR2HSV)
+            # find the colors within the boundaries
+            roi = flatFrameHSV[0: 4500,0: 600]
+        
+
+            #——————————————Red Mask————————————————
+
+    
+            lower_red = np.array([75,0,0])
+            upper_red = np.array([100,255,255])
+
+            maskRed = cv2.inRange(roi, lower_red, upper_red)
             
-        # BEAM DETECTION THREAD 
-        # NO LONGER IN USE
-        # try: 
-        #     # print("Attempting Beam Thread") 
-        #     argss = ("BeamThread", "BeamMe")
-        #     start_new_thread(breakBeamLogic,argss)
-        #     slowDown = 0
-        # except Exception as e:
-        #     print("An error occurred in the Beam thread: " + str(e))
-        if key == ord('q'):
-            break
+            contoursRed, _ = cv2.findContours(maskRed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            centresRed = []
+            pygameArrayRed = []
+            
+            for cnt in contoursRed:
+
+                # hull = cv2.convexHull(cnt)
+                # Calculate area and remove small elements
+                area = cv2.contourArea(cnt)
+                
+                if area > 400:
+                    cv2.drawContours(maskRed, [cnt], -1, (255,255, 255), -1)
+                    cv2.drawContours(flatFrame, [cnt], -1, (0, 255, 0), 2)
+                    # ellipse = cv2.fitEllipse(hull)
+                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                    x, y, w, h = cv2.boundingRect(cnt)
+
+                    # moments = cv2.moments(cnt)
+                    # appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
+                    # appendString = appendString.replace('(','[')
+                    # appendString = appendString.replace(')',']')
+                    # centresRed.append(appendString)
+
+                    # pygameArrayRedString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                    # pygameArrayRed.append(pygameArrayRedString)
+
+            #red pucks white circles
+
+            #findWhites
+            lower_whites = np.array([0,0,0])
+            upper_whites = np.array([180,255,135])
+
+            #create a mask for white colour using inRange function
+            maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+
+            maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
+
+            contoursRedCenters, _ = cv2.findContours(maskRedCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            detections = []
+            for cnt2 in contoursRedCenters:
+                # hull2 = cv2.convexHull(cnt2)
+                # Calculate area and remove small elements
+                area = cv2.contourArea(cnt2)
+                if area > 80:
+                    cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
+                    # ellipse = cv2.fitEllipse(hull)
+                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                    x, y, w, h = cv2.boundingRect(cnt2)
+                    detections.append([x, y, w, h])
+
+                    moments = cv2.moments(cnt2)
+                    appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
+                    appendString = appendString.replace('(','[')
+                    appendString = appendString.replace(')',']')
+                    centresRed.append(appendString)
+
+                    pygameArrayRedString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                    pygameArrayRed.append(pygameArrayRedString)
+
+            # #——————————————Blue Mask————————————————     
+            #set the lower and upper bounds for the blue hue (red hsv wraps)
+            # lower_blue = np.array([100,80,100])
+            # upper_blue = np.array([140,200,255])
+            lower_blue = np.array([5,0,0])
+            upper_blue = np.array([39,255,255])
+
+            #create a mask for blue colour using inRange function
+            maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
+            contoursBlue, _ = cv2.findContours(maskBlue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            centresBlue = []
+            pygameArrayBlue = []
+            for cnt in contoursBlue:
+                # hull = cv2.convexHull(cnt)
+                # Calculate area and remove small elements
+                area = cv2.contourArea(cnt)
+                if area > 400:
+                    cv2.drawContours(maskBlue, [cnt], -1, (255,255, 255), -1)
+
+                    # # compute the center of the contour
+                    # moments = cv2.moments(cnt)
+                    # appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
+                    # appendString = appendString.replace('(','[')
+                    # appendString = appendString.replace(')',']')
+                    # centresBlue.append(appendString)
+                    # pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                    # pygameArrayBlue.append(pygameArrayBlueString)
+                    
+
+            #find hole in blue mask
+            #red pucks white circles
+
+            #findWhites
+            lower_whites = np.array([0,0,0])
+            upper_whites = np.array([180,255,135])
+
+            #create a mask for white colour using inRange function
+            maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+
+            maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
+
+            contoursBlueCenters, _ = cv2.findContours(maskBlueCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            detections = []
+            for cnt2 in contoursBlueCenters:
+                # hull2 = cv2.convexHull(cnt2)
+                # Calculate area and remove small elements
+                area = cv2.contourArea(cnt2)
+                if area > 80:
+                    # cv2.drawContours(flatFrame, [hull2], -1, (0, 255, 0), 2)
+                    cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
+                    # ellipse = cv2.fitEllipse(hull)
+                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                    # x, y, w, h = cv2.boundingRect(hull2)
+                    x, y, w, h = cv2.boundingRect(cnt2)
+                    detections.append([x, y, w, h])
+
+                            # compute the center of the contour
+                    moments = cv2.moments(cnt2)
+                    appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
+                    appendString = appendString.replace('(','[')
+                    appendString = appendString.replace(')',']')
+                    centresBlue.append(appendString)
+                    pygameArrayBlueString = str(int(moments['m10']/moments['m00'])) + ","+ str(int(moments['m01']/moments['m00']))
+                    pygameArrayBlue.append(pygameArrayBlueString)
+
+
+
+
+        
+            #show actual maks not contours
+            # maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
+            # maskRed = cv2.inRange(roi, lower_red, upper_red)
+            # maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+            # maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
+            # maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
+
+            # print(centresBlue)
+            
+            cv2.imshow("flatframe", flatFrameClean)
+            cv2.imshow("puckframe", flatFrame)
+            cv2.imshow("redMask", maskRed)
+            cv2.imshow("Red Centers", maskRedCenters)
+            cv2.imshow("Blue Centers", maskBlueCenters)
+            cv2.imshow("blueMask", maskBlue)
+
+                #break loop
+            key = cv2.waitKey(30)
+            
+            # if shotCount >= 8:
+            #     # End of round thread                     
+            #     try:
+            #         print("Attempting End of round Thread")
+            #         argss = (pygameArrayRed,pygameArrayBlue)
+            #         start_new_thread(endOfRound,argss)
+                
+            #     except Exception as e:
+            #         print("An error occurred in the end of round thread: " + str(e))
+                
+            # API THREAD                     
+            try:
+                # if slowDown == 3:
+                # print("Attempting Thread")
+                # thread1 = Thread(target = CallAPI())
+                argss = (centresBlue,centresRed,pygameArrayRed,pygameArrayBlue)
+                start_new_thread(CallAPI,argss)
+                slowDown = 0
+            except Exception as e:
+                print("An error occurred in the API thread: " + str(e))
+                
+            # BEAM DETECTION THREAD 
+            # NO LONGER IN USE
+            # try: 
+            #     # print("Attempting Beam Thread") 
+            #     argss = ("BeamThread", "BeamMe")
+            #     start_new_thread(breakBeamLogic,argss)
+            #     slowDown = 0
+            # except Exception as e:
+            #     print("An error occurred in the Beam thread: " + str(e))
+            if key == ord('q'):
+                break
+        except Exception as e:
+                print("An error occurred in the Puck Detection function " + str(e))
 
 #——————————————End Of Puck Detection———————————————— 
 
