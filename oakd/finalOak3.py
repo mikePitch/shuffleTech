@@ -52,6 +52,7 @@ cameraFound = False
 while not cameraFound:
     try:
         device = dai.Device(pipeline)
+        video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
         cameraFound = True
     except Exception as e:
         print("Camera Device error: " + str(e))
@@ -90,8 +91,8 @@ def cameraSettings():
     controlQueue.send(ctrl)
 
 cameraSettings()
-  
-video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
+    
+
 
 #end of oakd setup
 
