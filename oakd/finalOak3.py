@@ -165,6 +165,8 @@ def findCornermarkers():
 
 def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
     resp = 0
+    global cancelShot
+    cancelShot = False
     try:
         # print('API Thread Running')
         url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
@@ -191,14 +193,19 @@ def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
         blueJSON = '{"locations":[' + blue + ']}'
         redJSON = '{"locations":[' + red + ']}'
 
-        data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "' + str(shotPlayed) + '","shotFinished": "' + str(shotFinished) + '"}'
+        data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "False" , "shotFinished": "False"}'
         # print(data)
+        
         if shotPlayed:
             shotPlayed = False
+            data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "True" , "shotFinished": "False"}'
+
+            
         if shotFinished:
+            data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "False" , "shotFinished": "True"}'
             shotFinished = False 
             sumOfPoints = 0
-            shotActive = False
+            cancelShot = True
             print("stopping")
         
         
@@ -206,6 +213,11 @@ def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
         if shotActive:
             print("Sending Data")
             resp = requests.post(url, headers=headers, data=data)
+            print(data)
+            if cancelShot:
+                shotActive = False
+                return 0
+
     except Exception as e: 
         print("An error occurred in the callAPI function " + str(e)) 
 
@@ -218,8 +230,8 @@ def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
 #————————————Start puck detection on s key—————————————————
 def puckDetection(key, tick,tabCorners):
     # End of round variables
-    global iteration, sumOfPoints, passTrigger, killRound, BlueRounds, RedRounds
-    
+    global iteration, sumOfPoints, passTrigger, killRound, BlueRounds, RedRounds, cancelShot
+    cancelShot = False
     iteration = 0
     passTrigger = 0 
     sumOfPoints = 0
@@ -448,7 +460,8 @@ def puckDetection(key, tick,tabCorners):
                 # print("Attempting Thread")
                 # thread1 = Thread(target = CallAPI())
                 argss = (centresBlue,centresRed,pygameArrayRed,pygameArrayBlue)
-                start_new_thread(CallAPI,argss)
+                if not cancelShot:
+                    start_new_thread(CallAPI,argss)
                 slowDown = 0
             except Exception as e:
                 print("An error occurred in the API thread: " + str(e))
@@ -539,12 +552,12 @@ def readPuckFile():
     
 def arduino_switch(aa,a):
     global shotCount
-    global shotPlayed
+    global shotPlayed, cancelShot
     shotCount = 0
     print("Successfully entered arduino thread")
     # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    # board = pyfirmata.Arduino('/dev/cu.usbmodem101')
-    board = pyfirmata.Arduino('COM3')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    # board = pyfirmata.Arduino('COM3')
     
 
     it = pyfirmata.util.Iterator(board)
@@ -563,7 +576,7 @@ def arduino_switch(aa,a):
             shotPlayed = True
             
             print('Shot Number: ' + str(shotCount))
-
+            cancelShot = False
             while True:
                 sw = switchPin.read()
                 if sw is False:
