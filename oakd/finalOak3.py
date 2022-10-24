@@ -11,7 +11,6 @@ import pyfirmata
 import json
 import depthai as dai
 
-
 from _thread import *
 from requests.structures import CaseInsensitiveDict
 
@@ -28,13 +27,11 @@ pipeline = dai.Pipeline()
 # Define source and output
 camRgb = pipeline.create(dai.node.ColorCamera)
 xoutVideo = pipeline.create(dai.node.XLinkOut)
-
 xoutVideo.setStreamName("video")
 
 # Properties
 camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
-
 
 controlIn = pipeline.createXLinkIn()
 controlIn.setStreamName('control')
@@ -71,7 +68,6 @@ def cameraSettings():
     ctrl.setManualExposure(13000, 400)
     controlQueue.send(ctrl)
 
-
     effect_mode = dai.CameraControl.EffectMode.NEGATIVE
     ctrl = dai.CameraControl()
     ctrl.setEffectMode(effect_mode)
@@ -99,22 +95,11 @@ video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
 #end of oakd setup
 
-# PYGAME Setup
-
-background_colour = (255,255,255)
-table_colour = (202,164,116)
-(width, height) = (1100, 240) #108
-    
-
-puckX = 300
-puckY = 300
-
 #Set Variables
 #dimensions of table in mm
 tableWidth = 600
 tableLength = 3462
 puckRadius = 35
-puckArea = puckRadius * puckRadius * 3.14
 
 #number of mm outside table to show in frame
 tablePadding = 0
@@ -131,7 +116,6 @@ bottomRight = [872,695]
 
 # Mike
 # cap = cv2.VideoCapture(2)
-
 # Caf
 # cap = cv2.VideoCapture(0)
 
@@ -179,47 +163,52 @@ def findCornermarkers():
 
 
 def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
-    # print('API Thread Running')
-    url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
-    headers = CaseInsensitiveDict()
-    headers["Content-Type"] = "application/json"
-    global shotPlayed, shotFinished, shotActive, sumOfPoints
-    if shotPlayed:
-        print("Shot played")
-        shotActive = True
-    
-    if shotActive and not shotFinished:                 
-        try:
-            # print("Attempting End of round Thread")
-            argss = (pygameArrayRed,pygameArrayBlue)
-            start_new_thread(endOfRound,argss)
-        
-        except Exception as e:
-            print("An error occurred in the end of round thread: " + str(e)) 
-       
-        
-    blue = ",".join(centresBlue)
-    red = ",".join(centresRed)
-    
-    blueJSON = '{"locations":[' + blue + ']}'
-    redJSON = '{"locations":[' + red + ']}'
-
-    data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "' + str(shotPlayed) + '","shotFinished": "' + str(shotFinished) + '"}'
-    # print(data)
-    if shotPlayed:
-        shotPlayed = False
-    if shotFinished:
-        shotFinished = False 
-        sumOfPoints = 0
-        shotActive = False
-        print("stopping")
-    
-    
     resp = 0
-    if shotActive:
-        print("Sending Data")
-        resp = requests.post(url, headers=headers, data=data)
-    
+    try:
+        # print('API Thread Running')
+        url = "https://elatedtwist.backendless.app/api/services/Game/score-standard"
+        headers = CaseInsensitiveDict()
+        headers["Content-Type"] = "application/json"
+        global shotPlayed, shotFinished, shotActive, sumOfPoints
+        if shotPlayed:
+            print("Shot played")
+            shotActive = True
+        
+        if shotActive and not shotFinished:                 
+            try:
+                # print("Attempting End of round Thread")
+                argss = (pygameArrayRed,pygameArrayBlue)
+                start_new_thread(endOfRound,argss)
+            
+            except Exception as e:
+                print("An error occurred in the end of round thread: " + str(e)) 
+        
+            
+        blue = ",".join(centresBlue)
+        red = ",".join(centresRed)
+        
+        blueJSON = '{"locations":[' + blue + ']}'
+        redJSON = '{"locations":[' + red + ']}'
+
+        data = '{"tableNo": 1, "puckLocationsRed":' + redJSON + ', "puckLocationsBlue": ' + blueJSON + ', "shotPlayed": "' + str(shotPlayed) + '","shotFinished": "' + str(shotFinished) + '"}'
+        # print(data)
+        if shotPlayed:
+            shotPlayed = False
+        if shotFinished:
+            shotFinished = False 
+            sumOfPoints = 0
+            shotActive = False
+            print("stopping")
+        
+        
+        
+        if shotActive:
+            print("Sending Data")
+            resp = requests.post(url, headers=headers, data=data)
+    except Exception as e: 
+        print("An error occurred in the callAPI function " + str(e)) 
+
+        
     return(resp)
         
 
@@ -550,7 +539,8 @@ def arduino_switch(aa,a):
     shotCount = 0
     print("Successfully entered arduino thread")
     # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    board = pyfirmata.Arduino('/dev/cu.usbmodem101')
+    # board = pyfirmata.Arduino('/dev/cu.usbmodem101')
+    board = pyfirmata.Arduino('COM3')
     
 
     it = pyfirmata.util.Iterator(board)
