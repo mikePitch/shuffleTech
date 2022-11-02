@@ -20,16 +20,29 @@
       </div>
 
     </div>
+
 		<script>
-
-
+      
+      
 
       const backendless = false;
+
+      //game type
+      const gameType = new Object();
+      gameType.neoShuffle = true;
+      gameType.classicShuffle = true;
+      gameType.spaceInvaders = true;
+      gameType.blackJack = true;
+      gameType.neoCurling = true;
+
+      
 
       
       // Our Javascript will go here.
       const scene = new THREE.Scene();
+      
 
+      
  
       //Add Renderer
       const renderer = new THREE.WebGLRenderer();
@@ -41,25 +54,48 @@
 
 
       //Background
+      
 
-      //cubemap
-      scene.background = new THREE.CubeTextureLoader()
-      .setPath( 'textures/cubeMaps/' )
-      .load( [
-        'nx.jpeg',
-        'px.jpeg',
-        'py.jpeg',
-        'ny.jpeg',
-        'pz.jpeg',
-        'nz.jpeg'
-      ] );
+      // //cubemap
+      // scene.background = new THREE.CubeTextureLoader()
+      // // .setPath( '/api/files/Images/threejs/textures/cubeMaps/' )
+      // // .setPath( 'textures/cubeMaps/' )
+      // // .load( [
+      // //   'nx.jpeg',
+      // //   'px.jpeg',
+      // //   'py.jpeg',
+      // //   'ny.jpeg',
+      // //   'pz.jpeg',
+      // //   'nz.jpeg'
+      // // ] );
+      // .setPath( 'textures/cubeMaps/synthwave/' )
+      // .load( [
+      //   'lft.png',
+      //   'rht.png',
+      //   'top.png',
+      //   'btm.png',
+      //   'fnt.png',
+      //   'bck.png'
+      // ] );
       
 
       //Camera
-      const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
-      camera.position.x = 1000;
-      camera.position.y = 1000;
-      camera.position.z = -500;
+      
+
+      //---- 3DPerspective ----
+      // const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
+      // camera.position.x = 1000;
+      // camera.position.y = 1000;
+      // camera.position.z = -500;
+
+      //---- Isometric Perspective ----
+      scene.rotation.y = -90 * Math.PI/180
+      var aspect = window.innerWidth / window.innerHeight;
+      var d = 1400;
+      const camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 100000 );
+      camera.position.set( 2000, 2000, 2000 );
+      camera.lookAt( scene.position ); // or the origin
+      
 
       if (backendless === false){
       //controls
@@ -153,19 +189,6 @@
         allBluePucks[i].add( new THREE.Mesh( puckCoreCylinder, bpCoreMat ) );
       }
 
-      //bar Chart
-      const bpBarWFMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
-      const bpBarMat = new THREE.MeshPhongMaterial( {color: 0x03b1fc} );
-      const barGeometry = new THREE.BoxGeometry( 200, 1000, 200 );
-      const bpBar = new THREE.Mesh( barGeometry, bpBarMat );
-
-      scene.add( bpBar );
-
-      bpBar.position.set(-200, 400, 0);
-
-
-
-
       const allPucks = allBluePucks.concat(allRedPucks);
       for (let i = 0; i < allPucks.length; i++) {
         scene.add(allPucks[i]);
@@ -193,16 +216,16 @@
       } 
 
 
-      //Markers
-      const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 80, 8, 2 );
-      const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
-      const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
-      scene.add( puckPointer );
-
       const vlGroup = new THREE.Group();
-      const testlocation = new Object();
-      testlocation.x = 200;
-      testlocation.y = 3000;
+
+
+      const bpLocation = new Object();
+      bpLocation.x = 100;
+      bpLocation.y = 3000;
+
+      const rpLocation = new Object();
+      rpLocation.x = 400;
+      rpLocation.y = 3080;
     
 
 
@@ -210,11 +233,48 @@
             //gui
       var gui = new dat.GUI();
       // gui.add(lightPoint, 'intensity', 0, 10, 0.01);
-      gui.add( camera.position , 'z', -10000, 10000 ).step(10)
-      gui.add( camera.position , 'x', -10000, 10000 ).step(10)
-      gui.add( camera.position , 'y', -10000, 10000 ).step(10)
-      gui.add( testlocation , 'y', -10000, 10000 ).step(1)
-      
+      gui.add( camera.position , 'z', -10000, 10000 ).step(10);
+      gui.add( camera.position , 'x', -10000, 10000 ).step(10);
+      gui.add( camera.position , 'y', -10000, 10000 ).step(10);
+      var bluetestpuck = gui.addFolder('Blue Test Puck');
+      bluetestpuck.add( bpLocation , 'y', 0, 4500 ).step(1);
+      bluetestpuck.add( bpLocation , 'x', 0, 600 ).step(1);
+      var redtestpuck = gui.addFolder('Red Test Puck');
+      redtestpuck.add( rpLocation , 'y', 0, 4500 ).step(1);
+      redtestpuck.add( rpLocation , 'x', 0, 600 ).step(1);
+
+
+      // ------------Game Specific UI-----------
+
+      // ---Space Invaders---
+
+      //bar Chart
+      const barBaseX = 50;
+      const barHeight = 1;
+      const barBaseY = 50;
+      const bpBarWFMaterial = new THREE.MeshBasicMaterial( {color: 0x03b1fc, wireframe: true} );
+      const bpBarMat = new THREE.MeshPhongMaterial( {color: 0x03b1fc} );
+      const rpBarMat = new THREE.MeshPhongMaterial( {color: 0xfc0352} );
+      const barBlueGeometry = new THREE.BoxGeometry( barBaseX, barHeight, barBaseY );
+      const barRedGeometry = new THREE.BoxGeometry( barBaseX, barHeight, barBaseY );
+      barRedGeometry.translate( 0, barHeight/2 , 0 );
+      barBlueGeometry.translate( 0, barHeight/2 , 0 );
+      const bpBar = new THREE.Mesh( barBlueGeometry, bpBarMat );
+      const rpBar = new THREE.Mesh( barRedGeometry, rpBarMat );
+
+      if (gameType.spaceInvaders){
+        scene.add( bpBar, rpBar );
+        bpBar.position.set(-50, 0, 0);
+        rpBar.position.set(-50, 0, 50);
+      };
+
+      // ---Classic Shuffle---
+
+      //Markers
+      const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 20, 8, 2 );
+      const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
+      const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
+      scene.add( puckPointer );
 
 
 
@@ -224,7 +284,12 @@
         
         requestAnimationFrame( animate );
 
-        camera.lookAt(300, -200, 1200);
+        // -----3d Perspective-----
+        // camera.lookAt(300, -200, 1200);
+
+        // -----Isometric Perspective-----
+        camera.position.set( -250, 2000, 2140 );
+        
         
         bp1.position.set(10000, 0, 0);
         bp2.position.set(10000, 0, 0);
@@ -252,7 +317,7 @@
 
         if (bpJSON) {
 
-          const bpObj = {"locations":[{"puck":[518,0,1]},{"puck":[180,220,1]},{"puck":[testlocation.x,testlocation.y,1]}]};
+          const bpObj = {"locations":[{"puck":[bpLocation.x,bpLocation.y,1]},{"puck":[518,1231,1]},{"puck":[180,220,1]}]};
           // const bpObj = JSON.parse(bpJSON);
 
           
@@ -297,7 +362,7 @@
         // let rpJSON = component.redPucks;
 
         if (rpJSON) {
-          const rpObj = {"locations":[{"puck":[468,420,1]},{"puck":[94,290,1]},{"puck":[218,1420,1]},{"puck":[40,390,1]}]};
+          const rpObj = {"locations":[{"puck":[rpLocation.x,rpLocation.y,1]},{"puck":[584,690,1]}]};
           // const rpObj = JSON.parse(rpJSON);
         
 
@@ -323,11 +388,6 @@
           } 
 
 
-          
-
-          
-
-
           //add arrow to best red shot
           const lowY = Math.min(...rpyv);
           const lowYindex = rpyv.indexOf(lowY);
@@ -347,9 +407,15 @@
           puckPointer.position.set(bpBest[0], 80, bpBest[1]);
         }
         
-        const cellObjArray = [];
+        
 
-        if (true){
+
+        //----------spaceinvades start------------------------
+
+
+        if (gameType.spaceInvaders){
+          const cellObjArray = [];
+          console.log("spaceInvaders = ", gameType.spaceInvaders)
         //veronoi
 
           // var sites = [{x:300,y:300}, {x:100,y:100}, {x:200,y:500}, {x:250,y:450}, {x:600,y:150}];
@@ -408,7 +474,20 @@
           scene.add( vlGroup );
 
 
-          diagram.cells.forEach(cell => {
+          // for (let i = 0; i < diagram.cells.length; i++) {
+          //   const cell = diagram.cells[i];
+          //   console.log("cell2 = ", cell);
+          //   console.log("cell2 x = ", cell.site.x);
+          // };
+
+          console.log ("test  =",diagram.cells.length);
+
+
+
+       
+          diagram.cells.forEach(function(cell, i, a) {
+            console.log("cell = ", cell);
+            console.log("cell x = ", cell.site.x);
             //check red or blue
             //red
             if (rpxv.includes(cell.site.x)){
@@ -468,53 +547,61 @@
           
           
 
+        
+
+          console.log("---------areas calculated-------------")
+          console.log( "cellObjArray = ", cellObjArray)
+
+
+
+
+          //Total area
+          const cellAreaArray = []
+
+          cellObjArray.forEach((element, index, array) => {
+            cellAreaArray.push(element.area);
+          });
+
+          const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
+          console.log( "totalArea = ", totalArea)
+
+          //Blue and red area
+          const redAreaArray = [];
+          const blueAreaArray = [];
+
+          cellObjArray.forEach((element, index, array) => {
+            if ( element.colour === "blue" ){
+              blueAreaArray.push(element.area);
+            }
+            if ( element.colour === "red" ){
+              redAreaArray.push(element.area);
+            }
+            
+          });
+
+
+          const redArea = redAreaArray.reduce((a, b) => a + b, 0);;
+          const blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
+
+
+          const bluePercent = blueArea / totalArea * 100;
+          const redPercent = redArea / totalArea * 100;
+
+          console.log("blue % = ", bluePercent);
+          console.log("red % = ", redPercent);
+
+          rpBar.scale.y = redPercent*5;
+          bpBar.scale.y = bluePercent*5;
+
+          const barRedHeight = redPercent*5;
+          const barBlueHeight = bluePercent*5;
         }
 
-        console.log("---------areas calculated-------------")
-        console.log( "cellObjArray = ", cellObjArray)
+        //----------spaceinvades end-------------------------
+
+        
 
 
-
-
-        //Total area
-        const cellAreaArray = []
-
-        cellObjArray.forEach((element, index, array) => {
-          cellAreaArray.push(element.area);
-        });
-
-        const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
-        console.log( "totalArea = ", totalArea)
-
-        //Blue and red area
-        const redAreaArray = [];
-        const blueAreaArray = [];
-
-        cellObjArray.forEach((element, index, array) => {
-          if ( element.colour === "blue" ){
-            blueAreaArray.push(element.area);
-          }
-          if ( element.colour === "red" ){
-            redAreaArray.push(element.area);
-          }
-          
-        });
-
-
-        const redArea = redAreaArray.reduce((a, b) => a + b, 0);;
-        const blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
-
-
-        const bluePercent = blueArea / totalArea * 100;
-        const redPercent = redArea / totalArea * 100;
-
-        console.log("blue % = ", bluePercent);
-        console.log("red % = ", redPercent);
-
-          //Add colour
-
-          //Area as a percentage
-          //Display percentage
 
 
         renderer.render( scene, camera );
