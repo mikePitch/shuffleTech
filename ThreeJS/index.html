@@ -21,6 +21,7 @@
 
     </div>
 
+
 		<script>
       
       
@@ -29,9 +30,9 @@
 
       //game type
       const gameType = new Object();
-      gameType.neoShuffle = true;
+      gameType.neoShuffle = false;
       gameType.classicShuffle = true;
-      gameType.spaceInvaders = true;
+      gameType.spaceInvaders = false;
       gameType.blackJack = true;
       gameType.neoCurling = true;
 
@@ -40,6 +41,9 @@
       
       // Our Javascript will go here.
       const scene = new THREE.Scene();
+
+
+     
       
 
       
@@ -50,24 +54,25 @@
       var w = container.offsetWidth;
       var h = container.offsetHeight;
       renderer.setSize(w, h);
+      renderer.setPixelRatio( window.devicePixelRatio );
       container.appendChild(renderer.domElement);
 
 
       //Background
       
 
-      // //cubemap
-      // scene.background = new THREE.CubeTextureLoader()
-      // // .setPath( '/api/files/Images/threejs/textures/cubeMaps/' )
-      // // .setPath( 'textures/cubeMaps/' )
-      // // .load( [
-      // //   'nx.jpeg',
-      // //   'px.jpeg',
-      // //   'py.jpeg',
-      // //   'ny.jpeg',
-      // //   'pz.jpeg',
-      // //   'nz.jpeg'
-      // // ] );
+      //cubemap
+      scene.background = new THREE.CubeTextureLoader()
+      // .setPath( '/api/files/Images/threejs/textures/cubeMaps/' )
+      .setPath( 'textures/cubeMaps/' )
+      .load( [
+        'nx.jpeg',
+        'px.jpeg',
+        'py.jpeg',
+        'ny.jpeg',
+        'pz.jpeg',
+        'nz.jpeg'
+      ] );
       // .setPath( 'textures/cubeMaps/synthwave/' )
       // .load( [
       //   'lft.png',
@@ -83,24 +88,28 @@
       
 
       //---- 3DPerspective ----
-      // const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
-      // camera.position.x = 1000;
-      // camera.position.y = 1000;
-      // camera.position.z = -500;
+      const camera = new THREE.PerspectiveCamera( 60, w / h, 0.1, 10000 );
+      camera.position.x = 1000;
+      camera.position.y = 1000;
+      camera.position.z = -500;
 
-      //---- Isometric Perspective ----
-      scene.rotation.y = -90 * Math.PI/180
-      var aspect = window.innerWidth / window.innerHeight;
-      var d = 1400;
-      const camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 100000 );
-      camera.position.set( 2000, 2000, 2000 );
-      camera.lookAt( scene.position ); // or the origin
+      // //---- Isometric Perspective ----
+      // scene.rotation.y = -90 * Math.PI/180;
+      // var aspect = window.innerWidth / window.innerHeight;
+      // var d = 1400;
+      // const camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 100000 );
+      // camera.position.set( 2000, 2000, 2000 );
+      // camera.lookAt( scene.position ); // or the origin
       
 
       if (backendless === false){
       //controls
         var controls = new THREE.OrbitControls(camera, container);
       }
+
+      // camera.position.set( -250, 2000, 2140 );
+
+      
 
       //Lights
       const lightAmb = new THREE.AmbientLight( 0x404040, 2.5 ); // soft white light
@@ -197,26 +206,11 @@
 
 
 
-
-      //Lines
-      const scoreLines = [60,165,524,1054,1768,2762]; // y value of lines
-      const lineGeometries = [];
-      for (let i = 0; i < scoreLines.length; i++) {
-        const points = [];
-        const lineY = scoreLines[i];
-        points.push( new THREE.Vector3( 0, 1, lineY ) );
-        points.push( new THREE.Vector3( 600, 1, lineY ) );
-        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-        lineGeometries.push(geometry);
-      } 
-      const material = new THREE.LineBasicMaterial( { 	color: 0x00ffff, linewidth: 1, } );
-      for (let i = 0; i < lineGeometries.length; i++) {
-        const line = new THREE.Line( lineGeometries[i], material );
-        scene.add( line ); //adding each line to the scene
-      } 
+      var voronoiLinesMat = new THREE.LineBasicMaterial({color: 0x9f9fff});
 
 
       const vlGroup = new THREE.Group();
+
 
 
       const bpLocation = new Object();
@@ -242,6 +236,9 @@
       var redtestpuck = gui.addFolder('Red Test Puck');
       redtestpuck.add( rpLocation , 'y', 0, 4500 ).step(1);
       redtestpuck.add( rpLocation , 'x', 0, 600 ).step(1);
+
+      
+
 
 
       // ------------Game Specific UI-----------
@@ -270,11 +267,62 @@
 
       // ---Classic Shuffle---
 
+      //Lines
+
+      if (gameType.classicShuffle || gameType.neoShuffle){
+
+        const scoreLines = [60,165,524,1054,1768,2762]; // y value of lines
+        const lineGeometries = [];
+        for (let i = 0; i < scoreLines.length; i++) {
+          const points = [];
+          const lineY = scoreLines[i];
+          points.push( new THREE.Vector3( 0, 1, lineY ) );
+          points.push( new THREE.Vector3( 600, 1, lineY ) );
+          const geometry = new THREE.BufferGeometry().setFromPoints( points );
+          lineGeometries.push(geometry);
+        } 
+          const material = new THREE.LineBasicMaterial( { 	color: 0x00ffff, linewidth: 1, } );
+          for (let i = 0; i < lineGeometries.length; i++) {
+            const line = new THREE.Line( lineGeometries[i], material );
+            scene.add( line ); //adding each line to the scene
+          }; 
+      };
+      
       //Markers
       const puckPointerGeo = new THREE.CylinderGeometry( 20, 5, 20, 8, 2 );
       const puckPointerMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, wireframe: true} );
       const puckPointer = new THREE.Mesh( puckPointerGeo, puckPointerMaterial );
       scene.add( puckPointer );
+      puckPointer.position.set(10000,10000,10000);
+
+      const scoringPuckGeo = new THREE.CircleGeometry( 50, 8 );
+      const scoringPuckIndicatorsGrp = new THREE.Group();
+
+
+      //------curling----------
+      const curlingCenter = {x: 300, y: 789};
+      console.log("curling center x = ", curlingCenter.x, "curling center y = ", curlingCenter.y)
+      const curlingCircGeo1 = new THREE.CircleGeometry( 150
+      , 36 );
+      const curlingCircMat1 = new THREE.MeshPhongMaterial( {color: 0x00ffff, wireframe: true} );
+      const curlingCircGeo2 = new THREE.CircleGeometry( 20, 56 );
+      const curlingCircMat2 = new THREE.MeshPhongMaterial( {color: 0x250b52, side: THREE.DoubleSide} );
+      const curlingCircleMesh1 = new THREE.Mesh( curlingCircGeo1, curlingCircMat1 );
+      const curlingCircleMesh2 = new THREE.Mesh( curlingCircGeo2, curlingCircMat2 );
+
+      const curlingCircles = new THREE.Group();
+
+      curlingCircles.add( curlingCircleMesh1, curlingCircleMesh2 );
+      scene.add( curlingCircles );
+      curlingCircles.position.set( curlingCenter.x, 1, curlingCenter.y);
+      curlingCircleMesh2.position.set( 0, 0, -2);
+      curlingCircles.rotation.x = Math.PI / 2;
+
+
+
+
+
+      
 
 
 
@@ -285,10 +333,12 @@
         requestAnimationFrame( animate );
 
         // -----3d Perspective-----
-        // camera.lookAt(300, -200, 1200);
+        camera.lookAt(300, -200, 1200);
 
-        // -----Isometric Perspective-----
-        camera.position.set( -250, 2000, 2140 );
+        
+        
+
+        
         
         
         bp1.position.set(10000, 0, 0);
@@ -399,15 +449,45 @@
         }
 
 
+        if (gameType.neoCurling){
+          
+
+        }
+
+
+        if (gameType.classicShuffle){
+        scoringPuckIndicatorsGrp.remove(...scoringPuckIndicatorsGrp.children);
+
+
         if (rpBest[1]<bpBest[1]){
-          puckPointer.position.set(rpBest[0], 80, rpBest[1]);
+          puckPointer.position.set(rpBest[0], 50, rpBest[1]);
+          rpyv.forEach(function(e, i, a) {
+            if (rpyv[i]<bpBest[1]){
+            const scoringPuckIndicators = new THREE.Mesh( scoringPuckGeo, puckPointerMaterial );
+            scoringPuckIndicators.position.set(rpxv[i], 3, rpyv[i]);
+            scoringPuckIndicators.rotation.x = Math.PI / 2;
+            scoringPuckIndicatorsGrp.add( scoringPuckIndicators );
+            }
+          });
+          scene.add( scoringPuckIndicatorsGrp );
         }
 
         else{
-          puckPointer.position.set(bpBest[0], 80, bpBest[1]);
-        }
+          puckPointer.position.set(bpBest[0], 50, bpBest[1]);
+          bpyv.forEach(function(e, i, a) {
+            if (bpyv[i]<rpBest[1]){
+            const scoringPuckIndicators = new THREE.Mesh( scoringPuckGeo, puckPointerMaterial );
+            scoringPuckIndicators.position.set(bpxv[i], 3, bpyv[i]);
+            scoringPuckIndicators.rotation.x = Math.PI / 2;
+            scoringPuckIndicatorsGrp.add( scoringPuckIndicators );
+            }
+          });
+          scene.add( scoringPuckIndicatorsGrp );
+        };
+      };
         
-        
+
+
 
 
         //----------spaceinvades start------------------------
@@ -459,8 +539,7 @@
           
           var voronoiLinesGeom = new THREE.BufferGeometry();
           voronoiLinesGeom.setAttribute("position", new THREE.Float32BufferAttribute(voronoiLinesPoints, 3));
-          voronoiLinesGeom.setAttribute("color", new THREE.Float32BufferAttribute(voronoiLinesColors, 3));
-          var voronoiLinesMat = new THREE.LineBasicMaterial({vertexColors: true});
+          // voronoiLinesGeom.setAttribute("color", new THREE.Float32BufferAttribute(voronoiLinesColors, 3));
           var voronoiLines = new THREE.LineSegments(voronoiLinesGeom, voronoiLinesMat);
     
           // const vlGroup = new THREE.Group();
@@ -599,10 +678,7 @@
 
         //----------spaceinvades end-------------------------
 
-        
-
-
-
+      
 
         renderer.render( scene, camera );
       }
