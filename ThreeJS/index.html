@@ -1049,6 +1049,24 @@
           };
         };
 
+        if (gameType.blackJack){
+          if (gsRedScore){
+            gsRedScore.innerHTML = 0;
+          };
+          if (gsBlueScore){
+            gsBlueScore.innerHTML = 0;
+          };
+        };
+
+        if (gameType.neoShuffle){
+          if (gsRedScore){
+            gsRedScore.innerHTML = roundScoreNeoShuffle.red;
+          };
+          if (gsBlueScore){
+            gsBlueScore.innerHTML = roundScoreNeoShuffle.blue;
+          };
+        };
+
         renderer.render( scene, camera );
       }
       animate();

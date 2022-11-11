@@ -465,8 +465,8 @@ def puckDetection(key, tick,tabCorners):
                 # print("Attempting Thread")
                 # thread1 = Thread(target = CallAPI())
                 argss = (centresBlue,centresRed,pygameArrayRed,pygameArrayBlue)
-                if not cancelShot:
-                    start_new_thread(CallAPI,argss)
+                # if not cancelShot:
+                start_new_thread(CallAPI,argss)
                 slowDown = 0
             except Exception as e:
                 print("An error occurred in the API thread: " + str(e))
@@ -562,7 +562,7 @@ def arduino_switch(aa,a):
     print("Successfully entered arduino thread")
 
 
-    board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem14101')
     # board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
 
     # board = pyfirmata.Arduino('COM3')
