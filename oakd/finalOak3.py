@@ -209,14 +209,19 @@ def CallAPI(centresBlue, centresRed, pygameArrayRed,pygameArrayBlue):
             print("stopping")
         
         
-        
+        sent = False 
         if shotActive:
+            sent = True
             print("Sending Data")
             resp = requests.post(url, headers=headers, data=data)
             print(data)
             if cancelShot:
                 shotActive = False
                 return 0
+            
+        # Always call the api 11/11
+        if not sent:
+            resp = requests.post(url, headers=headers, data=data)
 
     except Exception as e: 
         print("An error occurred in the callAPI function " + str(e)) 
@@ -487,7 +492,7 @@ def puckDetection(key, tick,tabCorners):
 def endOfRound(pygameArrayRed,pygameArrayBlue): 
     global iteration, sumOfPoints, passTrigger, passSumOfValues, killRound, shotFinished
     killRound = False
-    arbitraryNumberOfGameTicks = 10
+    arbitraryNumberOfGameTicks = 7
     # if the sumOfPoints doesn't change (+-10 for X amount of frames the round is deemed to be finished)
     
     if passTrigger == 0:
@@ -556,8 +561,8 @@ def arduino_switch(aa,a):
     shotCount = 0
     print("Successfully entered arduino thread")
     # board = pyfirmata.Arduino('/dev/cu.usbmodem14401')
-    # board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
-    board = pyfirmata.Arduino('COM3')
+    board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+    # board = pyfirmata.Arduino('COM3')
     
 
     it = pyfirmata.util.Iterator(board)
