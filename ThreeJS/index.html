@@ -399,6 +399,7 @@
 
         let prevPuckPosSum = 1;
         let puckMovement = false;
+        let puckData = undefined;
 
         //-----------------------animation loop--------------------
 
@@ -426,51 +427,34 @@
             let bpJSON = true;
             // let bpJSON = component.bluePucks;
 
-            fetch('http://localhost:3000/PuckLocations/1', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                })
-                .then(response => response.text())
-                .then(text => console.log(text))
+            
 
-            // {
-            //     "puckLocationsRed": [
-            //         [
-            //             268,
-            //             921
-            //         ]
-            //     ],
-            //     "puckLocationsBlue": [
-            //         [
-            //             292,
-            //             974
-            //         ]
-            //     ],
-            //     "id": 1
-            // }
+            fetch('http://localhost:3000/PuckLocations/1', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.text())
+            .then(data => {
+                puckData = data;
+            })
+            .then(text => console.log(text))
+
+
+            const puckDataObj = JSON.parse(puckData);
+
+            console.log("zzz", puckDataObj.puckLocationsRed);
 
             if (bpJSON) {
 
-                const bpObj = {
-                    "locations": [{
-                        "puck": [bpLocation.x, bpLocation.y, 1]
-                    }, {
-                        "puck": [518, 1231, 1]
-                    }, {
-                        "puck": [180, 220, 1]
-                    }]
-                };
-                // const bpObj = JSON.parse(bpJSON);
+                const bpObj = puckDataObj.puckLocationsBlue;
 
-
-
-                for (let i = 0; i < bpObj.locations.length; i++) {
+                for (let i = 0; i < bpObj.length; i++) {
                     var bpx = 0;
                     var bpy = 0;
-                    bpx = bpObj.locations[i].puck[0];
-                    bpy = bpObj.locations[i].puck[1];
+                    bpx = bpObj[i][0];
+                    bpy = bpObj[i][1];
 
                     const bluePuck = new THREE.Mesh(puckCylinder, bpCoreMat);
                     bluePuck.position.set(bpx, 10, bpy);
@@ -480,6 +464,8 @@
                     bpyv.push(bpy);
 
                 }
+
+
 
                 //add arrow to best red shot
 
@@ -500,21 +486,14 @@
             // let rpJSON = component.redPucks;
 
             if (rpJSON) {
-                const rpObj = {
-                    "locations": [{
-                        "puck": [rpLocation.x, rpLocation.y, 1]
-                    }, {
-                        "puck": [584, 690, 1]
-                    }]
-                };
-                // const rpObj = JSON.parse(rpJSON);
+                const rpObj = puckDataObj.puckLocationsRed;
+      
 
-
-                for (let i = 0; i < rpObj.locations.length; i++) {
+                for (let i = 0; i < rpObj.length; i++) {
                     var rpx = 0;
                     var rpy = 0;
-                    rpx = rpObj.locations[i].puck[0];
-                    rpy = rpObj.locations[i].puck[1];
+                    rpx = rpObj[i][0];
+                    rpy = rpObj[i][1];
 
                     const redPuck = new THREE.Mesh(puckCylinder, rpCoreMat);
                     redPuck.position.set(rpx, 10, rpy);
