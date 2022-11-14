@@ -269,6 +269,25 @@
       const rpBar = new THREE.Mesh( barRedGeometry, rpBarMat );
       const spaceInvadersGroup = new THREE.Group();
 
+      //create crab geo
+      const crabBoxLocations = [
+        [0,0,1,0,0,0,0,0,1,0,0],
+        [0,0,0,1,0,0,0,1,0,0,0],
+        [0,0,1,1,1,1,1,1,1,0,0],
+        [0,1,1,0,1,1,1,0,1,1,0],
+        [1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,1,0,0,0,0,0,1,0,1],
+        [0,0,0,1,1,0,1,1,0,0,0],
+      ]
+      console.log(crabBoxLocations.length);
+
+
+      const spaceInvadersCrab = new THREE.Group();
+      const crabBB = new THREE.BoxGeometry( 1, 1, 1 );
+      const crabMat = new THREE.MeshPhongMaterial( {color: 0x00aa00} );
+
+
       let bluePercent = 0;
       let redPercent = 0;
 
