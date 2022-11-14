@@ -330,6 +330,7 @@ def puckDetection(key, tick,tabCorners):
                             # compute the center of the contour
                     moments = cv2.moments(cnt2)
                     appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
+
                     appendString = appendString.replace('(','[')
                     appendString = appendString.replace(')',']')
                     centresBlue.append(appendString)
@@ -350,9 +351,11 @@ def puckDetection(key, tick,tabCorners):
             
             headers = CaseInsensitiveDict()
             headers["Content-Type"] = "application/json"
-            data = {"puckLocationsRed":[centresRed], "puckLocationsBlue":[centresBlue]}
+            data = '{"puckLocationsRed":' + centresRed+ ', "puckLocationsBlue":' +centresBlue+'}'
             resp = requests.put("http://localhost:3000/PuckLocations/1", headers=headers, data=data)
-            print("ZZZ" + resp.status_code)
+            # resp = requests.get("http://localhost:3000/PuckLocations/1", headers=headers)
+            
+            print("ZZZ" + str(resp.status_code))
             
             cv2.imshow("flatframe", flatFrameClean)
             cv2.imshow("puckframe", flatFrame)
