@@ -334,6 +334,7 @@ def puckDetection(key, tick,tabCorners):
                             # compute the center of the contour
                     moments = cv2.moments(cnt2)
                     appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
+
                     appendString = appendString.replace('(','[')
                     appendString = appendString.replace(')',']')
                     centresBlue.append(appendString)
