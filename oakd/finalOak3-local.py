@@ -263,6 +263,7 @@ def puckDetection(key, tick,tabCorners):
 
             contoursRedCenters, _ = cv2.findContours(maskRedCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             detections = []
+            localRed = []
             for cnt2 in contoursRedCenters:
                 # hull2 = cv2.convexHull(cnt2)
                 # Calculate area and remove small elements
@@ -279,6 +280,8 @@ def puckDetection(key, tick,tabCorners):
                     appendString = appendString.replace('(','[')
                     appendString = appendString.replace(')',']')
                     centresRed.append(appendString)
+                    
+                    localRed.append(str(int(moments['m10']/moments['m00']) + "," + str(int(moments['m01']/moments['m00']))))
 
             # #——————————————Blue Mask————————————————     
             #set the lower and upper bounds for the blue hue (red hsv wraps)
@@ -314,6 +317,7 @@ def puckDetection(key, tick,tabCorners):
 
             contoursBlueCenters, _ = cv2.findContours(maskBlueCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             detections = []
+            localBlue = []
             for cnt2 in contoursBlueCenters:
                 # hull2 = cv2.convexHull(cnt2)
                 # Calculate area and remove small elements
@@ -333,7 +337,8 @@ def puckDetection(key, tick,tabCorners):
                     appendString = appendString.replace('(','[')
                     appendString = appendString.replace(')',']')
                     centresBlue.append(appendString)
-
+                    
+                    localBlue.append("[" + str(int(moments['m10']/moments['m00']) + "," + str(int(moments['m01']/moments['m00']))+ "]"))
 
 
         
@@ -350,9 +355,9 @@ def puckDetection(key, tick,tabCorners):
             
             headers = CaseInsensitiveDict()
             headers["Content-Type"] = "application/json"
-            data = {"puckLocationsRed":[centresRed], "puckLocationsBlue":[centresBlue]}
+            data = {"puckLocationsRed: " + localRed +  ",puckLocationsBlue: " + localBlue}
             resp = requests.put("http://localhost:3000/PuckLocations/1", headers=headers, data=data)
-            print("ZZZ" + resp.status_code)
+            
             
             cv2.imshow("flatframe", flatFrameClean)
             cv2.imshow("puckframe", flatFrame)
