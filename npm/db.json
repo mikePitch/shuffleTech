@@ -1,33 +1,19 @@
 {
-    "PuckLocations": [{
-        "puckLocationsRed": [
-            [
-                295,
-                3161
-            ],
-            [
-                231,
-                1916
-            ],
-            [
-                372,
-                1624
-            ]
-        ],
-        "puckLocationsBlue": [
-            [
-                295,
-                3161
-            ],
-            [
-                231,
-                1916
-            ],
-            [
-                372,
-                1624
-            ]
-        ],
-        "id": 1
-    }]
+  "PuckLocations": [
+    {
+      "puckLocationsRed": [
+        [
+          268,
+          922
+        ]
+      ],
+      "puckLocationsBlue": [
+        [
+          292,
+          975
+        ]
+      ],
+      "id": 1
+    }
+  ]
 }

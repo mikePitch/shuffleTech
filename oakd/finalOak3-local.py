@@ -193,186 +193,190 @@ def puckDetection(key, tick,tabCorners):
     
 
     while True:
-        try:
-            # if killRound:  
-            #     return 1
-            # print("Game tick: " + str(tick))
-            tick += 1
-            slowDown = slowDown + 1
-            # if key == 100: #key "d"
-            #read frame
-            frame = video.get().getCvFrame()
+        # try:
+        # ABCD
+        # if killRound:  
+        #     return 1
+        # print("Game tick: " + str(tick))
+        tick += 1
+        slowDown = slowDown + 1
+        # if key == 100: #key "d"
+        #read frame
+        frame = video.get().getCvFrame()
 
-            #refactor this ⬇︎⬇︎⬇︎⬇︎
-            #co-ordinates in 
-            #  of table corners
-            pts1 = np.float32([topLeft,topRight,bottomLeft,bottomRight])
-            #co-ordinates those points will be remapped to in flatFrame
-            pts2 = np.float32([[tablePadding,tablePadding],[tablePadding + tableWidth,tablePadding],[tablePadding,tablePadding + tableLength],[tablePadding + tableWidth,tablePadding + tableLength]])
+        #refactor this ⬇︎⬇︎⬇︎⬇︎
+        #co-ordinates in 
+        #  of table corners
+        pts1 = np.float32([topLeft,topRight,bottomLeft,bottomRight])
+        #co-ordinates those points will be remapped to in flatFrame
+        pts2 = np.float32([[tablePadding,tablePadding],[tablePadding + tableWidth,tablePadding],[tablePadding,tablePadding + tableLength],[tablePadding + tableWidth,tablePadding + tableLength]])
 
 
-            #change perspective of frame
-            M = cv2.getPerspectiveTransform(pts1,pts2)
-            flatFrameClean = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
-            flatFrame = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
-            #refactor this ⬆︎⬆︎⬆︎⬆︎
+        #change perspective of frame
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        flatFrameClean = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
+        flatFrame = cv2.warpPerspective(frame,M,(tablePadding * 2 + tableWidth,tablePadding * 2 + tableLength))
+        #refactor this ⬆︎⬆︎⬆︎⬆︎
+    
+        #———————————————Puck detection start————————————————————————
+
+        # convert to hsv colorspace
+        flatFrameHSV = cv2.cvtColor(flatFrame, cv2.COLOR_BGR2HSV)
+        # find the colors within the boundaries
+        roi = flatFrameHSV[0: 4500,0: 600]
+    
+
+        #——————————————Red Mask————————————————
+
+
+        lower_red = np.array([75,0,0])
+        upper_red = np.array([100,255,255])
+
+        maskRed = cv2.inRange(roi, lower_red, upper_red)
         
-            #———————————————Puck detection start————————————————————————
+        contoursRed, _ = cv2.findContours(maskRed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        centresRed = []            
 
-            # convert to hsv colorspace
-            flatFrameHSV = cv2.cvtColor(flatFrame, cv2.COLOR_BGR2HSV)
-            # find the colors within the boundaries
-            roi = flatFrameHSV[0: 4500,0: 600]
-        
+        for cnt in contoursRed:
 
-            #——————————————Red Mask————————————————
+            # hull = cv2.convexHull(cnt)
+            # Calculate area and remove small elements
+            area = cv2.contourArea(cnt)
+            
+            if area > 400:
+                cv2.drawContours(maskRed, [cnt], -1, (255,255, 255), -1)
+                cv2.drawContours(flatFrame, [cnt], -1, (0, 255, 0), 2)
+                # ellipse = cv2.fitEllipse(hull)
+                # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                x, y, w, h = cv2.boundingRect(cnt)
+
+
+        #red pucks white circles
+
+        #findWhites
+        lower_whites = np.array([0,0,0])
+        upper_whites = np.array([180,255,135])
+
+        #create a mask for white colour using inRange function
+        maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+
+        maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
+
+        contoursRedCenters, _ = cv2.findContours(maskRedCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        detections = []
+        localRed = []
+        for cnt2 in contoursRedCenters:
+            # hull2 = cv2.convexHull(cnt2)
+            # Calculate area and remove small elements
+            area = cv2.contourArea(cnt2)
+            if area > 80:
+                cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
+                # ellipse = cv2.fitEllipse(hull)
+                # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                x, y, w, h = cv2.boundingRect(cnt2)
+                detections.append([x, y, w, h])
+
+                moments = cv2.moments(cnt2)
+                appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
+                appendString = appendString.replace('(','[')
+                appendString = appendString.replace(')',']')
+                centresRed.append(appendString)
+                
+                localRed.append("[" + str(int(moments['m10']/moments['m00'])) + "," + str(int(moments['m01']/moments['m00'])) + "]")
+
+        # #——————————————Blue Mask————————————————     
+        #set the lower and upper bounds for the blue hue (red hsv wraps)
+        # lower_blue = np.array([100,80,100])
+        # upper_blue = np.array([140,200,255])
+        lower_blue = np.array([5,0,0])
+        upper_blue = np.array([39,255,255])
+
+        #create a mask for blue colour using inRange function
+        maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
+        contoursBlue, _ = cv2.findContours(maskBlue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        centresBlue = []
+
+        for cnt in contoursBlue:
+            # hull = cv2.convexHull(cnt)
+            # Calculate area and remove small elements
+            area = cv2.contourArea(cnt)
+            if area > 400:
+                cv2.drawContours(maskBlue, [cnt], -1, (255,255, 255), -1)
+
+
+        #find hole in blue mask
+        #red pucks white circles
+
+        #findWhites
+        lower_whites = np.array([0,0,0])
+        upper_whites = np.array([180,255,135])
+
+        #create a mask for white colour using inRange function
+        maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+
+        maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
+
+        contoursBlueCenters, _ = cv2.findContours(maskBlueCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        detections = []
+        localBlue = []
+        for cnt2 in contoursBlueCenters:
+            # hull2 = cv2.convexHull(cnt2)
+            # Calculate area and remove small elements
+            area = cv2.contourArea(cnt2)
+            if area > 80:
+                # cv2.drawContours(flatFrame, [hull2], -1, (0, 255, 0), 2)
+                cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
+                # ellipse = cv2.fitEllipse(hull)
+                # cv2.ellipse(frame,ellipse,(0,255,0),2)
+                # x, y, w, h = cv2.boundingRect(hull2)
+                x, y, w, h = cv2.boundingRect(cnt2)
+                detections.append([x, y, w, h])
+
+                        # compute the center of the contour
+                moments = cv2.moments(cnt2)
+                appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
+
+                appendString = appendString.replace('(','[')
+                appendString = appendString.replace(')',']')
+                centresBlue.append(appendString)
+                
+                localBlue.append("[" + str(int(moments['m10']/moments['m00'])) + "," + str(int(moments['m01']/moments['m00']))+ "]")
+
 
     
-            lower_red = np.array([75,0,0])
-            upper_red = np.array([100,255,255])
+        #show actual maks not contours
+        # maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
+        # maskRed = cv2.inRange(roi, lower_red, upper_red)
+        # maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
+        # maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
+        # maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
 
-            maskRed = cv2.inRange(roi, lower_red, upper_red)
-            
-            contoursRed, _ = cv2.findContours(maskRed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            centresRed = []            
-
-            for cnt in contoursRed:
-
-                # hull = cv2.convexHull(cnt)
-                # Calculate area and remove small elements
-                area = cv2.contourArea(cnt)
-                
-                if area > 400:
-                    cv2.drawContours(maskRed, [cnt], -1, (255,255, 255), -1)
-                    cv2.drawContours(flatFrame, [cnt], -1, (0, 255, 0), 2)
-                    # ellipse = cv2.fitEllipse(hull)
-                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-
-            #red pucks white circles
-
-            #findWhites
-            lower_whites = np.array([0,0,0])
-            upper_whites = np.array([180,255,135])
-
-            #create a mask for white colour using inRange function
-            maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-
-            maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
-
-            contoursRedCenters, _ = cv2.findContours(maskRedCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            detections = []
-            localRed = []
-            for cnt2 in contoursRedCenters:
-                # hull2 = cv2.convexHull(cnt2)
-                # Calculate area and remove small elements
-                area = cv2.contourArea(cnt2)
-                if area > 80:
-                    cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
-                    # ellipse = cv2.fitEllipse(hull)
-                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                    x, y, w, h = cv2.boundingRect(cnt2)
-                    detections.append([x, y, w, h])
-
-                    moments = cv2.moments(cnt2)
-                    appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']), 1)) + '}'
-                    appendString = appendString.replace('(','[')
-                    appendString = appendString.replace(')',']')
-                    centresRed.append(appendString)
-                    
-                    localRed.append(str(int(moments['m10']/moments['m00']) + "," + str(int(moments['m01']/moments['m00']))))
-
-            # #——————————————Blue Mask————————————————     
-            #set the lower and upper bounds for the blue hue (red hsv wraps)
-            # lower_blue = np.array([100,80,100])
-            # upper_blue = np.array([140,200,255])
-            lower_blue = np.array([5,0,0])
-            upper_blue = np.array([39,255,255])
-
-            #create a mask for blue colour using inRange function
-            maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
-            contoursBlue, _ = cv2.findContours(maskBlue, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            centresBlue = []
-
-            for cnt in contoursBlue:
-                # hull = cv2.convexHull(cnt)
-                # Calculate area and remove small elements
-                area = cv2.contourArea(cnt)
-                if area > 400:
-                    cv2.drawContours(maskBlue, [cnt], -1, (255,255, 255), -1)
-
-
-            #find hole in blue mask
-            #red pucks white circles
-
-            #findWhites
-            lower_whites = np.array([0,0,0])
-            upper_whites = np.array([180,255,135])
-
-            #create a mask for white colour using inRange function
-            maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-
-            maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
-
-            contoursBlueCenters, _ = cv2.findContours(maskBlueCenters, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            detections = []
-            localBlue = []
-            for cnt2 in contoursBlueCenters:
-                # hull2 = cv2.convexHull(cnt2)
-                # Calculate area and remove small elements
-                area = cv2.contourArea(cnt2)
-                if area > 80:
-                    # cv2.drawContours(flatFrame, [hull2], -1, (0, 255, 0), 2)
-                    cv2.drawContours(flatFrame, [cnt2], -1, (0, 255, 0), 2)
-                    # ellipse = cv2.fitEllipse(hull)
-                    # cv2.ellipse(frame,ellipse,(0,255,0),2)
-                    # x, y, w, h = cv2.boundingRect(hull2)
-                    x, y, w, h = cv2.boundingRect(cnt2)
-                    detections.append([x, y, w, h])
-
-                            # compute the center of the contour
-                    moments = cv2.moments(cnt2)
-                    appendString = '{"puck":' + str((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']) , 1)) + '}'
-
-                    appendString = appendString.replace('(','[')
-                    appendString = appendString.replace(')',']')
-                    centresBlue.append(appendString)
-                    
-                    localBlue.append("[" + str(int(moments['m10']/moments['m00']) + "," + str(int(moments['m01']/moments['m00']))+ "]"))
-
-
+        print(centresBlue)
+        print(centresRed)
         
-            #show actual maks not contours
-            # maskBlue = cv2.inRange(roi, lower_blue, upper_blue)
-            # maskRed = cv2.inRange(roi, lower_red, upper_red)
-            # maskWhite = cv2.inRange(roi, lower_whites, upper_whites)
-            # maskBlueCenters = cv2.bitwise_and(maskWhite, maskBlue)
-            # maskRedCenters = cv2.bitwise_and(maskWhite, maskRed)
+        
+        headers = CaseInsensitiveDict()
+        headers["Content-Type"] = "application/json"
+        data2 = '{"puckLocationsRed": [' + ",".join(localRed) +  '] ,"puckLocationsBlue": [' + ",".join(localBlue)+ ']}'
+        print(data2)
+        
+        
+        resp = requests.put("http://localhost:3000/PuckLocations/1", headers=headers, data=data2)
+        print(resp.status_code)
+        
+        cv2.imshow("flatframe", flatFrameClean)
+        cv2.imshow("puckframe", flatFrame)
+        cv2.imshow("redMask", maskRed)
+        cv2.imshow("Red Centers", maskRedCenters)
+        cv2.imshow("Blue Centers", maskBlueCenters)
+        cv2.imshow("blueMask", maskBlue)
 
-            print(centresBlue)
-            print(centresRed)
-            
-            
-            headers = CaseInsensitiveDict()
-            headers["Content-Type"] = "application/json"
-            data = {"puckLocationsRed: " + localRed +  ",puckLocationsBlue: " + localBlue}
-            resp = requests.put("http://localhost:3000/PuckLocations/1", headers=headers, data=data)
-            
-            
-            cv2.imshow("flatframe", flatFrameClean)
-            cv2.imshow("puckframe", flatFrame)
-            cv2.imshow("redMask", maskRed)
-            cv2.imshow("Red Centers", maskRedCenters)
-            cv2.imshow("Blue Centers", maskBlueCenters)
-            cv2.imshow("blueMask", maskBlue)
-
-                #break loop
-            key = cv2.waitKey(30)
-            if key == ord('q'):
-                break
-        except Exception as e:
-                print("An error occurred in the Puck Detection function " + str(e))
+            #break loop
+        key = cv2.waitKey(30)
+        if key == ord('q'):
+            break
+        # except Exception as e:
+        #         print("An error occurred in the Puck Detection function " + str(e))
 
 #——————————————End Of Puck Detection———————————————— 
 
@@ -441,13 +445,13 @@ def main(a):
     #!!!! need to take this out of the here as it slows it down way to much!!!!!-------------------------------------
 
     # Arduino Thread
-    try:
-        # print("Attempting Arduino Thread")
-        # print ("attempting to enter turn thread")
-        argss = (0, 0)
-        start_new_thread(arduino_switch,argss) 
-    except Exception as e:
-        print("An error occurred in the Arduino thread: " + str(e))
+    # try:
+    #     # print("Attempting Arduino Thread")
+    #     # print ("attempting to enter turn thread")
+    #     argss = (0, 0)
+    #     start_new_thread(arduino_switch,argss) 
+    # except Exception as e:
+    #     print("An error occurred in the Arduino thread: " + str(e))
         
     #check if connection with camera is successfully
     print(video.get().getCvFrame())
@@ -471,21 +475,21 @@ def main(a):
             if key == 113: #key q
                 tabCorners = [(1700,297), (1644,810), (578,451), (566,575)]
                 print("Manual tab corners obtained")
-            if key == 115: #key "s"
-                #start Looking for pucks
-                print("Puck detection Initiallized")
-                tabCorners = readPuckFile()
-                
-                tick = 0
-                round = 1 
-                while True:
-                    shotCount = 0
-                    print ("Round: " + str(round))
-                    print("Red: " + str(RedRounds))
-                    print("Blue: " + str (BlueRounds))
-                    print("Shot Count: " + str(shotCount))
-                    round = round + puckDetection(key, tick,tabCorners) 
-                    time.sleep(1)
+            # if key == 115: #key "s"
+            #     #start Looking for pucks
+            print("Puck detection Initiallized")
+            tabCorners = readPuckFile()
+            
+            tick = 0
+            round = 1 
+            while True:
+                shotCount = 0
+                print ("Round: " + str(round))
+                print("Red: " + str(RedRounds))
+                print("Blue: " + str (BlueRounds))
+                print("Shot Count: " + str(shotCount))
+                round = round + puckDetection(key, tick,tabCorners) 
+                time.sleep(1)
                     
                     
             if key == 100: #key "d"
