@@ -165,6 +165,7 @@ def findCornermarkers():
 #————————————Start puck detection on s key—————————————————
 def puckDetection(key, tick,tabCorners):
     # End of round variables
+    
     global iteration, sumOfPoints, passTrigger, killRound, BlueRounds, RedRounds, cancelShot
     cancelShot = False
     iteration = 0
@@ -345,6 +346,13 @@ def puckDetection(key, tick,tabCorners):
 
             print(centresBlue)
             print(centresRed)
+            
+            
+            headers = CaseInsensitiveDict()
+            headers["Content-Type"] = "application/json"
+            data = {"puckLocationsRed":[centresRed], "puckLocationsBlue":[centresBlue]}
+            resp = requests.put("http://localhost:3000/PuckLocations/1", headers=headers, data=data)
+            print("ZZZ" + resp.status_code)
             
             cv2.imshow("flatframe", flatFrameClean)
             cv2.imshow("puckframe", flatFrame)
