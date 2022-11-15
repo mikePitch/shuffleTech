@@ -615,7 +615,7 @@ function animate() {
                     // mesh.receiveShadow = true;
                     // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
                     mesh.geometry.center()
-                    curlingLines.add( mesh, bbox );
+                    curlingLines.add( mesh );
          
                 
                 } );
@@ -670,7 +670,7 @@ function animate() {
                     // mesh.receiveShadow = true;
                     // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
                     mesh.geometry.center()
-                    curlingLines.add( mesh, bbox );
+                    curlingLines.add( mesh );
          
                 
                 } );
