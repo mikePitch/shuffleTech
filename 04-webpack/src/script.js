@@ -20,6 +20,7 @@ gameType.neoCurling = true;
 let gameState = "idle";
 
 var instructions = document.getElementById('instructions');
+var instructionRow = document.getElementById('bottomRowHud');
 
 //score and round trackers
 
@@ -58,7 +59,7 @@ turnNumber.innerHTML = (shotsThrown + 1).toString();
 function shotsThrownUp(){
     shotsThrown = shotsThrown + 1;
     turnNumber.innerHTML = (shotsThrown + 1).toString();
-    if (shotsThrown > 8){
+    if (shotsThrown > 7){
         shotsThrown = 8;
         turnNumber.innerHTML = "8";
     }
@@ -598,7 +599,7 @@ function animate() {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-            },
+            }
         })
         .then(response => response.text())
         .then(data => {
@@ -1351,27 +1352,46 @@ function animate() {
             };
         };
 
-    //------ turn round and game stuff ----
+        //------ turn round and game stuff ----
+
+ 
+
+        // ---end of round----
+        if(shotsThrown == 8){
+            console.log("round over")
+            gameState = "endOfRound";
+
+        };
+
+        //---end of game
+        if(roundsPlayed == 8){
+            console.log("game over")
+            gameState = "endOfGame";
+        };
+    };
 
     // ----display turn---
-    if (gameState = "inProgress"){
+    if (gameState == "inProgress"){
         instructions.innerHTML = "test";
+        if(shotsThrown % 2 == 0){
+            instructionRow.style.backgroundColor = "#fc0352";
+            instructions.innerHTML = "red turn";
+        }
+        else {
+            instructionRow.style.backgroundColor = "#03b1fc";
+            instructions.innerHTML = "blue turn";
+        };
+    };
 
+    if(gameState == "idle"){
+        instructionRow.style.backgroundColor = "#444444";
+        instructions.innerHTML = "Press START";
     }
 
-    // ---end of round----
-    if(shotsThrown == 8){
-        console.log("round over")
-        gameState = "endOfRound";
-
-    };
-
-    //---end of game
-    if(roundsPlayed == 8){
-        console.log("game over")
-        gameState = "endOfGame";
-    };
-    };
+    if(gameState == "endOfRound"){
+        instructionRow.style.backgroundColor = "#444444";
+        instructions.innerHTML = "end of round";
+    }
 
 
     renderer.render(scene, camera);
