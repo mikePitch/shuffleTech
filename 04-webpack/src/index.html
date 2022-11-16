@@ -20,24 +20,54 @@
                 <h1 class="bigScore">-</h1>
                 <h1 class="bigScore blueTeamBigScore">00</h1>
             </div>
-            <div class="turnStepper">
-                <span class="backTurn">◀︎</span>
-                <span class="turnNumber">00</span>
-                <span class="nextTurn">▶︎</span>
-            </div>
+
         </div>
-        <div class="bottomRowHud">
-            <ul class="gameSelector">
-                <li class="selectBJ">BJ</li>
-                <li class="selectCS">CS</li>
-                <li class="selectNS">NS</li>
-                <li class="selectSI">SI</li>
-                <li class="selectCU">CU</li>
-                <li class="selectALL">ALL</li>
-            </ul>
+        <div id="bottomRowHud">
+            <h1 id="instructions">Intructions</h1>
         </div>
+    </div>
+    <div class="kiosk">
+        <h2>turn</h2>
+        <div class="turnStepper">
+            <span id="backTurn">◀︎</span>
+            <span id="turnNumber">00</span>
+            <span id="nextTurn">▶︎</span>
+        </div>
+        <h2>round</h2>
+        <span id="roundNumber">00</span>
 
 
+        <h2>add red player</h2>
+        <input type="text" id="playerNameInputRed">
+        <button id="addRedPlayerBtn">add</button>
+        <ul id="redPlayerList">
+
+        </ul>
+
+
+
+        <h2>add blue player</h2>
+        <input type="text" id="playerNameInputBlue">
+        <button id="addBluePlayerBtn">add</button>
+        <ul id="bluePlayerList">
+
+        </ul>
+
+
+        <h2>select game</h2>
+
+        <ul class="gameSelector">
+            <li class="selectBJ">BJ</li>
+            <li class="selectCS">CS</li>
+            <li class="selectNS">NS</li>
+            <li class="selectSI">SI</li>
+            <li class="selectCU">CU</li>
+            <li class="selectALL">ALL</li>
+        </ul>
+
+        <button id="startGame">Start Game</button>
+        <button id="startNextRound">Start Next Round</button>
+        
     </div>
 </body>
 </html>
