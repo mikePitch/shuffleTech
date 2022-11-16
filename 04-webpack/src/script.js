@@ -1,7 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
 import Voronoi from 'voronoi'
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm//geometries/TextGeometry.js';
@@ -36,7 +36,7 @@ let roundsPlayed = 0;
 //----start Game---
 var startGameBtn = document.getElementById('startGame');
 
-function startGame(){
+function startGame() {
     shotsThrown = 0
     roundsPlayed = 0
     gameState = "inProgress";
@@ -45,7 +45,7 @@ function startGame(){
     roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
 }
 
-startGameBtn.onclick = function() {startGame()};
+startGameBtn.onclick = function() { startGame() };
 
 //----manually increment shot----
 var backTurn = document.getElementById('backTurn');
@@ -55,27 +55,30 @@ var turnNumber = document.getElementById('turnNumber');
 turnNumber.innerHTML = (shotsThrown + 1).toString();
 
 
-function shotsThrownUp(){
+function shotsThrownUp() {
     shotsThrown = shotsThrown + 1;
     turnNumber.innerHTML = (shotsThrown + 1).toString();
-    if (shotsThrown > 8){
+    if (shotsThrown > 8) {
         shotsThrown = 8;
         turnNumber.innerHTML = "8";
     }
     console.log("shotsThrown = ", shotsThrown);
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}')
 };
 
-function shotsThrownDown(){
+function shotsThrownDown() {
     shotsThrown = shotsThrown - 1;
-    if (shotsThrown < 0){
+    if (shotsThrown < 0) {
         shotsThrown = 0;
     }
     turnNumber.innerHTML = (shotsThrown + 1).toString();
     console.log("shotsThrown = ", shotsThrown);
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}')
+
 };
 
-backTurn.onclick = function() {shotsThrownDown()};
-nextTurn.onclick = function() {shotsThrownUp()};
+backTurn.onclick = function() { shotsThrownDown() };
+nextTurn.onclick = function() { shotsThrownUp() };
 
 //--- Start Next Round ---
 
@@ -88,14 +91,14 @@ startNextRoundBtn.onclick = () => {
     shotsThrown = 0;
     roundsPlayed = roundsPlayed + 1;
     roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
-    if (roundsPlayed > 7){
+    if (roundsPlayed > 7) {
         roundsPlayed = 8;
         roundNumberTxt.innerHTML = "8";
     }
 
     turnNumber.innerHTML = (shotsThrown + 1).toString();
     gameState = "inProgress";
-    
+
 };
 
 
@@ -161,7 +164,7 @@ addRedBtn.onclick = () => {
 };
 
 
-function addRedPlayer(){
+function addRedPlayer() {
     var inputField = document.getElementById('playerNameInputRed');
     var w = inputField.value;
     var li = document.createElement("li");
@@ -185,7 +188,7 @@ addBlueBtn.onclick = () => {
 };
 
 
-function addBluePlayer(){
+function addBluePlayer() {
     var inputField = document.getElementById('playerNameInputBlue');
     var w = inputField.value;
     var li = document.createElement("li");
@@ -202,8 +205,8 @@ function addBluePlayer(){
 }
 
 function remove(e) {
-  var el = e.target;
-  el.parentNode.remove();
+    var el = e.target;
+    el.parentNode.remove();
 }
 
 
@@ -245,7 +248,7 @@ container.appendChild(renderer.domElement);
 //Background
 scene.background = new THREE.CubeTextureLoader()
 
-    .setPath('/cubeMaps/space/')
+.setPath('/cubeMaps/space/')
     .load([
         'lft.jpg',
         'rht.jpg',
@@ -491,9 +494,9 @@ const newCubeGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 
 
 const loader = new THREE.TextureLoader();
-loader.setPath( '/cubeMaps/synthwave/' );
+loader.setPath('/cubeMaps/synthwave/');
 
-const textureCube =[
+const textureCube = [
     new THREE.MeshStandardMaterial({ map: loader.load('lft.jpg'), side: THREE.DoubleSide }),
     new THREE.MeshStandardMaterial({ map: loader.load('rht.jpg'), side: THREE.DoubleSide }),
     new THREE.MeshStandardMaterial({ map: loader.load('top.jpg'), side: THREE.DoubleSide }),
@@ -524,7 +527,7 @@ const textureCube =[
 //     m.scale.set = (100, 100, 100);
 
 //     modelSign.add (m)
-    
+
 
 // // modelSign.position.set(-600, 500, 2500);
 
@@ -559,7 +562,27 @@ const textureCube =[
 // TEXT
 
 
-
+function callAPI(table, id, verb, APIdata) {
+    let endPoint = "http://localhost:3000/" + table + "/" + id
+    console.log(endPoint)
+    console.log(verb)
+    console.log(APIdata)
+    fetch(endPoint, {
+            method: verb,
+            headers: {
+                'Accept': 'application/json',
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: APIdata
+        })
+        .then(response => response.text())
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .then(data => {
+            puckData = JSON.stringify(data);
+        })
+}
 
 
 
@@ -572,12 +595,12 @@ function animate() {
     camera.lookAt(camLookAt);
 
     //check game state
-    if (gameState == "inProgress"){
+    if (gameState == "inProgress") {
 
 
         // -----3d Perspective-----
         // camera.lookAt(300, -200, 1200);
-        
+
 
         const bpBest = [];
         const rpBest = [];
@@ -595,15 +618,15 @@ function animate() {
         let bpJSON = true;
 
         fetch('http://localhost:3000/PuckLocations/1', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-        .then(response => response.text())
-        .then(data => {
-            puckData = data;
-        })
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.text())
+            .then(data => {
+                puckData = data;
+            })
 
 
 
@@ -748,28 +771,28 @@ function animate() {
 
                     //add dist above puck
 
-                    fontLoader.load( 'fonts/helvetiker_bold.typeface.json', function ( font ) {
+                    fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
 
-                        const textGeo = new TextGeometry( String(Math.round(lineLength)), {
+                        const textGeo = new TextGeometry(String(Math.round(lineLength)), {
                             font: font,
                             size: 50,
                             height: 5,
                             curveSegments: 12,
-                        } );
+                        });
                         // textGeo.computeBoundingBox();
-                        const mesh = new THREE.Mesh( textGeo, redTextMat );
+                        const mesh = new THREE.Mesh(textGeo, redTextMat);
                         mesh.position.x = redX;
                         mesh.position.y = 80;
                         mesh.position.z = redY;
-                        mesh.lookAt( camera.position );
+                        mesh.lookAt(camera.position);
                         // mesh.castShadow = true;
                         // mesh.receiveShadow = true;
                         // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
                         mesh.geometry.center()
-                        curlingLines.add( mesh );
-            
-                    
-                    } );
+                        curlingLines.add(mesh);
+
+
+                    });
                 }
 
                 for (let i = 0; i < bpyv.length; i++) {
@@ -803,28 +826,28 @@ function animate() {
                     bpCurlingObj.y = blueY;
                     bpCurlingDistances.push(bpCurlingObj);
 
-                    fontLoader.load( 'fonts/helvetiker_bold.typeface.json', function ( font ) {
+                    fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
 
-                        const textGeo = new TextGeometry( String(Math.round(lineLength)), {
+                        const textGeo = new TextGeometry(String(Math.round(lineLength)), {
                             font: font,
                             size: 50,
                             height: 5,
                             curveSegments: 12,
-                        } );
+                        });
                         // textGeo.computeBoundingBox();
-                        const mesh = new THREE.Mesh( textGeo, blueTextMat );
+                        const mesh = new THREE.Mesh(textGeo, blueTextMat);
                         mesh.position.x = blueX;
                         mesh.position.y = 80;
                         mesh.position.z = blueY;
-                        mesh.lookAt( camera.position );
+                        mesh.lookAt(camera.position);
                         // mesh.castShadow = true;
                         // mesh.receiveShadow = true;
                         // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
                         mesh.geometry.center()
-                        curlingLines.add( mesh );
-            
-                    
-                    } );
+                        curlingLines.add(mesh);
+
+
+                    });
                 }
 
                 function compare(a, b) {
@@ -1351,29 +1374,30 @@ function animate() {
             };
         };
 
-    //------ turn round and game stuff ----
+        //------ turn round and game stuff ----
 
-    // ----display turn---
-    if (gameState = "inProgress"){
-        instructions.innerHTML = "test";
+        // ----display turn---
+        if (gameState = "inProgress") {
+            instructions.innerHTML = "test";
 
-    }
+        }
 
-    // ---end of round----
-    if(shotsThrown == 8){
-        console.log("round over")
-        gameState = "endOfRound";
+        // ---end of round----
+        if (shotsThrown == 8) {
+            console.log("round over")
+            gameState = "endOfRound";
 
-    };
+        };
 
-    //---end of game
-    if(roundsPlayed == 8){
-        console.log("game over")
-        gameState = "endOfGame";
-    };
+        //---end of game
+        if (roundsPlayed == 8) {
+            console.log("game over")
+            gameState = "endOfGame";
+        };
     };
 
 
     renderer.render(scene, camera);
 }
+animate();
 animate();
