@@ -7,6 +7,29 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm//geometries/TextGeometry.js';
 
 
+function callAPI(table, id, verb, APIdata) {
+    let endPoint = "http://localhost:3000/" + table + "/" + id
+    console.log(endPoint)
+    console.log(verb)
+    console.log(APIdata)
+    fetch(endPoint, {
+            method: verb,
+            headers: {
+                'Accept': 'application/json',
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: APIdata
+        })
+        .then(response => response.text())
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .then(data => {
+            puckData = JSON.stringify(data);
+        })
+};
+
+
 //game type
 const gameType = new Object();
 gameType.neoShuffle = true;
@@ -20,6 +43,10 @@ gameType.neoCurling = true;
 let gameState = "idle";
 
 var instructions = document.getElementById('instructions');
+var instructionRow = document.getElementById('bottomRowHud');
+
+instructionRow.style.backgroundColor = "#444444";
+instructions.innerHTML = "Press Start";
 
 //score and round trackers
 
@@ -58,7 +85,7 @@ turnNumber.innerHTML = (shotsThrown + 1).toString();
 function shotsThrownUp() {
     shotsThrown = shotsThrown + 1;
     turnNumber.innerHTML = (shotsThrown + 1).toString();
-    if (shotsThrown > 8) {
+    if (shotsThrown > 7) {
         shotsThrown = 8;
         turnNumber.innerHTML = "8";
     }
@@ -125,26 +152,31 @@ function setAllGamesFalse() {
 selectNS.onclick = () => {
     setAllGamesFalse();
     gameType.neoShuffle = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "neoShuffle" }')
 };
 
 selectCS.onclick = () => {
     setAllGamesFalse();
     gameType.classicShuffle = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "classicShuffle" }')
 };
 
 selectSI.onclick = () => {
     setAllGamesFalse();
     gameType.spaceInvaders = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "spaceInvaders" }')
 };
 
 selectBJ.onclick = () => {
     setAllGamesFalse();
     gameType.blackJack = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "blackJack" }')
 };
 
 selectCU.onclick = () => {
     setAllGamesFalse();
     gameType.neoCurling = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "neoCurling" }')
 };
 
 selectALL.onclick = () => {
@@ -154,6 +186,7 @@ selectALL.onclick = () => {
     gameType.spaceInvaders = true;
     gameType.blackJack = true;
     gameType.neoCurling = true;
+    callAPI("TableData", 1, "PATCH", '{"GameType": "ALL" }')
 };
 
 //---add player---
@@ -558,34 +591,6 @@ const textureCube = [
 // } );
 
 
-
-// TEXT
-
-
-function callAPI(table, id, verb, APIdata) {
-    let endPoint = "http://localhost:3000/" + table + "/" + id
-    console.log(endPoint)
-    console.log(verb)
-    console.log(APIdata)
-    fetch(endPoint, {
-            method: verb,
-            headers: {
-                'Accept': 'application/json',
-                'Content-type': 'application/json; charset=UTF-8'
-            },
-            body: APIdata
-        })
-        .then(response => response.text())
-        .then((data) => {
-            console.log('Success:', data);
-        })
-        .then(data => {
-            puckData = JSON.stringify(data);
-        })
-}
-
-
-
 //-----------------------animation loop--------------------
 
 //Anitmation
@@ -618,7 +623,7 @@ function animate() {
         let bpJSON = true;
 
         fetch('http://localhost:3000/PuckLocations/1', {
-                method: 'PATCH',
+                method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                 },
@@ -628,7 +633,7 @@ function animate() {
                 puckData = data;
             })
 
-
+            console.log("zzz", puckData);
 
         const puckDataObj = JSON.parse(puckData);
 
@@ -1376,16 +1381,26 @@ function animate() {
 
         //------ turn round and game stuff ----
 
-        // ----display turn---
-        if (gameState = "inProgress") {
+       // ----display turn---
+       if (gameState = "inProgress"){
             instructions.innerHTML = "test";
+            if(shotsThrown % 2 == 0){
+                instructionRow.style.backgroundColor = "#fc0352";
+                instructions.innerHTML = "red turn";
+            }
+            else {
+                instructionRow.style.backgroundColor = "#03b1fc";
+                instructions.innerHTML = "blue turn";
+            };
 
-        }
+        };
 
         // ---end of round----
         if (shotsThrown == 8) {
             console.log("round over")
             gameState = "endOfRound";
+            instructionRow.style.backgroundColor = "#444444";
+            instructions.innerHTML = "round over press next round";
 
         };
 
@@ -1393,6 +1408,8 @@ function animate() {
         if (roundsPlayed == 8) {
             console.log("game over")
             gameState = "endOfGame";
+            instructionRow.style.backgroundColor = "#444444";
+            instructions.innerHTML = "game over press new game";
         };
     };
 
