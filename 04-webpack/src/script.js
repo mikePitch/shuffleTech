@@ -251,18 +251,10 @@ const tableWidth = 600;
 const tableLength = 4500;
 const puckRadius = 30;
 const puckHeight = 20;
-
-
+const detectionZone = 3500
 
 
 var xmlHttp = new XMLHttpRequest();
-
-
-
-
-
-
-
 
 
 //create scene
@@ -270,7 +262,7 @@ const scene = new THREE.Scene();
 const fontLoader = new FontLoader();
 
 //Add Renderer
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 var container = document.getElementById('scene');
 var w = container.offsetWidth;
 var h = container.offsetHeight;
@@ -389,6 +381,17 @@ const bpBarMat = new THREE.MeshPhongMaterial({
 const rpBarMat = new THREE.MeshPhongMaterial({
     color: 0xfc0352
 });
+const blueSiMat = new THREE.MeshBasicMaterial({
+    color: 0x03b1fc,
+    transparent: true,
+    opacity: 0.5
+});
+const redSiMat = new THREE.MeshBasicMaterial({
+    color: 0xfc0352,
+    transparent: true,
+    opacity: 0.5
+});
+
 const barBlueGeometry = new THREE.BoxGeometry(barBaseX, barHeight, barBaseY);
 const barRedGeometry = new THREE.BoxGeometry(barBaseX, barHeight, barBaseY);
 barRedGeometry.translate(0, barHeight / 2, 0);
@@ -731,13 +734,6 @@ function animate() {
 
 
         }
-
-
-        //----------------------------------Changes for backendless----------------------------------
-        // let rpJSON = true;
-        // // let rpJSON = component.redPucks;
-
- 
 
         scene.add(puckGrp);
 
@@ -1167,20 +1163,8 @@ function animate() {
                 spaceInvadersGroup.add(bpBar, rpBar);
                 bpBar.position.set(725, 0, 25);
                 rpBar.position.set(725, 0, 85);
-                //veronoi
 
-                // var sites = [{x:300,y:300}, {x:100,y:100}, {x:200,y:500}, {x:250,y:450}, {x:600,y:150}];
-                // // xl, xr means x left, x right
-                // // yt, yb means y top, y bottom
-                // var bbox = {xl:0, xr:600, yt:0, yb:3500};
-                // var voronoi = new Voronoi();
-                // // pass an object which exhibits xl, xr, yt, yb properties. The bounding
-                // // box will be used to connect unbound edges, and to close open cells
-                // result = voronoi.compute(sites, bbox);
-                // // render, further analyze, etc.
-
-
-
+                //voronoi
                 var redSites = [];
                 for (let i = 0; i < rpxv.length; i++) {
                     redSites.push({
@@ -1197,16 +1181,14 @@ function animate() {
                     });
                 };
 
-                // var redSites = [ {x: rpxv[0], y: rpyv[0]}, {x: rpxv[1], y: rpyv[1]}, {x: rpxv[2], y: rpyv[2]}, {x: rpxv[3], y: rpyv[3]} ];
-                // var blueSites = [ {x: bpxv[0], y: bpyv[0]}, {x: bpxv[1], y: bpyv[1]}, {x: bpxv[2], y: bpyv[2]}, {x: bpxv[3], y: bpyv[3]} ];
                 const sites = blueSites.concat(redSites);
 
                 var voronoi = new Voronoi();
                 var bbox = {
                     xl: 0,
-                    xr: 600,
+                    xr: tableWidth,
                     yt: 0,
-                    yb: 3500
+                    yb: detectionZone
                 };
                 var diagram = voronoi.compute(sites, bbox);
                 diagram.puckColour = "not-assigned";
@@ -1221,36 +1203,17 @@ function animate() {
 
                 var voronoiLinesGeom = new THREE.BufferGeometry();
                 voronoiLinesGeom.setAttribute("position", new THREE.Float32BufferAttribute(voronoiLinesPoints, 3));
-                // voronoiLinesGeom.setAttribute("color", new THREE.Float32BufferAttribute(voronoiLinesColors, 3));
                 var voronoiLines = new THREE.LineSegments(voronoiLinesGeom, voronoiLinesMat);
+                // console.log("zzz = ", voronoiLinesPoints)
 
-                // const spaceInvadersGroup = new THREE.Group();
-
-
-
-
-                // spaceInvadersGroup.remove(...spaceInvadersGroup.children);
                 spaceInvadersGroup.add(voronoiLines);
 
                 scene.add(spaceInvadersGroup);
 
 
-                // for (let i = 0; i < diagram.cells.length; i++) {
-                //   const cell = diagram.cells[i];
-                //   console.log("cell2 = ", cell);
-                //   console.log("cell2 x = ", cell.site.x);
-                // };
-
-                // console.log("test  =", diagram.cells.length);
-
-
-
-
                 diagram.cells.forEach(function(cell, i, a) {
                     // console.log("cell = ", cell);
-                    // console.log("cell x = ", cell.site.x);
-                    //check red or blue
-                    //red
+
                     if (rpxv.includes(cell.site.x)) {
                         i = rpxv.indexOf(cell.site.x)
                         if (rpyv[i] === cell.site.y) {
@@ -1271,6 +1234,7 @@ function animate() {
                     const cellId = cell.site.voronoiId;
                     const cellCenter = cell.site; //{x: 218, y: 1420, voronoiId: 4}
 
+
                     cell.halfedges.forEach(halfedge => {
                         const edge = halfedge.edge;
                         const edgeVa = edge.va; //{x: 0, y: 1613.8425531914893}
@@ -1290,9 +1254,39 @@ function animate() {
                         // "bY = " + bY ,
                         // "cX = " + cX ,
                         // "cY = " + cY ,);
-                        const segArea = (aX * (bY - cY) + bX * (cY - aY) + cX * (aY - bY)) / 2
+                        const segArea = (aX * (bY - cY) + bX * (cY - aY) + cX * (aY - bY)) / 2;
+
+                        
+                        const triangle = new THREE.Shape();
+                        triangle.moveTo(aX, aY);
+                        triangle.lineTo(bX, bY);
+                        triangle.lineTo(cX, cY);
+                        // const TriangleGeometry = new THREE.ShapeGeometry(triangle);
+                        let triangleMat = redSiMat
+                        if (cell.puckColour === "blue" ){
+                            triangleMat = blueSiMat
+                        }
+                        const extrudeSettings = {
+                            steps: 1,
+                            depth: -1,
+                            bevelEnabled: false,
+                            bevelThickness: 0,
+                            bevelSize: 0,
+                            bevelOffset: 0,
+                            bevelSegments: 0
+                        };
+                        const TriangleGeometryEx = new THREE.ExtrudeGeometry( triangle, extrudeSettings );
+                        const triangleMesh = new THREE.Mesh( TriangleGeometryEx, triangleMat )
+                        triangleMesh.position.set(0, 10, 0);
+                        triangleMesh.rotation.x = Math.PI / 2;
+             
+
+
+                        spaceInvadersGroup.add(triangleMesh);
+                        
                         const segAreaPositive = Math.abs(segArea);
                         cellSegs.push(segAreaPositive);
+
 
                     });
 
@@ -1324,7 +1318,7 @@ function animate() {
                 });
 
                 const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
-                // console.log("totalArea = ", totalArea)
+                console.log("totalArea = ", totalArea)
 
                 //Blue and red area
                 const redAreaArray = [];
@@ -1344,9 +1338,18 @@ function animate() {
                 const redArea = redAreaArray.reduce((a, b) => a + b, 0);;
                 const blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
 
+                console.log("redArea = ", redArea)
+                console.log("blueArea = ", blueArea)
 
-                bluePercent = blueArea / totalArea * 100;
-                redPercent = redArea / totalArea * 100;
+                if (totalArea === 0){
+                bluePercent = 0
+                redPercent = 0
+                }
+                else {
+                    bluePercent = blueArea / totalArea * 100;
+                    redPercent = redArea / totalArea * 100;
+                }
+
 
                 // console.log("blue % = ", bluePercent);
                 // console.log("red % = ", redPercent);
@@ -1354,8 +1357,6 @@ function animate() {
                 rpBar.scale.y = redPercent * 5;
                 bpBar.scale.y = bluePercent * 5;
 
-                const barRedHeight = redPercent * 5;
-                const barBlueHeight = bluePercent * 5;
             }
 
             //----------spaceinvades end-------------------------

@@ -3,18 +3,38 @@
     {
       "puckLocationsRed": [
         [
-          185,
-          197
+          382,
+          1688
+        ],
+        [
+          212,
+          1609
+        ],
+        [
+          216,
+          1303
+        ],
+        [
+          235,
+          1002
         ]
       ],
       "puckLocationsBlue": [
         [
-          318,
-          726
+          135,
+          1398
         ],
         [
-          215,
-          584
+          444,
+          1347
+        ],
+        [
+          385,
+          1064
+        ],
+        [
+          173,
+          803
         ]
       ],
       "id": 1
@@ -22,9 +42,9 @@
   ],
   "TableData": [
     {
-      "PythonShotCounter": 61,
-      "GameType": "classicShuffle",
-      "ShotsPlayed": 8,
+      "PythonShotCounter": 37,
+      "GameType": "spaceInvaders",
+      "ShotsPlayed": 1,
       "RoundsPlayed": 2,
       "GameState": "Idle",
       "id": 1
