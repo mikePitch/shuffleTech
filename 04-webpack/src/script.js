@@ -90,7 +90,7 @@ function shotsThrownUp() {
         turnNumber.innerHTML = "8";
     }
     console.log("shotsThrown = ", shotsThrown);
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}')
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
 };
 
 function shotsThrownDown() {
@@ -100,7 +100,7 @@ function shotsThrownDown() {
     }
     turnNumber.innerHTML = (shotsThrown + 1).toString();
     console.log("shotsThrown = ", shotsThrown);
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}')
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
 
 };
 
@@ -476,7 +476,7 @@ const redTextMat = new THREE.MeshPhongMaterial({
 
 
 
-console.log("curling center x = ", curlingCenter.x, "curling center y = ", curlingCenter.y)
+// console.log("curling center x = ", curlingCenter.x, "curling center y = ", curlingCenter.y)
 const curlingCircGeo1 = new THREE.CircleGeometry(80, 36);
 const curlingCircMat1 = new THREE.MeshPhongMaterial({
     color: 0xffffff,
@@ -516,10 +516,11 @@ curlingCircles.rotation.x = Math.PI / 2;
 
 const curlingLines = new THREE.Group();
 
-
+let prevPythonShotCount = 0;
 let prevPuckPosSum = 1;
 let puckMovement = false;
 let puckData = undefined;
+let pythonShotCounter = undefined;
 
 //new cube  
 
@@ -619,8 +620,40 @@ function animate() {
         //Add Pucks
         puckGrp.remove(...puckGrp.children);
 
-        //----------------------------------Changes for backendless----------------------------------
-        let bpJSON = true;
+        fetch('http://localhost:3000/TableData/1', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => response.text())
+        .then(data => {
+            pythonShotCounter = data;
+        })
+
+        if (pythonShotCounter) {
+            const pythonShotCounterObj = JSON.parse(pythonShotCounter);
+            console.log("psc = ", pythonShotCounterObj.PythonShotCounter);
+
+            //check for change
+
+            const currentPythonShotCount = pythonShotCounterObj.PythonShotCounter;
+
+
+            if (currentPythonShotCount !== prevPythonShotCount) {
+                console.log("change");
+                shotsThrownUp()
+                prevPythonShotCount = currentPythonShotCount;
+            };
+
+            
+
+
+        }
+
+        
+
+        
 
         fetch('http://localhost:3000/PuckLocations/1', {
                 method: 'GET',
@@ -633,13 +666,10 @@ function animate() {
                 puckData = data;
             })
 
-            console.log("zzz", puckData);
 
-        const puckDataObj = JSON.parse(puckData);
-
-        // console.log("zzz", puckDataObj.puckLocationsRed);
 
         if (puckData) {
+            const puckDataObj = JSON.parse(puckData);
 
             const bpObj = puckDataObj.puckLocationsBlue;
 
@@ -670,15 +700,8 @@ function animate() {
             bpBest.push(bplowX);
             bpBest.push(bplowY);
 
+            //redpucklocations
 
-        }
-
-
-        //----------------------------------Changes for backendless----------------------------------
-        let rpJSON = true;
-        // let rpJSON = component.redPucks;
-
-        if (rpJSON) {
             const rpObj = puckDataObj.puckLocationsRed;
 
 
@@ -705,7 +728,16 @@ function animate() {
 
             rpBest.push(lowX);
             rpBest.push(lowY);
+
+
         }
+
+
+        //----------------------------------Changes for backendless----------------------------------
+        // let rpJSON = true;
+        // // let rpJSON = component.redPucks;
+
+ 
 
         scene.add(puckGrp);
 
