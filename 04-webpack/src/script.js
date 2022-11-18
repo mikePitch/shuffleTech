@@ -42,16 +42,26 @@ gameType.neoCurling = true;
 //idle, inProgress, endOfRound, endOfGame
 let gameState = "idle";
 
-var instructions = document.getElementById('instructions');
-var instructionRow = document.getElementById('bottomRowHud');
+let instructions = document.getElementById('instructions');
+let instructionRow = document.getElementById('bottomRowHud');
+let gsRedScore = document.getElementById("redRoundScore");
+let gsBlueScore = document.getElementById("blueRoundScore");
+let redGameScore = document.getElementById("redGameScore");
+let blueGameScore = document.getElementById("blueGameScore");
+let redGamesWonScore = document.getElementById("redGamesWon");
+let blueGamesWonScore = document.getElementById("blueGamesWon");
 
-instructionRow.style.backgroundColor = "#444444";
+instructionRow.style.backgroundColor = "linear-gradient(180deg, #34FD8400 0%, #34FD84 100%)";
 instructions.innerHTML = "Press Start";
 
 //score and round trackers
 
 let shotsThrown = 0;
 let roundsPlayed = 0;
+let redGameScoreTotal = 0;
+let blueGameScoreTotal = 0;
+let redGamesWon = -1;
+let blueGamesWon = -1;
 
 
 
@@ -64,12 +74,17 @@ let roundsPlayed = 0;
 var startGameBtn = document.getElementById('startGame');
 
 function startGame() {
-    shotsThrown = 0
-    roundsPlayed = 0
+    shotsThrown = 0;
+    roundsPlayed = 0;
+    addToGamesWon();
+    blueGameScoreTotal = 0;
+    redGameScoreTotal = 0;
     gameState = "inProgress";
     console.log("run");
     turnNumber.innerHTML = (shotsThrown + 1).toString();
     roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
+    updateGameScore();
+    
 }
 
 startGameBtn.onclick = function() { startGame() };
@@ -117,6 +132,11 @@ roundNumberTxt.innerHTML = (roundsPlayed + 1).toString()
 startNextRoundBtn.onclick = () => {
     shotsThrown = 0;
     roundsPlayed = roundsPlayed + 1;
+
+    //---add score to game scrore
+
+
+
     roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
     if (roundsPlayed > 7) {
         roundsPlayed = 8;
@@ -124,6 +144,8 @@ startNextRoundBtn.onclick = () => {
     }
 
     turnNumber.innerHTML = (shotsThrown + 1).toString();
+    addRoundScoreToGameScore();
+
     gameState = "inProgress";
 
 };
@@ -251,7 +273,7 @@ const tableWidth = 600;
 const tableLength = 4500;
 const puckRadius = 30;
 const puckHeight = 20;
-const detectionZone = 3500
+const detectionZone = 2000
 
 
 var xmlHttp = new XMLHttpRequest();
@@ -287,10 +309,10 @@ scene.background = new THREE.CubeTextureLoader()
 
 
 //Camera
-const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 10000);
-camera.position.x = 2790;
-camera.position.z = 400;
-camera.position.y = 2790;
+const camera = new THREE.PerspectiveCamera(52, w / h, 0.1, 10000);
+camera.position.x = 2400;
+camera.position.z = 1000;
+camera.position.y = 1400;
 const camLookAt = new THREE.Vector3(300, 0, 1800);
 
 
@@ -604,7 +626,7 @@ function animate() {
     camera.lookAt(camLookAt);
 
     //check game state
-    if (gameState == "inProgress") {
+    if (gameState == "inProgress" || true) {
 
 
         // -----3d Perspective-----
@@ -921,7 +943,6 @@ function animate() {
                     for (let i = 0; i < bpCurlingDistances.length; i++) {
                         if (bpCurlingDistances[i].dist < rpCurlingDistances[0].dist) {
                             curlingBlueScore.push(1);
-                            curlingRedScore.push(1);
                             const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
                             puckScoreBox.position.set(bpCurlingDistances[i].x, 60, bpCurlingDistances[i].y);
                             curlingLines.add(puckScoreBox);
@@ -1161,8 +1182,8 @@ function animate() {
                 // console.log("spaceInvaders = ", gameType.spaceInvaders)
 
                 spaceInvadersGroup.add(bpBar, rpBar);
-                bpBar.position.set(725, 0, 25);
-                rpBar.position.set(725, 0, 85);
+                bpBar.position.set(-80, 0, 25);
+                rpBar.position.set(-80, 0, 85);
 
                 //voronoi
                 var redSites = [];
@@ -1362,10 +1383,8 @@ function animate() {
             //----------spaceinvades end-------------------------
         }
 
-        //set displayed score in backendless
 
-        const gsRedScore = document.getElementsByClassName("redTeamBigScore")[0];
-        const gsBlueScore = document.getElementsByClassName("blueTeamBigScore")[0];
+
 
         if (gameType.neoCurling) {
             if (gsRedScore) {
@@ -1415,14 +1434,13 @@ function animate() {
         //------ turn round and game stuff ----
 
        // ----display turn---
-       if (gameState = "inProgress"){
-            instructions.innerHTML = "test";
+       if (gameState == "inProgress"){
             if(shotsThrown % 2 == 0){
-                instructionRow.style.backgroundColor = "#fc0352";
+                instructionRow.style.background = "linear-gradient(180deg, #fc035200 0%, #fc0352 100%)";
                 instructions.innerHTML = "red turn";
             }
             else {
-                instructionRow.style.backgroundColor = "#03b1fc";
+                instructionRow.style.background = "linear-gradient(180deg, #03b1fc00 0%, #03b1fc 100%)";
                 instructions.innerHTML = "blue turn";
             };
 
@@ -1432,7 +1450,7 @@ function animate() {
         if (shotsThrown == 8) {
             console.log("round over")
             gameState = "endOfRound";
-            instructionRow.style.backgroundColor = "#444444";
+            instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
             instructions.innerHTML = "round over press next round";
 
         };
@@ -1441,7 +1459,7 @@ function animate() {
         if (roundsPlayed == 8) {
             console.log("game over")
             gameState = "endOfGame";
-            instructionRow.style.backgroundColor = "#444444";
+            instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
             instructions.innerHTML = "game over press new game";
         };
     };
@@ -1450,4 +1468,97 @@ function animate() {
     renderer.render(scene, camera);
 }
 animate();
-animate();
+
+
+//✅curling blue cant win
+//end of each round add to game score
+//end of each game add to games won
+//✅keep tracking after last shot thrown
+//fisrst push start should go to throw 1 not 2
+//classic shuffle is forst to 21
+//blackjack
+//visuals
+
+
+function addRoundScoreToGameScore(){
+
+    console.log("run");
+    if (gameType.neoCurling) {
+        if (redGameScore) {
+            // redGameScore.innerHTML = redGameScoreTotal + redCurlingScore;
+            redGameScoreTotal = redGameScoreTotal + redCurlingScore;
+        };
+        if (blueGameScore) {
+            // blueGameScore.innerHTML = blueGameScoreTotal + blueCurlingScore;
+            blueGameScoreTotal = blueGameScoreTotal + blueCurlingScore;
+        };
+    };
+
+    if (gameType.classicShuffle) {
+        if (redGameScore) {
+            // redGameScore.innerHTML = redGameScoreTotal + roundScoreClassicShuffle.red;
+            redGameScoreTotal = redGameScoreTotal + roundScoreClassicShuffle.red
+        };
+        if (blueGameScore) {
+            // blueGameScore.innerHTML = blueGameScoreTotal + roundScoreClassicShuffle.blue;
+            blueGameScoreTotal = blueGameScoreTotal + roundScoreClassicShuffle.blue
+        };
+    };
+
+    if (gameType.spaceInvaders) {
+        if (redGameScore && blueGameScore) {
+            redGameScore.innerHTML = Math.round(redPercent) + "﹪";
+            if(Math.round(redPercent) >= Math.round(bluePercent)){
+                redGameScoreTotal = redGameScoreTotal + 1
+            }
+            if(Math.round(redPercent) <= Math.round(bluePercent)){
+                blueGameScoreTotal = blueGameScoreTotal + 1
+            }
+
+        
+        };
+
+    };
+
+    if (gameType.blackJack) {
+        if (redGameScore) {
+            redGameScore.innerHTML = 0;
+        };
+        if (blueGameScore) {
+            blueGameScore.innerHTML = 0;
+        };
+    };
+
+    if (gameType.neoShuffle) {
+        if (redGameScore) {
+            // redGameScore.innerHTML = redGameScoreTotal + roundScoreNeoShuffle.red;
+            redGameScoreTotal = redGameScoreTotal + roundScoreNeoShuffle.red;
+        };
+        if (blueGameScore) {
+            // blueGameScore.innerHTML = blueGameScoreTotal + roundScoreNeoShuffle.blue;
+            blueGameScoreTotal = blueGameScoreTotal + roundScoreNeoShuffle.blue
+        };
+
+    };
+    updateGameScore()
+
+};
+
+function updateGameScore(){
+    blueGameScore.innerHTML = blueGameScoreTotal;
+    redGameScore.innerHTML = redGameScoreTotal;
+};
+
+function addToGamesWon(){
+    if (blueGameScoreTotal >= redGameScoreTotal){
+        blueGamesWon = blueGamesWon + 1;
+    }
+    if (blueGameScoreTotal <= redGameScoreTotal){
+        redGamesWon = redGamesWon + 1;
+    }
+
+    console.log("blue = ", blueGamesWon)
+    console.log("red = ", redGamesWonScore)
+    redGamesWonScore.innerHTML = redGamesWon;
+    blueGamesWonScore.innerHTML = blueGamesWon;
+};

@@ -11,33 +11,52 @@
         </div>
 
     </div>
+    <!-- Heads up display -->
     <div class="hud">
-        <div class="leftColHud"></div>
+
+        <div class="leftColHud">
+            <h2 class="headingMed autoTop">Games Won</h2>
+            <div class="scoreHolder">
+                <h1 id="redGamesWon" class="smallScore redTeamSmallScore">0</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueGamesWon" class="smallScore blueTeamSmallScore">0</h1>
+            </div>
+        </div>
         <div class="midColHud"></div>
         <div class="rightColHud">
+            <h2 class="headingMed">Round Score</h2>
             <div class="scoreHolder">
-                <h1 class="bigScore redTeamBigScore">00</h1>
-                <h1 class="bigScore">-</h1>
-                <h1 class="bigScore blueTeamBigScore">00</h1>
+                <h1 id="redRoundScore" class="bigScore redTeamBigScore">00</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueRoundScore" class="bigScore blueTeamBigScore">00</h1>
             </div>
+
+            <h2 class="headingMed">Throw <span id="turnNumber">1</span><span>/8</span></h2>
+            
+            <h2 class="headingMed">Round <span id="roundNumber">1</span><span>/8</span></h2>
+
+            <h2 class="headingMed autoTop">Game Score</h2>
+            <div class="scoreHolder">
+                <h1 id="redGameScore" class="smallScore redTeamSmallScore">00</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueGameScore" class="smallScore blueTeamSmallScore">00</h1>
+            </div>
+
 
         </div>
         <div id="bottomRowHud">
-            <h1 id="instructions">Intructions</h1>
+            <h1 class="headingMed" id="instructions">Intructions</h1>
         </div>
     </div>
     <div class="kiosk">
-        <h2>turn</h2>
+        <h4>turn stepper </h4>
         <div class="turnStepper">
             <span id="backTurn">◀︎</span>
-            <span id="turnNumber">00</span>
             <span id="nextTurn">▶︎</span>
         </div>
-        <h2>round</h2>
-        <span id="roundNumber">00</span>
 
 
-        <h2>add red player</h2>
+        <h4>add red player </h4>
         <input type="text" id="playerNameInputRed">
         <button id="addRedPlayerBtn">add</button>
         <ul id="redPlayerList">
@@ -46,7 +65,7 @@
 
 
 
-        <h2>add blue player</h2>
+        <h4>add blue player </h4>
         <input type="text" id="playerNameInputBlue">
         <button id="addBluePlayerBtn">add</button>
         <ul id="bluePlayerList">
@@ -54,7 +73,7 @@
         </ul>
 
 
-        <h2>select game</h2>
+        <h4>select game</h4>
 
         <ul class="gameSelector">
             <li class="selectBJ">BJ</li>
