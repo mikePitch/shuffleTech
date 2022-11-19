@@ -386,8 +386,18 @@ rpLocation.y = 3080;
 // ------------Game Specific UI-----------
 
 // ---Space Invaders---
+const extrudeSettings = {
+    steps: 1,
+    depth: -1,
+    bevelEnabled: false,
+    bevelThickness: 0,
+    bevelSize: 0,
+    bevelOffset: 0,
+    bevelSegments: 0
+};
+
 var voronoiLinesMat = new THREE.LineBasicMaterial({
-    color: 0x9f9fff
+    color: 0xffffff
 });
 //bar Chart
 const barBaseX = 50;
@@ -413,6 +423,20 @@ const redSiMat = new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0.5
 });
+const greySiMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.5
+});
+
+
+const siFullRectangle = new THREE.Shape();
+siFullRectangle.moveTo(0, 0);
+siFullRectangle.lineTo(tableWidth, 0);
+siFullRectangle.lineTo(tableWidth, detectionZone);
+siFullRectangle.lineTo(0, detectionZone);
+
+const siFullRectangleEx = new THREE.ExtrudeGeometry( siFullRectangle, extrudeSettings );
 
 const barBlueGeometry = new THREE.BoxGeometry(barBaseX, barHeight, barBaseY);
 const barRedGeometry = new THREE.BoxGeometry(barBaseX, barHeight, barBaseY);
@@ -422,8 +446,9 @@ const bpBar = new THREE.Mesh(barBlueGeometry, bpBarMat);
 const rpBar = new THREE.Mesh(barRedGeometry, rpBarMat);
 const spaceInvadersGroup = new THREE.Group();
 
-let bluePercent = 0;
-let redPercent = 0;
+let bluePercent = 50;
+let redPercent = 50;
+let siFullRectangleMat = greySiMat
 
 // ---Classic Shuffle---
 //Score Boxes
@@ -1187,19 +1212,25 @@ function animate() {
 
                 //voronoi
                 var redSites = [];
+
                 for (let i = 0; i < rpxv.length; i++) {
-                    redSites.push({
-                        x: rpxv[i],
-                        y: rpyv[i]
-                    });
+                    if(rpyv[i]<=detectionZone){
+                        redSites.push({
+                            x: rpxv[i],
+                            y: rpyv[i]
+                        });
+                    };
                 };
 
                 var blueSites = [];
+
                 for (let i = 0; i < bpxv.length; i++) {
-                    blueSites.push({
-                        x: bpxv[i],
-                        y: bpyv[i]
-                    });
+                    if(bpyv[i]<=detectionZone){
+                        blueSites.push({
+                            x: bpxv[i],
+                            y: bpyv[i]
+                        });
+                    };
                 };
 
                 const sites = blueSites.concat(redSites);
@@ -1218,7 +1249,7 @@ function animate() {
                 var voronoiLinesPoints = [];
                 var voronoiLinesColors = [];
                 diagram.edges.forEach(ed => {
-                    voronoiLinesPoints.push(ed.va.x, 1, ed.va.y, ed.vb.x, 1, ed.vb.y, ed.va.x, 3, ed.va.y, ed.vb.x, 3, ed.vb.y);
+                    voronoiLinesPoints.push(ed.va.x, 3, ed.va.y, ed.vb.x, 3, ed.vb.y, ed.va.x, 4, ed.va.y, ed.vb.x, 4, ed.vb.y);
                     voronoiLinesColors.push(1, .8, .8, 1, .8, .8, 1, .8, .8, 1, .8, .8);
                 });
 
@@ -1283,22 +1314,17 @@ function animate() {
                         triangle.lineTo(bX, bY);
                         triangle.lineTo(cX, cY);
                         // const TriangleGeometry = new THREE.ShapeGeometry(triangle);
-                        let triangleMat = redSiMat
+                        let triangleMat = greySiMat
                         if (cell.puckColour === "blue" ){
                             triangleMat = blueSiMat
                         }
-                        const extrudeSettings = {
-                            steps: 1,
-                            depth: -1,
-                            bevelEnabled: false,
-                            bevelThickness: 0,
-                            bevelSize: 0,
-                            bevelOffset: 0,
-                            bevelSegments: 0
-                        };
+                        if (cell.puckColour === "red" ){
+                            triangleMat = redSiMat
+                        }
+
                         const TriangleGeometryEx = new THREE.ExtrudeGeometry( triangle, extrudeSettings );
                         const triangleMesh = new THREE.Mesh( TriangleGeometryEx, triangleMat )
-                        triangleMesh.position.set(0, 10, 0);
+                        triangleMesh.position.set(0, 3, 0);
                         triangleMesh.rotation.x = Math.PI / 2;
              
 
@@ -1338,8 +1364,8 @@ function animate() {
                     cellAreaArray.push(element.area);
                 });
 
-                const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
-                console.log("totalArea = ", totalArea)
+                // const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
+                // console.log("totalArea = ", totalArea)
 
                 //Blue and red area
                 const redAreaArray = [];
@@ -1352,24 +1378,58 @@ function animate() {
                     if (element.colour === "red") {
                         redAreaArray.push(element.area);
                     }
-
                 });
 
 
-                const redArea = redAreaArray.reduce((a, b) => a + b, 0);;
-                const blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
 
-                console.log("redArea = ", redArea)
-                console.log("blueArea = ", blueArea)
 
-                if (totalArea === 0){
-                bluePercent = 0
-                redPercent = 0
+                let redArea = redAreaArray.reduce((a, b) => a + b, 0);;
+                let blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
+                const totalArea = redArea + blueArea;
+
+
+
+
+
+
+
+                
+
+                if(blueAreaArray.length == 0 && redAreaArray.length != 0) {
+                    console.log("xxx ba= ", blueAreaArray.length)
+                    bluePercent = 0
+                    redPercent = 100
+                    siFullRectangleMat = redSiMat
+                    //redbox
                 }
-                else {
+
+                if(redAreaArray.length == 0) {
+                    console.log("xxx ra= ", redAreaArray.length)
+                    redPercent = 0
+                    siFullRectangleMat = blueSiMat
+                    //blue box
+                }
+
+                if((redAreaArray.length == 0) && (blueAreaArray.length == 0)) {
+                    bluePercent = 0
+                    redPercent = 0
+                    siFullRectangleMat = greySiMat
+                    //grey box
+                }
+
+
+
+
+                if(redAreaArray.length + blueAreaArray.length > 1){
+                    console.log("xxx ra+ba= ", redAreaArray.length + blueAreaArray.length)
                     bluePercent = blueArea / totalArea * 100;
                     redPercent = redArea / totalArea * 100;
-                }
+                }else{
+                    const siFullRectangleMesh = new THREE.Mesh( siFullRectangleEx, siFullRectangleMat )
+                    siFullRectangleMesh.position.set(0, 3, 0);
+                    siFullRectangleMesh.rotation.x = Math.PI / 2;
+                    spaceInvadersGroup.add(siFullRectangleMesh);
+                };
 
 
                 // console.log("blue % = ", bluePercent);
@@ -1470,14 +1530,7 @@ function animate() {
 animate();
 
 
-//✅curling blue cant win
-//end of each round add to game score
-//end of each game add to games won
-//✅keep tracking after last shot thrown
-//fisrst push start should go to throw 1 not 2
-//classic shuffle is forst to 21
-//blackjack
-//visuals
+
 
 
 function addRoundScoreToGameScore(){
@@ -1503,6 +1556,13 @@ function addRoundScoreToGameScore(){
             // blueGameScore.innerHTML = blueGameScoreTotal + roundScoreClassicShuffle.blue;
             blueGameScoreTotal = blueGameScoreTotal + roundScoreClassicShuffle.blue
         };
+        if ( blueGameScoreTotal>=21 && redGameScoreTotal<21 ){
+            console.log("blue won");
+        }
+        if ( redGameScoreTotal>=21 && blueGameScoreTotal<21 ){
+            console.log("red won");
+        }
+
     };
 
     if (gameType.spaceInvaders) {
@@ -1562,3 +1622,12 @@ function addToGamesWon(){
     redGamesWonScore.innerHTML = redGamesWon;
     blueGamesWonScore.innerHTML = blueGamesWon;
 };
+
+//✅curling blue cant win
+//end of each round add to game score
+//end of each game add to games won
+//✅keep tracking after last shot thrown
+//fisrst push start should go to throw 1 not 2
+//classic shuffle is forst to 21
+//blackjack
+//visuals
