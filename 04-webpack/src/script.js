@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm//geometries/TextGeometry.js';
+import { ReverseSubtractEquation } from 'three';
 
 
 function callAPI(table, id, verb, APIdata) {
@@ -28,6 +29,8 @@ function callAPI(table, id, verb, APIdata) {
             puckData = JSON.stringify(data);
         })
 };
+
+
 
 
 //game type
@@ -66,6 +69,8 @@ let blueGamesWon = -1;
 
 
 
+
+
 //---------------------kiosk stuff-------------------
 
 
@@ -80,9 +85,8 @@ function startGame() {
     blueGameScoreTotal = 0;
     redGameScoreTotal = 0;
     gameState = "inProgress";
-    console.log("run");
-    turnNumber.innerHTML = (shotsThrown + 1).toString();
-    roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
+    updateShotsPlayedText();
+    updateRoundsPlayedText();
     updateGameScore();
     
 }
@@ -136,14 +140,14 @@ startNextRoundBtn.onclick = () => {
     //---add score to game scrore
 
 
+    updateRoundsPlayedText();
 
-    roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
     if (roundsPlayed > 7) {
         roundsPlayed = 8;
         roundNumberTxt.innerHTML = "8";
     }
 
-    turnNumber.innerHTML = (shotsThrown + 1).toString();
+    updateShotsPlayedText();
     addRoundScoreToGameScore();
 
     gameState = "inProgress";
@@ -385,6 +389,34 @@ rpLocation.y = 3080;
 
 // ------------Game Specific UI-----------
 
+// ---Black Jack---
+
+// 1 area = random cards between 2 and 4
+// 2 area = random cards between 5 and 7
+// 3 area = random cards between 8 and 10
+// 4 area = random Picture cards (J, Q, or K)
+// 5/6 area = Ace
+
+// let cardsObjArray = [];
+
+// let cardsArray =  ['H2', 'D2', 'S2', 'C2', 'H3', 'D3', 'S3', 'C3', 'H4', 'D4', 'S4', 'C4', 'H5', 'D5', 'S5', 'C5', 'H6', 'D6', 'S6', 'C6', 'H7', 'D7', 'S7', 'C7', 'H8', 'D8', 'S8', 'C8', 'H9', 'D9', 'S9', 'C9', 'H10', 'D10', 'S10', 'C10', 'HJ', 'DJ', 'SJ', 'CJ', 'HQ', 'DQ', 'SQ', 'CQ', 'HK', 'DK', 'SK', 'CK', 'HA', 'DA', 'SA', 'CA'];
+
+// cardsArray.forEach(e => {
+//     const cardObj = new Object();
+//     cardObj.name = e;
+//     cardObj. value = 0;
+//     cardObj.zone = 0;
+//     let card = "H" + e;
+//     allCards.push(card);
+//     card = "D" + e;
+//     allCards.push(card);
+//     card = "S" + e;
+//     allCards.push(card);
+//     card = "C" + e;
+//     allCards.push(card);
+// });
+// console.log("ccc=",allCards)
+
 // ---Space Invaders---
 const extrudeSettings = {
     steps: 1,
@@ -566,11 +598,13 @@ curlingCircles.rotation.x = Math.PI / 2;
 
 const curlingLines = new THREE.Group();
 
+//---table shit---
+
 let prevPythonShotCount = 0;
 let prevPuckPosSum = 1;
 let puckMovement = false;
 let puckData = undefined;
-let pythonShotCounter = undefined;
+let tableData = undefined;
 
 //new cube  
 
@@ -678,16 +712,16 @@ function animate() {
         })
         .then(response => response.text())
         .then(data => {
-            pythonShotCounter = data;
+            tableData = data;
         })
 
-        if (pythonShotCounter) {
-            const pythonShotCounterObj = JSON.parse(pythonShotCounter);
-            console.log("psc = ", pythonShotCounterObj.PythonShotCounter);
+        if (tableData) {
+            const tableDataObj = JSON.parse(tableData);
+            console.log("psc = ", tableDataObj.PythonShotCounter);
 
             //check for change
 
-            const currentPythonShotCount = pythonShotCounterObj.PythonShotCounter;
+            const currentPythonShotCount = tableDataObj.PythonShotCounter;
 
 
             if (currentPythonShotCount !== prevPythonShotCount) {
@@ -695,9 +729,6 @@ function animate() {
                 shotsThrownUp()
                 prevPythonShotCount = currentPythonShotCount;
             };
-
-            
-
 
         }
 
@@ -1495,15 +1526,19 @@ function animate() {
 
        // ----display turn---
        if (gameState == "inProgress"){
-            if(shotsThrown % 2 == 0){
-                instructionRow.style.background = "linear-gradient(180deg, #fc035200 0%, #fc0352 100%)";
-                instructions.innerHTML = "red turn";
-            }
-            else {
-                instructionRow.style.background = "linear-gradient(180deg, #03b1fc00 0%, #03b1fc 100%)";
-                instructions.innerHTML = "blue turn";
+            if(roundsPlayed % 2 == 0){
+                if(shotsThrown % 2 == 0){
+                    redTurnIndicator();
+                } else {
+                    blueTurnIndicator();
+                };
+            } else {
+                if(shotsThrown % 2 == 0){
+                    blueTurnIndicator();
+                } else {
+                    redTurnIndicator();
+                };
             };
-
         };
 
         // ---end of round----
@@ -1523,6 +1558,7 @@ function animate() {
             instructions.innerHTML = "game over press new game";
         };
     };
+
 
 
     renderer.render(scene, camera);
@@ -1604,6 +1640,14 @@ function addRoundScoreToGameScore(){
 
 };
 
+function updateShotsPlayedText(){
+    turnNumber.innerHTML = (shotsThrown + 1).toString();
+};
+
+function updateRoundsPlayedText(){
+    roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
+};
+
 function updateGameScore(){
     blueGameScore.innerHTML = blueGameScoreTotal;
     redGameScore.innerHTML = redGameScoreTotal;
@@ -1623,11 +1667,22 @@ function addToGamesWon(){
     blueGamesWonScore.innerHTML = blueGamesWon;
 };
 
+function redTurnIndicator(){
+    instructionRow.style.background = "linear-gradient(180deg, #fc035200 0%, #fc0352 100%)";
+    instructions.innerHTML = "red turn";
+};
+
+function blueTurnIndicator(){
+    instructionRow.style.background = "linear-gradient(180deg, #03b1fc00 0%, #03b1fc 100%)";
+    instructions.innerHTML = "blue turn";
+};
+
+
 //✅curling blue cant win
 //end of each round add to game score
 //end of each game add to games won
 //✅keep tracking after last shot thrown
-//fisrst push start should go to throw 1 not 2
-//classic shuffle is forst to 21
+//first push start should go to throw 1 not 2
+//classic shuffle is first to 21
 //blackjack
 //visuals
