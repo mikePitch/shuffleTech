@@ -23,10 +23,10 @@
   "TableData": [
     {
       "PythonShotCounter": 34,
-      "GameType": "neoCurling",
-      "ShotsPlayed": 8,
-      "RoundsPlayed": 2,
-      "GameState": "Idle",
+      "GameType": null,
+      "ShotsPlayed": 1,
+      "RoundsPlayed": 0,
+      "GameState": "idle",
       "id": 1
     }
   ]

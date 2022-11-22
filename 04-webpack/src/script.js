@@ -34,12 +34,14 @@ function callAPI(table, id, verb, APIdata) {
 
 
 //game type
-const gameType = new Object();
-gameType.neoShuffle = true;
-gameType.classicShuffle = true;
-gameType.spaceInvaders = true;
-gameType.blackJack = true;
-gameType.neoCurling = true;
+// const gameType = new Object();
+// gameType.neoShuffle = true;
+// gameType.classicShuffle = true;
+// gameType.spaceInvaders = true;
+// gameType.blackJack = true;
+// gameType.neoCurling = true;
+
+let gameType = null;
 
 //game states
 //idle, inProgress, endOfRound, endOfGame
@@ -53,6 +55,11 @@ let redGameScore = document.getElementById("redGameScore");
 let blueGameScore = document.getElementById("blueGameScore");
 let redGamesWonScore = document.getElementById("redGamesWon");
 let blueGamesWonScore = document.getElementById("blueGamesWon");
+var backTurn = document.getElementById('backTurn');
+var nextTurn = document.getElementById('nextTurn');
+var turnNumber = document.getElementById('turnNumber');
+var startNextRoundBtn = document.getElementById('startNextRound');
+var roundNumberTxt = document.getElementById('roundNumber');
 
 instructionRow.style.backgroundColor = "linear-gradient(180deg, #34FD8400 0%, #34FD84 100%)";
 instructions.innerHTML = "Press Start";
@@ -63,13 +70,26 @@ let shotsThrown = 0;
 let roundsPlayed = 0;
 let redGameScoreTotal = 0;
 let blueGameScoreTotal = 0;
-let redGamesWon = -1;
-let blueGamesWon = -1;
+let redGamesWon = 0;
+let blueGamesWon = 0;
+let gameTypeDB = null;
+let gameStateDB = null;
+let shotsPlayedDB = 0;
+let roundsPlayedDB = 0;
 
+let pythonShotCounterDB = 0;
 
+//---table shit---
 
+let prevPythonShotCount = 0;
+let prevPuckPosSum = 1;
+let puckMovement = false;
+let puckData = undefined;
+let tableData = undefined;
 
+callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "idle", "GameType": null}');
 
+turnNumber.innerHTML = (shotsPlayedDB + 1).toString();
 
 //---------------------kiosk stuff-------------------
 
@@ -79,46 +99,32 @@ let blueGamesWon = -1;
 var startGameBtn = document.getElementById('startGame');
 
 function startGame() {
-    shotsThrown = 0;
-    roundsPlayed = 0;
-    addToGamesWon();
-    blueGameScoreTotal = 0;
-    redGameScoreTotal = 0;
-    gameState = "inProgress";
-    updateShotsPlayedText();
-    updateRoundsPlayedText();
-    updateGameScore();
-    
+    callAPI("TableData", 1, "PATCH", 
+            '{"ShotsPlayed":' + 0 + ', "RoundsPlayed":' + 0  + ', "GameState": "inProgress"}');
+
 }
 
 startGameBtn.onclick = function() { startGame() };
 
 //----manually increment shot----
-var backTurn = document.getElementById('backTurn');
-var nextTurn = document.getElementById('nextTurn');
-var turnNumber = document.getElementById('turnNumber');
-
-turnNumber.innerHTML = (shotsThrown + 1).toString();
 
 
 function shotsThrownUp() {
-    shotsThrown = shotsThrown + 1;
-    turnNumber.innerHTML = (shotsThrown + 1).toString();
+    shotsThrown = shotsPlayedDB + 1;
+
     if (shotsThrown > 7) {
         shotsThrown = 8;
-        turnNumber.innerHTML = "8";
     }
-    console.log("shotsThrown = ", shotsThrown);
+    console.log("shotsThrown = ", shotsPlayedDB);
     callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
 };
 
 function shotsThrownDown() {
-    shotsThrown = shotsThrown - 1;
-    if (shotsThrown < 0) {
+    shotsThrown = shotsPlayedDB - 1;
+        if (shotsThrown < 1) {
         shotsThrown = 0;
     }
-    turnNumber.innerHTML = (shotsThrown + 1).toString();
-    console.log("shotsThrown = ", shotsThrown);
+    console.log("shotsThrown = ", shotsPlayedDB);
     callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
 
 };
@@ -128,29 +134,17 @@ nextTurn.onclick = function() { shotsThrownUp() };
 
 //--- Start Next Round ---
 
-var startNextRoundBtn = document.getElementById('startNextRound');
-var roundNumberTxt = document.getElementById('roundNumber');
-
-roundNumberTxt.innerHTML = (roundsPlayed + 1).toString()
 
 startNextRoundBtn.onclick = () => {
     shotsThrown = 0;
-    roundsPlayed = roundsPlayed + 1;
-
-    //---add score to game scrore
-
-
-    updateRoundsPlayedText();
-
+    roundsPlayed = roundsPlayedDB + 1;
     if (roundsPlayed > 7) {
         roundsPlayed = 8;
-        roundNumberTxt.innerHTML = "8";
     }
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + ', "RoundsPlayed":' + roundsPlayed  + '}');
 
-    updateShotsPlayedText();
+    //---add score to game scrore
     addRoundScoreToGameScore();
-
-    gameState = "inProgress";
 
 };
 
@@ -176,42 +170,42 @@ function setAllGamesFalse() {
 };
 
 selectNS.onclick = () => {
-    setAllGamesFalse();
-    gameType.neoShuffle = true;
+    // setAllGamesFalse();
+    // gameType.neoShuffle = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "neoShuffle" }')
 };
 
 selectCS.onclick = () => {
-    setAllGamesFalse();
-    gameType.classicShuffle = true;
+    // setAllGamesFalse();
+    // gameType.classicShuffle = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "classicShuffle" }')
 };
 
 selectSI.onclick = () => {
-    setAllGamesFalse();
-    gameType.spaceInvaders = true;
+    // setAllGamesFalse();
+    // gameType.spaceInvaders = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "spaceInvaders" }')
 };
 
 selectBJ.onclick = () => {
-    setAllGamesFalse();
-    gameType.blackJack = true;
+    // setAllGamesFalse();
+    // gameType.blackJack = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "blackJack" }')
 };
 
 selectCU.onclick = () => {
-    setAllGamesFalse();
-    gameType.neoCurling = true;
+    // setAllGamesFalse();
+    // gameType.neoCurling = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "neoCurling" }')
 };
 
 selectALL.onclick = () => {
-    setAllGamesFalse();
-    gameType.neoShuffle = true;
-    gameType.classicShuffle = true;
-    gameType.spaceInvaders = true;
-    gameType.blackJack = true;
-    gameType.neoCurling = true;
+    // setAllGamesFalse();
+    // gameType.neoShuffle = true;
+    // gameType.classicShuffle = true;
+    // gameType.spaceInvaders = true;
+    // gameType.blackJack = true;
+    // gameType.neoCurling = true;
     callAPI("TableData", 1, "PATCH", '{"GameType": "ALL" }')
 };
 
@@ -280,7 +274,7 @@ const puckHeight = 20;
 const detectionZone = 2000
 
 
-var xmlHttp = new XMLHttpRequest();
+// var xmlHttp = new XMLHttpRequest();
 
 
 //create scene
@@ -489,27 +483,28 @@ const scoreBoxClassicGeometry = new THREE.BoxGeometry(30, 30, 60);
 //Lines
 const scoreLines = [60, 165, 524, 1054, 1768, 2762]; // y value of lines
 
-if (gameType.classicShuffle || gameType.neoShuffle) {
 
 
-    const lineGeometries = [];
-    for (let i = 0; i < scoreLines.length; i++) {
-        const points = [];
-        const lineY = scoreLines[i];
-        points.push(new THREE.Vector3(0, 1, lineY));
-        points.push(new THREE.Vector3(600, 1, lineY));
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        lineGeometries.push(geometry);
-    }
-    const material = new THREE.LineBasicMaterial({
-        color: 0x00ffff,
-        linewidth: 1,
-    });
-    for (let i = 0; i < lineGeometries.length; i++) {
-        const line = new THREE.Line(lineGeometries[i], material);
-        scene.add(line); //adding each line to the scene
-    };
+
+const lineGeometries = [];
+for (let i = 0; i < scoreLines.length; i++) {
+    const points = [];
+    const lineY = scoreLines[i];
+    points.push(new THREE.Vector3(0, 1, lineY));
+    points.push(new THREE.Vector3(600, 1, lineY));
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    lineGeometries.push(geometry);
+}
+const material = new THREE.LineBasicMaterial({
+    color: 0x00ffff,
+    linewidth: 1,
+});
+for (let i = 0; i < lineGeometries.length; i++) {
+    const line = new THREE.Line(lineGeometries[i], material);
+    //------!! add these later only for games with table lines------
+    scene.add(line); //adding each line to the scene
 };
+
 
 const roundScoreClassicShuffle = new Object();
 roundScoreClassicShuffle.red = 0;
@@ -598,30 +593,24 @@ curlingCircles.rotation.x = Math.PI / 2;
 
 const curlingLines = new THREE.Group();
 
-//---table shit---
 
-let prevPythonShotCount = 0;
-let prevPuckPosSum = 1;
-let puckMovement = false;
-let puckData = undefined;
-let tableData = undefined;
 
 //new cube  
 
-const newCubeGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+// const newCubeGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 
 
-const loader = new THREE.TextureLoader();
-loader.setPath('/cubeMaps/synthwave/');
+// const loader = new THREE.TextureLoader();
+// loader.setPath('/cubeMaps/synthwave/');
 
-const textureCube = [
-    new THREE.MeshStandardMaterial({ map: loader.load('lft.jpg'), side: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ map: loader.load('rht.jpg'), side: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ map: loader.load('top.jpg'), side: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ map: loader.load('btm.jpg'), side: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ map: loader.load('fnt.jpg'), side: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ map: loader.load('bck.jpg'), side: THREE.DoubleSide })
-]
+// const textureCube = [
+//     new THREE.MeshStandardMaterial({ map: loader.load('lft.jpg'), side: THREE.DoubleSide }),
+//     new THREE.MeshStandardMaterial({ map: loader.load('rht.jpg'), side: THREE.DoubleSide }),
+//     new THREE.MeshStandardMaterial({ map: loader.load('top.jpg'), side: THREE.DoubleSide }),
+//     new THREE.MeshStandardMaterial({ map: loader.load('btm.jpg'), side: THREE.DoubleSide }),
+//     new THREE.MeshStandardMaterial({ map: loader.load('fnt.jpg'), side: THREE.DoubleSide }),
+//     new THREE.MeshStandardMaterial({ map: loader.load('bck.jpg'), side: THREE.DoubleSide })
+// ]
 
 
 
@@ -684,27 +673,9 @@ function animate() {
 
     camera.lookAt(camLookAt);
 
-    //check game state
-    if (gameState == "inProgress" || true) {
+    // Get TableData
 
-
-        // -----3d Perspective-----
-        // camera.lookAt(300, -200, 1200);
-
-
-        const bpBest = [];
-        const rpBest = [];
-
-        const rpxv = [];
-        const rpyv = [];
-        const bpxv = [];
-        const bpyv = [];
-
-
-        //Add Pucks
-        puckGrp.remove(...puckGrp.children);
-
-        fetch('http://localhost:3000/TableData/1', {
+    fetch('http://localhost:3000/TableData/1', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -717,847 +688,876 @@ function animate() {
 
         if (tableData) {
             const tableDataObj = JSON.parse(tableData);
-            console.log("psc = ", tableDataObj.PythonShotCounter);
+            shotsPlayedDB = tableDataObj.ShotsPlayed;
+            roundsPlayedDB = tableDataObj.RoundsPlayed;
+            gameTypeDB = tableDataObj.GameType;
+            gameStateDB = tableDataObj.GameState;
+            pythonShotCounterDB = tableDataObj.PythonShotCounter;
 
             //check for change
 
-            const currentPythonShotCount = tableDataObj.PythonShotCounter;
 
-
-            if (currentPythonShotCount !== prevPythonShotCount) {
+            if (pythonShotCounterDB !== prevPythonShotCount) {
                 console.log("change");
                 shotsThrownUp()
-                prevPythonShotCount = currentPythonShotCount;
+                prevPythonShotCount = pythonShotCounterDB;
             };
 
         }
 
-        
-
-        
-
-        fetch('http://localhost:3000/PuckLocations/1', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                },
-            })
-            .then(response => response.text())
-            .then(data => {
-                puckData = data;
-            })
+    //update HUD
+    turnNumber.innerHTML = (shotsPlayedDB + 1).toString();
+    if (shotsPlayedDB > 7) {
+        turnNumber.innerHTML = "8";
+    }
+    roundNumberTxt.innerHTML = (roundsPlayedDB + 1).toString()
+    if (roundsPlayedDB > 7) {
+        turnNumber.innerHTML = "8";
+    }
 
 
-
-        if (puckData) {
-            const puckDataObj = JSON.parse(puckData);
-
-            const bpObj = puckDataObj.puckLocationsBlue;
-
-            for (let i = 0; i < bpObj.length; i++) {
-                var bpx = 0;
-                var bpy = 0;
-                bpx = bpObj[i][0];
-                bpy = bpObj[i][1];
-
-                const bluePuck = new THREE.Mesh(puckCylinder, bpCoreMat);
-                bluePuck.position.set(bpx, 10, bpy);
-                puckGrp.add(bluePuck);
-
-                bpxv.push(bpx);
-                bpyv.push(bpy);
-
-            }
+    // -----3d Perspective-----
+    // camera.lookAt(300, -200, 1200);
 
 
+    const bpBest = [];
+    const rpBest = [];
 
-            //add arrow to best red shot
-
-            const bplowY = Math.min(...bpyv);
-            const bplowYindex = bpyv.indexOf(bplowY);
-
-            const bplowX = bpxv[bplowYindex];
-
-            bpBest.push(bplowX);
-            bpBest.push(bplowY);
-
-            //redpucklocations
-
-            const rpObj = puckDataObj.puckLocationsRed;
+    const rpxv = [];
+    const rpyv = [];
+    const bpxv = [];
+    const bpyv = [];
 
 
-            for (let i = 0; i < rpObj.length; i++) {
-                var rpx = 0;
-                var rpy = 0;
-                rpx = rpObj[i][0];
-                rpy = rpObj[i][1];
+    //Add Pucks
+    puckGrp.remove(...puckGrp.children);
 
-                const redPuck = new THREE.Mesh(puckCylinder, rpCoreMat);
-                redPuck.position.set(rpx, 10, rpy);
-                puckGrp.add(redPuck);
+    fetch('http://localhost:3000/PuckLocations/1', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => response.text())
+        .then(data => {
+            puckData = data;
+        })
 
-                rpxv.push(rpx);
-                rpyv.push(rpy);
-            }
 
 
-            //add arrow to best red shot
-            const lowY = Math.min(...rpyv);
-            const lowYindex = rpyv.indexOf(lowY);
+    if (puckData) {
+        const puckDataObj = JSON.parse(puckData);
 
-            const lowX = rpxv[lowYindex];
+        const bpObj = puckDataObj.puckLocationsBlue;
 
-            rpBest.push(lowX);
-            rpBest.push(lowY);
+        for (let i = 0; i < bpObj.length; i++) {
+            var bpx = 0;
+            var bpy = 0;
+            bpx = bpObj[i][0];
+            bpy = bpObj[i][1];
 
+            const bluePuck = new THREE.Mesh(puckCylinder, bpCoreMat);
+            bluePuck.position.set(bpx, 10, bpy);
+            puckGrp.add(bluePuck);
+
+            bpxv.push(bpx);
+            bpyv.push(bpy);
 
         }
 
-        scene.add(puckGrp);
 
 
-        //-------------------Check for movement---------------------
+        //add arrow to best red shot
 
-        const puckPosArr = rpxv.concat(rpyv, bpxv, bpyv);
-        const puckPosSum = puckPosArr.reduce((a, b) => a + b, 0);
+        const bplowY = Math.min(...bpyv);
+        const bplowYindex = bpyv.indexOf(bplowY);
+
+        const bplowX = bpxv[bplowYindex];
+
+        bpBest.push(bplowX);
+        bpBest.push(bplowY);
+
+        //redpucklocations
+
+        const rpObj = puckDataObj.puckLocationsRed;
 
 
-        if (puckPosSum === prevPuckPosSum) {
-            puckMovement = false;
-            // console.log("puckMovement = ", puckMovement);
-        } else {
-            puckMovement = true;
-            // console.log("puckMovement = ", puckMovement);
+        for (let i = 0; i < rpObj.length; i++) {
+            var rpx = 0;
+            var rpy = 0;
+            rpx = rpObj[i][0];
+            rpy = rpObj[i][1];
+
+            const redPuck = new THREE.Mesh(puckCylinder, rpCoreMat);
+            redPuck.position.set(rpx, 10, rpy);
+            puckGrp.add(redPuck);
+
+            rpxv.push(rpx);
+            rpyv.push(rpy);
         }
 
-        prevPuckPosSum = puckPosSum;
 
-        if (puckMovement || gameChanged) {
+        //add arrow to best red shot
+        const lowY = Math.min(...rpyv);
+        const lowYindex = rpyv.indexOf(lowY);
 
-            gameChanged = false;
+        const lowX = rpxv[lowYindex];
 
-            //-----------NeoCurling---------------
-
-
-            curlingLines.remove(...curlingLines.children);
-            curlingPuckCircles.remove(...curlingPuckCircles.children);
-            if (gameType.neoCurling) {
+        rpBest.push(lowX);
+        rpBest.push(lowY);
 
 
-                const rpCurlingDistances = [];
-                const bpCurlingDistances = [];
-                const curlingRedScore = [];
-                const curlingBlueScore = [];
+    }
+
+    scene.add(puckGrp);
+
+
+    //-------------------Check for movement---------------------
+
+    const puckPosArr = rpxv.concat(rpyv, bpxv, bpyv);
+    const puckPosSum = puckPosArr.reduce((a, b) => a + b, 0);
+
+
+    if (puckPosSum === prevPuckPosSum) {
+        puckMovement = false;
+        // console.log("puckMovement = ", puckMovement);
+    } else {
+        puckMovement = true;
+        // console.log("puckMovement = ", puckMovement);
+    }
+
+    prevPuckPosSum = puckPosSum;
+
+    if (puckMovement || gameChanged) {
+
+        gameChanged = false;
+
+        //-----------NeoCurling---------------
+
+
+        curlingLines.remove(...curlingLines.children);
+        curlingPuckCircles.remove(...curlingPuckCircles.children);
+        if (gameTypeDB == "neoCurling") {
+
+            console.log("neo = running")
+
+
+            const rpCurlingDistances = [];
+            const bpCurlingDistances = [];
+            const curlingRedScore = [];
+            const curlingBlueScore = [];
 
 
 
-                //get dist to centre for each puck
-                //red
-                for (let i = 0; i < rpyv.length; i++) {
-                    const points = []
-                    const redX = rpxv[i];
-                    const redY = rpyv[i];
-                    const redPos = new THREE.Vector3(redX, 2, redY)
-                    const centerPos = new THREE.Vector3(curlingCenter.x, 2, curlingCenter.y)
-                    points.push(redPos);
-                    points.push(centerPos);
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    const line = new THREE.Line(geometry, curlingRedMaterial);
-                    curlingLines.add(line);
-                    const lineLength = redPos.distanceTo(centerPos);
-                    const curlingPuckRadGeo = new THREE.BufferGeometry().setFromPoints(
-                        new THREE.Path().absarc(0, 0, lineLength, 0, Math.PI * 2).getSpacedPoints(50)
-                    );
+            //get dist to centre for each puck
+            //red
+            for (let i = 0; i < rpyv.length; i++) {
+                const points = []
+                const redX = rpxv[i];
+                const redY = rpyv[i];
+                const redPos = new THREE.Vector3(redX, 2, redY)
+                const centerPos = new THREE.Vector3(curlingCenter.x, 2, curlingCenter.y)
+                points.push(redPos);
+                points.push(centerPos);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(geometry, curlingRedMaterial);
+                curlingLines.add(line);
+                const lineLength = redPos.distanceTo(centerPos);
+                const curlingPuckRadGeo = new THREE.BufferGeometry().setFromPoints(
+                    new THREE.Path().absarc(0, 0, lineLength, 0, Math.PI * 2).getSpacedPoints(50)
+                );
 
-                    const lineCircle = new THREE.Line(curlingPuckRadGeo, curlingRedMaterial);
-                    curlingPuckCircles.add(lineCircle);
-                    // console.log("red line ", i, " length = ", lineLength)
+                const lineCircle = new THREE.Line(curlingPuckRadGeo, curlingRedMaterial);
+                curlingPuckCircles.add(lineCircle);
+                // console.log("red line ", i, " length = ", lineLength)
 
-                    //scoring
-                    const rpCurlingObj = new Object();
-                    rpCurlingObj.dist = lineLength;
-                    rpCurlingObj.x = redX;
-                    rpCurlingObj.y = redY;
-                    rpCurlingDistances.push(rpCurlingObj);
+                //scoring
+                const rpCurlingObj = new Object();
+                rpCurlingObj.dist = lineLength;
+                rpCurlingObj.x = redX;
+                rpCurlingObj.y = redY;
+                rpCurlingDistances.push(rpCurlingObj);
 
-                    //add dist above puck
+                //add dist above puck
 
-                    fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
+                fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
 
-                        const textGeo = new TextGeometry(String(Math.round(lineLength)), {
-                            font: font,
-                            size: 50,
-                            height: 5,
-                            curveSegments: 12,
-                        });
-                        // textGeo.computeBoundingBox();
-                        const mesh = new THREE.Mesh(textGeo, redTextMat);
-                        mesh.position.x = redX;
-                        mesh.position.y = 80;
-                        mesh.position.z = redY;
-                        mesh.lookAt(camera.position);
-                        // mesh.castShadow = true;
-                        // mesh.receiveShadow = true;
-                        // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
-                        mesh.geometry.center()
-                        curlingLines.add(mesh);
-
-
+                    const textGeo = new TextGeometry(String(Math.round(lineLength)), {
+                        font: font,
+                        size: 50,
+                        height: 5,
+                        curveSegments: 12,
                     });
-                }
-
-                for (let i = 0; i < bpyv.length; i++) {
-                    const points = []
-                    const blueX = bpxv[i];
-                    const blueY = bpyv[i];
-                    const bluePos = new THREE.Vector3(blueX, 2, blueY)
-                    const centerPos = new THREE.Vector3(curlingCenter.x, 2, curlingCenter.y)
-                    points.push(bluePos);
-                    points.push(centerPos);
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-                    const line = new THREE.Line(geometry, curlingBlueMaterial);
-
-                    curlingLines.add(line);
-                    const lineLength = bluePos.distanceTo(centerPos);
-                    const curlingPuckRadGeo = new THREE.BufferGeometry().setFromPoints(
-                        new THREE.Path().absarc(0, 0, lineLength, 0, Math.PI * 2).getSpacedPoints(50)
-                    );
-
-                    const lineCircle = new THREE.Line(curlingPuckRadGeo, curlingBlueMaterial);
-                    curlingPuckCircles.add(lineCircle);
+                    // textGeo.computeBoundingBox();
+                    const mesh = new THREE.Mesh(textGeo, redTextMat);
+                    mesh.position.x = redX;
+                    mesh.position.y = 80;
+                    mesh.position.z = redY;
+                    mesh.lookAt(camera.position);
+                    // mesh.castShadow = true;
+                    // mesh.receiveShadow = true;
+                    // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
+                    mesh.geometry.center()
+                    curlingLines.add(mesh);
 
 
-                    // console.log("blue line ", i, " length = ", lineLength)
+                });
+            }
 
-                    //scoring
-                    const bpCurlingObj = new Object();
-                    bpCurlingObj.dist = lineLength;
-                    bpCurlingObj.x = blueX;
-                    bpCurlingObj.y = blueY;
-                    bpCurlingDistances.push(bpCurlingObj);
+            for (let i = 0; i < bpyv.length; i++) {
+                const points = []
+                const blueX = bpxv[i];
+                const blueY = bpyv[i];
+                const bluePos = new THREE.Vector3(blueX, 2, blueY)
+                const centerPos = new THREE.Vector3(curlingCenter.x, 2, curlingCenter.y)
+                points.push(bluePos);
+                points.push(centerPos);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-                    fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
+                const line = new THREE.Line(geometry, curlingBlueMaterial);
 
-                        const textGeo = new TextGeometry(String(Math.round(lineLength)), {
-                            font: font,
-                            size: 50,
-                            height: 5,
-                            curveSegments: 12,
-                        });
-                        // textGeo.computeBoundingBox();
-                        const mesh = new THREE.Mesh(textGeo, blueTextMat);
-                        mesh.position.x = blueX;
-                        mesh.position.y = 80;
-                        mesh.position.z = blueY;
-                        mesh.lookAt(camera.position);
-                        // mesh.castShadow = true;
-                        // mesh.receiveShadow = true;
-                        // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
-                        mesh.geometry.center()
-                        curlingLines.add(mesh);
+                curlingLines.add(line);
+                const lineLength = bluePos.distanceTo(centerPos);
+                const curlingPuckRadGeo = new THREE.BufferGeometry().setFromPoints(
+                    new THREE.Path().absarc(0, 0, lineLength, 0, Math.PI * 2).getSpacedPoints(50)
+                );
+
+                const lineCircle = new THREE.Line(curlingPuckRadGeo, curlingBlueMaterial);
+                curlingPuckCircles.add(lineCircle);
 
 
+                // console.log("blue line ", i, " length = ", lineLength)
+
+                //scoring
+                const bpCurlingObj = new Object();
+                bpCurlingObj.dist = lineLength;
+                bpCurlingObj.x = blueX;
+                bpCurlingObj.y = blueY;
+                bpCurlingDistances.push(bpCurlingObj);
+
+                fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
+
+                    const textGeo = new TextGeometry(String(Math.round(lineLength)), {
+                        font: font,
+                        size: 50,
+                        height: 5,
+                        curveSegments: 12,
                     });
+                    // textGeo.computeBoundingBox();
+                    const mesh = new THREE.Mesh(textGeo, blueTextMat);
+                    mesh.position.x = blueX;
+                    mesh.position.y = 80;
+                    mesh.position.z = blueY;
+                    mesh.lookAt(camera.position);
+                    // mesh.castShadow = true;
+                    // mesh.receiveShadow = true;
+                    // const bbox = new THREE.BoxHelper( mesh, 0xffff00 );
+                    mesh.geometry.center()
+                    curlingLines.add(mesh);
+
+
+                });
+            }
+
+            function compare(a, b) {
+                if (a.dist < b.dist) {
+                    return -1;
                 }
-
-                function compare(a, b) {
-                    if (a.dist < b.dist) {
-                        return -1;
-                    }
-                    if (a.dist > b.dist) {
-                        return 1;
-                    }
-                    return 0;
+                if (a.dist > b.dist) {
+                    return 1;
                 }
-
-
-
-                bpCurlingDistances.sort(compare);
-                rpCurlingDistances.sort(compare);
-
-
-                if (rpCurlingDistances[0] && rpCurlingDistances[0].dist < bpCurlingDistances[0].dist) {
-                    // console.log("red wins");
-
-                    for (let i = 0; i < rpCurlingDistances.length; i++) {
-                        if (rpCurlingDistances[i].dist < bpCurlingDistances[0].dist) {
-                            curlingRedScore.push(1);
-                            const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                            puckScoreBox.position.set(rpCurlingDistances[i].x, 60, rpCurlingDistances[i].y);
-                            curlingLines.add(puckScoreBox);
-                        } else {
-                            break;
-                        };
-                    };
-                };
-
-
-                if (bpCurlingDistances[0] && bpCurlingDistances[0].dist < rpCurlingDistances[0].dist) {
-                    // console.log("blue wins");
-
-                    for (let i = 0; i < bpCurlingDistances.length; i++) {
-                        if (bpCurlingDistances[i].dist < rpCurlingDistances[0].dist) {
-                            curlingBlueScore.push(1);
-                            const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                            puckScoreBox.position.set(bpCurlingDistances[i].x, 60, bpCurlingDistances[i].y);
-                            curlingLines.add(puckScoreBox);
-                        } else {
-                            break;
-                        };
-                    };
-                }
-
-                for (let i = 0; i < curlingRedScore.length; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, rpCoreMat);
-                    const zDist = i * 90 + 30;
-                    puckScoreBox.position.set(640, 0, zDist);
-                    curlingLines.add(puckScoreBox);
-                };
-                for (let i = 0; i < curlingBlueScore.length; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, bpCoreMat);
-                    const zDist = i * 90 + 30;
-                    puckScoreBox.position.set(640, 0, zDist);
-                    curlingLines.add(puckScoreBox);
-                };
-                // console.log("blue score = ", curlingBlueScore.length);
-                // console.log("red score = ", curlingRedScore.length);
-
-                blueCurlingScore = curlingBlueScore.length;
-                redCurlingScore = curlingRedScore.length;
-
-                scene.add(curlingLines);
-
+                return 0;
             }
 
 
-            //----------classic Shuffle-----------------------
 
-            scoringPuckIndicatorsGrp.remove(...scoringPuckIndicatorsGrp.children);
+            bpCurlingDistances.sort(compare);
+            rpCurlingDistances.sort(compare);
 
-            if (gameType.classicShuffle) {
-                roundScoreClassicShuffle.red = 0;
-                roundScoreClassicShuffle.blue = 0;
 
-                if (rpBest[1] < bpBest[1]) {
-                    // puckPointer.position.set(rpBest[0], 50, rpBest[1]);
-                    rpyv.forEach(function(e, i, a) {
-                        if (rpyv[i] < bpBest[1]) {
-                            const scoringPuckIndicators = new THREE.Mesh(scoringPuckGeo, puckPointerMaterial);
-                            scoringPuckIndicators.position.set(rpxv[i], 3, rpyv[i]);
-                            scoringPuckIndicators.rotation.x = Math.PI / 2;
-                            scoringPuckIndicatorsGrp.add(scoringPuckIndicators);
+            if (rpCurlingDistances[0] && rpCurlingDistances[0].dist < bpCurlingDistances[0].dist) {
+                // console.log("red wins");
 
-                            //point indicators
-
-                            const scoreCountRed = [];
-
-                            scoreLines.forEach(function(se, si, sa) {
-                                // console.log("sl = ", scoreLines[si])
-                                // console.log("rp = ", rpyv[i])
-                                if (rpyv[i] + puckRadius < scoreLines[si]) {
-                                    // console.log("test",scoreLines[si])
-                                    scoreCountRed.push(1);
-                                    roundScoreClassicShuffle.red = roundScoreClassicShuffle.red + 1;
-
-                                }
-                            });
-
-                            for (let lp = 0; lp < scoreCountRed.length; lp++) {
-                                const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                                const zDist = lp * 60 + 60;
-                                puckScoreBox.position.set(rpxv[i], zDist, rpyv[i]);
-                                // puckScoreBox.rotation.x = Math.PI / 2;
-                                scoringPuckIndicatorsGrp.add(puckScoreBox);
-                            };
-                        };
-                    });
-
-                } else {
-                    // puckPointer.position.set(bpBest[0], 50, bpBest[1]);
-                    bpyv.forEach(function(e, i, a) {
-                        if (bpyv[i] < rpBest[1]) {
-                            const scoringPuckIndicators = new THREE.Mesh(scoringPuckGeo, puckPointerMaterial);
-                            scoringPuckIndicators.position.set(bpxv[i], 3, bpyv[i]);
-                            scoringPuckIndicators.rotation.x = Math.PI / 2;
-                            scoringPuckIndicatorsGrp.add(scoringPuckIndicators);
-
-                            //point indicators
-
-                            const scoreCountBlue = [];
-
-                            scoreLines.forEach(function(se, si, sa) {
-                                // console.log("sl = ", scoreLines[si])
-                                // console.log("rp = ", rpyv[i])
-                                if (bpyv[i] + puckRadius < scoreLines[si]) {
-                                    // console.log("test",scoreLines[si])
-                                    scoreCountBlue.push(1);
-                                    roundScoreClassicShuffle.blue = roundScoreClassicShuffle.blue + 1;
-
-                                }
-                            });
-
-                            for (let lp = 0; lp < scoreCountBlue.length; lp++) {
-                                const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                                const zDist = lp * 60 + 60;
-                                puckScoreBox.position.set(bpxv[i], zDist, bpyv[i]);
-                                // puckScoreBox.rotation.x = Math.PI / 2;
-                                scoringPuckIndicatorsGrp.add(puckScoreBox);
-                            };
-                        }
-                    });
-
+                for (let i = 0; i < rpCurlingDistances.length; i++) {
+                    if (rpCurlingDistances[i].dist < bpCurlingDistances[0].dist) {
+                        curlingRedScore.push(1);
+                        const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                        puckScoreBox.position.set(rpCurlingDistances[i].x, 60, rpCurlingDistances[i].y);
+                        curlingLines.add(puckScoreBox);
+                    } else {
+                        break;
+                    };
                 };
-
-                for (let i = 0; i < roundScoreClassicShuffle.red; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, rpCoreMat);
-                    const zDist = i * 90 + 30;
-                    puckScoreBox.position.set(-40, 0, zDist);
-                    scoringPuckIndicatorsGrp.add(puckScoreBox);
-                };
-                for (let i = 0; i < roundScoreClassicShuffle.blue; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, bpCoreMat);
-                    const zDist = i * 90 + 30;
-                    puckScoreBox.position.set(-40, 0, zDist);
-                    scoringPuckIndicatorsGrp.add(puckScoreBox);
-                };
-
-                scene.add(scoringPuckIndicatorsGrp);
-
             };
 
 
+            if (bpCurlingDistances[0] && bpCurlingDistances[0].dist < rpCurlingDistances[0].dist) {
+                // console.log("blue wins");
+
+                for (let i = 0; i < bpCurlingDistances.length; i++) {
+                    if (bpCurlingDistances[i].dist < rpCurlingDistances[0].dist) {
+                        curlingBlueScore.push(1);
+                        const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                        puckScoreBox.position.set(bpCurlingDistances[i].x, 60, bpCurlingDistances[i].y);
+                        curlingLines.add(puckScoreBox);
+                    } else {
+                        break;
+                    };
+                };
+            }
+
+            for (let i = 0; i < curlingRedScore.length; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, rpCoreMat);
+                const zDist = i * 90 + 30;
+                puckScoreBox.position.set(640, 0, zDist);
+                curlingLines.add(puckScoreBox);
+            };
+            for (let i = 0; i < curlingBlueScore.length; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, bpCoreMat);
+                const zDist = i * 90 + 30;
+                puckScoreBox.position.set(640, 0, zDist);
+                curlingLines.add(puckScoreBox);
+            };
+            // console.log("blue score = ", curlingBlueScore.length);
+            // console.log("red score = ", curlingRedScore.length);
+
+            blueCurlingScore = curlingBlueScore.length;
+            redCurlingScore = curlingRedScore.length;
+
+            scene.add(curlingLines);
+
+        }
 
 
-            //-------------------Neo Shuffle-------------
+        //----------classic Shuffle-----------------------
 
-            if (gameType.neoShuffle) {
+        scoringPuckIndicatorsGrp.remove(...scoringPuckIndicatorsGrp.children);
 
-                roundScoreNeoShuffle.red = 0;
-                roundScoreNeoShuffle.blue = 0;
+        if (gameTypeDB == "classicShuffle") {
+            roundScoreClassicShuffle.red = 0;
+            roundScoreClassicShuffle.blue = 0;
 
-
-                const scoreCountRedTotals = [];
+            if (rpBest[1] < bpBest[1]) {
                 // puckPointer.position.set(rpBest[0], 50, rpBest[1]);
                 rpyv.forEach(function(e, i, a) {
+                    if (rpyv[i] < bpBest[1]) {
+                        const scoringPuckIndicators = new THREE.Mesh(scoringPuckGeo, puckPointerMaterial);
+                        scoringPuckIndicators.position.set(rpxv[i], 3, rpyv[i]);
+                        scoringPuckIndicators.rotation.x = Math.PI / 2;
+                        scoringPuckIndicatorsGrp.add(scoringPuckIndicators);
 
+                        //point indicators
 
-                    //point indicators
+                        const scoreCountRed = [];
 
+                        scoreLines.forEach(function(se, si, sa) {
+                            // console.log("sl = ", scoreLines[si])
+                            // console.log("rp = ", rpyv[i])
+                            if (rpyv[i] + puckRadius < scoreLines[si]) {
+                                // console.log("test",scoreLines[si])
+                                scoreCountRed.push(1);
+                                roundScoreClassicShuffle.red = roundScoreClassicShuffle.red + 1;
 
-                    const scoreCountRed = [];
+                            }
+                        });
 
-                    scoreLines.forEach(function(se, si, sa) {
-                        // console.log("sl = ", scoreLines[si])
-                        // console.log("rp = ", rpyv[i])
-                        if (rpyv[i] + puckRadius < scoreLines[si]) {
-                            // console.log("test",scoreLines[si])
-                            scoreCountRed.push(1);
-                            roundScoreNeoShuffle.red = roundScoreNeoShuffle.red + 1;
-
-                        }
-                    });
-                    scoreCountRedTotals.push(scoreCountRed);
-                    // console.log('red total = ', scoreCountRedTotals);
-
-                    for (let lp = 0; lp < scoreCountRed.length; lp++) {
-                        const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                        const zDist = lp * 60 + 60;
-                        puckScoreBox.position.set(rpxv[i], zDist, rpyv[i]);
-                        // puckScoreBox.rotation.x = Math.PI / 2;
-                        scoringPuckIndicatorsGrp.add(puckScoreBox);
+                        for (let lp = 0; lp < scoreCountRed.length; lp++) {
+                            const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                            const zDist = lp * 60 + 60;
+                            puckScoreBox.position.set(rpxv[i], zDist, rpyv[i]);
+                            // puckScoreBox.rotation.x = Math.PI / 2;
+                            scoringPuckIndicatorsGrp.add(puckScoreBox);
+                        };
                     };
-
                 });
 
-                scene.add(scoringPuckIndicatorsGrp);
-
-
-
+            } else {
                 // puckPointer.position.set(bpBest[0], 50, bpBest[1]);
                 bpyv.forEach(function(e, i, a) {
+                    if (bpyv[i] < rpBest[1]) {
+                        const scoringPuckIndicators = new THREE.Mesh(scoringPuckGeo, puckPointerMaterial);
+                        scoringPuckIndicators.position.set(bpxv[i], 3, bpyv[i]);
+                        scoringPuckIndicators.rotation.x = Math.PI / 2;
+                        scoringPuckIndicatorsGrp.add(scoringPuckIndicators);
 
+                        //point indicators
 
-                    //point indicators
+                        const scoreCountBlue = [];
 
-                    const scoreCountBlue = [];
+                        scoreLines.forEach(function(se, si, sa) {
+                            // console.log("sl = ", scoreLines[si])
+                            // console.log("rp = ", rpyv[i])
+                            if (bpyv[i] + puckRadius < scoreLines[si]) {
+                                // console.log("test",scoreLines[si])
+                                scoreCountBlue.push(1);
+                                roundScoreClassicShuffle.blue = roundScoreClassicShuffle.blue + 1;
 
-                    scoreLines.forEach(function(se, si, sa) {
-                        // console.log("sl = ", scoreLines[si])
-                        // console.log("rp = ", rpyv[i])
-                        if (bpyv[i] + puckRadius < scoreLines[si]) {
-                            // console.log("test",scoreLines[si])
-                            scoreCountBlue.push(1);
-                            roundScoreNeoShuffle.blue = roundScoreNeoShuffle.blue + 1;
+                            }
+                        });
 
-                        }
-                    });
-
-                    for (let lp = 0; lp < scoreCountBlue.length; lp++) {
-                        const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
-                        const zDist = lp * 60 + 60;
-                        puckScoreBox.position.set(bpxv[i], zDist, bpyv[i]);
-                        // puckScoreBox.rotation.x = Math.PI / 2;
-                        scoringPuckIndicatorsGrp.add(puckScoreBox);
-                    };
-
+                        for (let lp = 0; lp < scoreCountBlue.length; lp++) {
+                            const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                            const zDist = lp * 60 + 60;
+                            puckScoreBox.position.set(bpxv[i], zDist, bpyv[i]);
+                            // puckScoreBox.rotation.x = Math.PI / 2;
+                            scoringPuckIndicatorsGrp.add(puckScoreBox);
+                        };
+                    }
                 });
-                scene.add(scoringPuckIndicatorsGrp);
-
-                for (let i = 0; i < roundScoreNeoShuffle.red; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxNeoGeometry, rpCoreMat);
-                    const zDist = i * 60 + 60;
-                    puckScoreBox.position.set(-80, zDist, 120);
-                    scoringPuckIndicatorsGrp.add(puckScoreBox);
-                };
-                for (let i = 0; i < roundScoreNeoShuffle.blue; i++) {
-                    const puckScoreBox = new THREE.Mesh(scoreBoxNeoGeometry, bpCoreMat);
-                    const zDist = i * 60 + 60;
-                    puckScoreBox.position.set(-80, zDist, 400);
-                    scoringPuckIndicatorsGrp.add(puckScoreBox);
-                };
 
             };
 
+            for (let i = 0; i < roundScoreClassicShuffle.red; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, rpCoreMat);
+                const zDist = i * 90 + 30;
+                puckScoreBox.position.set(-40, 0, zDist);
+                scoringPuckIndicatorsGrp.add(puckScoreBox);
+            };
+            for (let i = 0; i < roundScoreClassicShuffle.blue; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, bpCoreMat);
+                const zDist = i * 90 + 30;
+                puckScoreBox.position.set(-40, 0, zDist);
+                scoringPuckIndicatorsGrp.add(puckScoreBox);
+            };
+
+            scene.add(scoringPuckIndicatorsGrp);
+
+        };
 
 
 
 
+        //-------------------Neo Shuffle-------------
+
+        if (gameTypeDB == "neoShuffle") {
+
+            roundScoreNeoShuffle.red = 0;
+            roundScoreNeoShuffle.blue = 0;
 
 
+            const scoreCountRedTotals = [];
+            // puckPointer.position.set(rpBest[0], 50, rpBest[1]);
+            rpyv.forEach(function(e, i, a) {
 
 
-            //----------spaceinvades start------------------------
+                //point indicators
 
 
+                const scoreCountRed = [];
 
-            spaceInvadersGroup.remove(...spaceInvadersGroup.children);
+                scoreLines.forEach(function(se, si, sa) {
+                    // console.log("sl = ", scoreLines[si])
+                    // console.log("rp = ", rpyv[i])
+                    if (rpyv[i] + puckRadius < scoreLines[si]) {
+                        // console.log("test",scoreLines[si])
+                        scoreCountRed.push(1);
+                        roundScoreNeoShuffle.red = roundScoreNeoShuffle.red + 1;
 
-            if (gameType.spaceInvaders) {
-                const cellObjArray = [];
-                // console.log("spaceInvaders = ", gameType.spaceInvaders)
+                    }
+                });
+                scoreCountRedTotals.push(scoreCountRed);
+                // console.log('red total = ', scoreCountRedTotals);
 
-                spaceInvadersGroup.add(bpBar, rpBar);
-                bpBar.position.set(-80, 0, 25);
-                rpBar.position.set(-80, 0, 85);
-
-                //voronoi
-                var redSites = [];
-
-                for (let i = 0; i < rpxv.length; i++) {
-                    if(rpyv[i]<=detectionZone){
-                        redSites.push({
-                            x: rpxv[i],
-                            y: rpyv[i]
-                        });
-                    };
+                for (let lp = 0; lp < scoreCountRed.length; lp++) {
+                    const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                    const zDist = lp * 60 + 60;
+                    puckScoreBox.position.set(rpxv[i], zDist, rpyv[i]);
+                    // puckScoreBox.rotation.x = Math.PI / 2;
+                    scoringPuckIndicatorsGrp.add(puckScoreBox);
                 };
 
-                var blueSites = [];
+            });
 
-                for (let i = 0; i < bpxv.length; i++) {
-                    if(bpyv[i]<=detectionZone){
-                        blueSites.push({
-                            x: bpxv[i],
-                            y: bpyv[i]
-                        });
-                    };
-                };
-
-                const sites = blueSites.concat(redSites);
-
-                var voronoi = new Voronoi();
-                var bbox = {
-                    xl: 0,
-                    xr: tableWidth,
-                    yt: 0,
-                    yb: detectionZone
-                };
-                var diagram = voronoi.compute(sites, bbox);
-                diagram.puckColour = "not-assigned";
+            scene.add(scoringPuckIndicatorsGrp);
 
 
-                var voronoiLinesPoints = [];
-                var voronoiLinesColors = [];
-                diagram.edges.forEach(ed => {
-                    voronoiLinesPoints.push(ed.va.x, 3, ed.va.y, ed.vb.x, 3, ed.vb.y, ed.va.x, 4, ed.va.y, ed.vb.x, 4, ed.vb.y);
-                    voronoiLinesColors.push(1, .8, .8, 1, .8, .8, 1, .8, .8, 1, .8, .8);
+
+            // puckPointer.position.set(bpBest[0], 50, bpBest[1]);
+            bpyv.forEach(function(e, i, a) {
+
+
+                //point indicators
+
+                const scoreCountBlue = [];
+
+                scoreLines.forEach(function(se, si, sa) {
+                    // console.log("sl = ", scoreLines[si])
+                    // console.log("rp = ", rpyv[i])
+                    if (bpyv[i] + puckRadius < scoreLines[si]) {
+                        // console.log("test",scoreLines[si])
+                        scoreCountBlue.push(1);
+                        roundScoreNeoShuffle.blue = roundScoreNeoShuffle.blue + 1;
+
+                    }
                 });
 
-                var voronoiLinesGeom = new THREE.BufferGeometry();
-                voronoiLinesGeom.setAttribute("position", new THREE.Float32BufferAttribute(voronoiLinesPoints, 3));
-                var voronoiLines = new THREE.LineSegments(voronoiLinesGeom, voronoiLinesMat);
-                // console.log("zzz = ", voronoiLinesPoints)
+                for (let lp = 0; lp < scoreCountBlue.length; lp++) {
+                    const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
+                    const zDist = lp * 60 + 60;
+                    puckScoreBox.position.set(bpxv[i], zDist, bpyv[i]);
+                    // puckScoreBox.rotation.x = Math.PI / 2;
+                    scoringPuckIndicatorsGrp.add(puckScoreBox);
+                };
 
-                spaceInvadersGroup.add(voronoiLines);
+            });
+            scene.add(scoringPuckIndicatorsGrp);
 
-                scene.add(spaceInvadersGroup);
+            for (let i = 0; i < roundScoreNeoShuffle.red; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxNeoGeometry, rpCoreMat);
+                const zDist = i * 60 + 60;
+                puckScoreBox.position.set(-80, zDist, 120);
+                scoringPuckIndicatorsGrp.add(puckScoreBox);
+            };
+            for (let i = 0; i < roundScoreNeoShuffle.blue; i++) {
+                const puckScoreBox = new THREE.Mesh(scoreBoxNeoGeometry, bpCoreMat);
+                const zDist = i * 60 + 60;
+                puckScoreBox.position.set(-80, zDist, 400);
+                scoringPuckIndicatorsGrp.add(puckScoreBox);
+            };
 
-
-                diagram.cells.forEach(function(cell, i, a) {
-                    // console.log("cell = ", cell);
-
-                    if (rpxv.includes(cell.site.x)) {
-                        i = rpxv.indexOf(cell.site.x)
-                        if (rpyv[i] === cell.site.y) {
-                            cell.puckColour = "red";
-                        };
-                    };
-
-                    //blue
-                    if (bpxv.includes(cell.site.x)) {
-                        i = bpxv.indexOf(cell.site.x)
-                        if (bpyv[i] === cell.site.y) {
-                            cell.puckColour = "blue";
-
-                        };
-                    };
-
-                    const cellSegs = [];
-                    const cellId = cell.site.voronoiId;
-                    const cellCenter = cell.site; //{x: 218, y: 1420, voronoiId: 4}
+        };
 
 
-                    cell.halfedges.forEach(halfedge => {
-                        const edge = halfedge.edge;
-                        const edgeVa = edge.va; //{x: 0, y: 1613.8425531914893}
-                        const edgeVb = edge.vb; //{x: 600, y: 1772.1404255319148}
-                        // console.log(edgeVa);
-                        // console.log(edgeVb);
-                        const aX = edgeVa.x;
-                        const aY = edgeVa.y;
-                        const bX = edgeVb.x;
-                        const bY = edgeVb.y;
-                        const cX = cellCenter.x;
-                        const cY = cellCenter.y;
-                        // console.log(
-                        // "aX = " + aX ,
-                        // "aY = " + aY ,
-                        // "bX = " + bX ,
-                        // "bY = " + bY ,
-                        // "cX = " + cX ,
-                        // "cY = " + cY ,);
-                        const segArea = (aX * (bY - cY) + bX * (cY - aY) + cX * (aY - bY)) / 2;
-
-                        
-                        const triangle = new THREE.Shape();
-                        triangle.moveTo(aX, aY);
-                        triangle.lineTo(bX, bY);
-                        triangle.lineTo(cX, cY);
-                        // const TriangleGeometry = new THREE.ShapeGeometry(triangle);
-                        let triangleMat = greySiMat
-                        if (cell.puckColour === "blue" ){
-                            triangleMat = blueSiMat
-                        }
-                        if (cell.puckColour === "red" ){
-                            triangleMat = redSiMat
-                        }
-
-                        const TriangleGeometryEx = new THREE.ExtrudeGeometry( triangle, extrudeSettings );
-                        const triangleMesh = new THREE.Mesh( TriangleGeometryEx, triangleMat )
-                        triangleMesh.position.set(0, 3, 0);
-                        triangleMesh.rotation.x = Math.PI / 2;
-             
 
 
-                        spaceInvadersGroup.add(triangleMesh);
-                        
-                        const segAreaPositive = Math.abs(segArea);
-                        cellSegs.push(segAreaPositive);
 
 
+
+
+
+        //----------spaceinvades start------------------------
+
+
+
+        spaceInvadersGroup.remove(...spaceInvadersGroup.children);
+
+        if (gameTypeDB == "spaceInvaders") {
+            const cellObjArray = [];
+            // console.log("spaceInvaders = ", gameType.spaceInvaders)
+
+            spaceInvadersGroup.add(bpBar, rpBar);
+            bpBar.position.set(-80, 0, 25);
+            rpBar.position.set(-80, 0, 85);
+
+            //voronoi
+            var redSites = [];
+
+            for (let i = 0; i < rpxv.length; i++) {
+                if(rpyv[i]<=detectionZone){
+                    redSites.push({
+                        x: rpxv[i],
+                        y: rpyv[i]
                     });
+                };
+            };
 
-                    const cellArea = cellSegs.reduce((a, b) => a + b, 0);
+            var blueSites = [];
 
-                    const cellObj = new Object();
-                    cellObj.voronoiId = cellId;
-                    cellObj.area = cellArea;
-                    cellObj.site = cellCenter;
-                    cellObj.colour = cell.puckColour;
-                    cellObjArray.push(cellObj);
-                });
+            for (let i = 0; i < bpxv.length; i++) {
+                if(bpyv[i]<=detectionZone){
+                    blueSites.push({
+                        x: bpxv[i],
+                        y: bpyv[i]
+                    });
+                };
+            };
 
+            const sites = blueSites.concat(redSites);
 
-
-
-
-                // console.log("---------areas calculated-------------")
-                // console.log("cellObjArray = ", cellObjArray)
-
-
-
-
-                //Total area
-                const cellAreaArray = []
-
-                cellObjArray.forEach((element, index, array) => {
-                    cellAreaArray.push(element.area);
-                });
-
-                // const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
-                // console.log("totalArea = ", totalArea)
-
-                //Blue and red area
-                const redAreaArray = [];
-                const blueAreaArray = [];
-
-                cellObjArray.forEach((element, index, array) => {
-                    if (element.colour === "blue") {
-                        blueAreaArray.push(element.area);
-                    }
-                    if (element.colour === "red") {
-                        redAreaArray.push(element.area);
-                    }
-                });
+            var voronoi = new Voronoi();
+            var bbox = {
+                xl: 0,
+                xr: tableWidth,
+                yt: 0,
+                yb: detectionZone
+            };
+            var diagram = voronoi.compute(sites, bbox);
+            diagram.puckColour = "not-assigned";
 
 
+            var voronoiLinesPoints = [];
+            var voronoiLinesColors = [];
+            diagram.edges.forEach(ed => {
+                voronoiLinesPoints.push(ed.va.x, 3, ed.va.y, ed.vb.x, 3, ed.vb.y, ed.va.x, 4, ed.va.y, ed.vb.x, 4, ed.vb.y);
+                voronoiLinesColors.push(1, .8, .8, 1, .8, .8, 1, .8, .8, 1, .8, .8);
+            });
+
+            var voronoiLinesGeom = new THREE.BufferGeometry();
+            voronoiLinesGeom.setAttribute("position", new THREE.Float32BufferAttribute(voronoiLinesPoints, 3));
+            var voronoiLines = new THREE.LineSegments(voronoiLinesGeom, voronoiLinesMat);
+            // console.log("zzz = ", voronoiLinesPoints)
+
+            spaceInvadersGroup.add(voronoiLines);
+
+            scene.add(spaceInvadersGroup);
 
 
-                let redArea = redAreaArray.reduce((a, b) => a + b, 0);;
-                let blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
-                const totalArea = redArea + blueArea;
+            diagram.cells.forEach(function(cell, i, a) {
+                // console.log("cell = ", cell);
 
-
-
-
-
-
-
-                
-
-                if(blueAreaArray.length == 0 && redAreaArray.length != 0) {
-                    console.log("xxx ba= ", blueAreaArray.length)
-                    bluePercent = 0
-                    redPercent = 100
-                    siFullRectangleMat = redSiMat
-                    //redbox
-                }
-
-                if(redAreaArray.length == 0) {
-                    console.log("xxx ra= ", redAreaArray.length)
-                    redPercent = 0
-                    siFullRectangleMat = blueSiMat
-                    //blue box
-                }
-
-                if((redAreaArray.length == 0) && (blueAreaArray.length == 0)) {
-                    bluePercent = 0
-                    redPercent = 0
-                    siFullRectangleMat = greySiMat
-                    //grey box
-                }
-
-
-
-
-                if(redAreaArray.length + blueAreaArray.length > 1){
-                    console.log("xxx ra+ba= ", redAreaArray.length + blueAreaArray.length)
-                    bluePercent = blueArea / totalArea * 100;
-                    redPercent = redArea / totalArea * 100;
-                }else{
-                    const siFullRectangleMesh = new THREE.Mesh( siFullRectangleEx, siFullRectangleMat )
-                    siFullRectangleMesh.position.set(0, 3, 0);
-                    siFullRectangleMesh.rotation.x = Math.PI / 2;
-                    spaceInvadersGroup.add(siFullRectangleMesh);
+                if (rpxv.includes(cell.site.x)) {
+                    i = rpxv.indexOf(cell.site.x)
+                    if (rpyv[i] === cell.site.y) {
+                        cell.puckColour = "red";
+                    };
                 };
 
+                //blue
+                if (bpxv.includes(cell.site.x)) {
+                    i = bpxv.indexOf(cell.site.x)
+                    if (bpyv[i] === cell.site.y) {
+                        cell.puckColour = "blue";
 
-                // console.log("blue % = ", bluePercent);
-                // console.log("red % = ", redPercent);
+                    };
+                };
 
-                rpBar.scale.y = redPercent * 5;
-                bpBar.scale.y = bluePercent * 5;
+                const cellSegs = [];
+                const cellId = cell.site.voronoiId;
+                const cellCenter = cell.site; //{x: 218, y: 1420, voronoiId: 4}
 
+
+                cell.halfedges.forEach(halfedge => {
+                    const edge = halfedge.edge;
+                    const edgeVa = edge.va; //{x: 0, y: 1613.8425531914893}
+                    const edgeVb = edge.vb; //{x: 600, y: 1772.1404255319148}
+                    // console.log(edgeVa);
+                    // console.log(edgeVb);
+                    const aX = edgeVa.x;
+                    const aY = edgeVa.y;
+                    const bX = edgeVb.x;
+                    const bY = edgeVb.y;
+                    const cX = cellCenter.x;
+                    const cY = cellCenter.y;
+                    // console.log(
+                    // "aX = " + aX ,
+                    // "aY = " + aY ,
+                    // "bX = " + bX ,
+                    // "bY = " + bY ,
+                    // "cX = " + cX ,
+                    // "cY = " + cY ,);
+                    const segArea = (aX * (bY - cY) + bX * (cY - aY) + cX * (aY - bY)) / 2;
+
+                    
+                    const triangle = new THREE.Shape();
+                    triangle.moveTo(aX, aY);
+                    triangle.lineTo(bX, bY);
+                    triangle.lineTo(cX, cY);
+                    // const TriangleGeometry = new THREE.ShapeGeometry(triangle);
+                    let triangleMat = greySiMat
+                    if (cell.puckColour === "blue" ){
+                        triangleMat = blueSiMat
+                    }
+                    if (cell.puckColour === "red" ){
+                        triangleMat = redSiMat
+                    }
+
+                    const TriangleGeometryEx = new THREE.ExtrudeGeometry( triangle, extrudeSettings );
+                    const triangleMesh = new THREE.Mesh( TriangleGeometryEx, triangleMat )
+                    triangleMesh.position.set(0, 3, 0);
+                    triangleMesh.rotation.x = Math.PI / 2;
+            
+
+
+                    spaceInvadersGroup.add(triangleMesh);
+                    
+                    const segAreaPositive = Math.abs(segArea);
+                    cellSegs.push(segAreaPositive);
+
+
+                });
+
+                const cellArea = cellSegs.reduce((a, b) => a + b, 0);
+
+                const cellObj = new Object();
+                cellObj.voronoiId = cellId;
+                cellObj.area = cellArea;
+                cellObj.site = cellCenter;
+                cellObj.colour = cell.puckColour;
+                cellObjArray.push(cellObj);
+            });
+
+
+
+
+
+            // console.log("---------areas calculated-------------")
+            // console.log("cellObjArray = ", cellObjArray)
+
+
+
+
+            //Total area
+            const cellAreaArray = []
+
+            cellObjArray.forEach((element, index, array) => {
+                cellAreaArray.push(element.area);
+            });
+
+            // const totalArea = cellAreaArray.reduce((a, b) => a + b, 0);
+            // console.log("totalArea = ", totalArea)
+
+            //Blue and red area
+            const redAreaArray = [];
+            const blueAreaArray = [];
+
+            cellObjArray.forEach((element, index, array) => {
+                if (element.colour === "blue") {
+                    blueAreaArray.push(element.area);
+                }
+                if (element.colour === "red") {
+                    redAreaArray.push(element.area);
+                }
+            });
+
+
+
+
+            let redArea = redAreaArray.reduce((a, b) => a + b, 0);;
+            let blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
+            const totalArea = redArea + blueArea;
+
+
+
+
+
+
+
+            
+
+            if(blueAreaArray.length == 0 && redAreaArray.length != 0) {
+                console.log("xxx ba= ", blueAreaArray.length)
+                bluePercent = 0
+                redPercent = 100
+                siFullRectangleMat = redSiMat
+                //redbox
             }
 
-            //----------spaceinvades end-------------------------
+            if(redAreaArray.length == 0) {
+                console.log("xxx ra= ", redAreaArray.length)
+                redPercent = 0
+                siFullRectangleMat = blueSiMat
+                //blue box
+            }
+
+            if((redAreaArray.length == 0) && (blueAreaArray.length == 0)) {
+                bluePercent = 0
+                redPercent = 0
+                siFullRectangleMat = greySiMat
+                //grey box
+            }
+
+
+
+
+            if(redAreaArray.length + blueAreaArray.length > 1){
+                console.log("xxx ra+ba= ", redAreaArray.length + blueAreaArray.length)
+                bluePercent = blueArea / totalArea * 100;
+                redPercent = redArea / totalArea * 100;
+            }else{
+                const siFullRectangleMesh = new THREE.Mesh( siFullRectangleEx, siFullRectangleMat )
+                siFullRectangleMesh.position.set(0, 3, 0);
+                siFullRectangleMesh.rotation.x = Math.PI / 2;
+                spaceInvadersGroup.add(siFullRectangleMesh);
+            };
+
+
+            // console.log("blue % = ", bluePercent);
+            // console.log("red % = ", redPercent);
+
+            rpBar.scale.y = redPercent * 5;
+            bpBar.scale.y = bluePercent * 5;
+
         }
 
+        //----------spaceinvades end-------------------------
+    }
 
 
 
-        if (gameType.neoCurling) {
-            if (gsRedScore) {
-                gsRedScore.innerHTML = redCurlingScore;
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = blueCurlingScore;
-            };
+
+    if (gameTypeDB == "neoCurling") {
+
+        console.log("curling running score red =", redCurlingScore)
+        if (gsRedScore) {
+            gsRedScore.innerHTML = redCurlingScore;
         };
-
-        if (gameType.classicShuffle) {
-            if (gsRedScore) {
-                gsRedScore.innerHTML = roundScoreClassicShuffle.red;
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = roundScoreClassicShuffle.blue;
-            };
-        };
-
-        if (gameType.spaceInvaders) {
-            if (gsRedScore) {
-                gsRedScore.innerHTML = Math.round(redPercent) + "﹪";
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = Math.round(bluePercent) + "﹪";
-            };
-        };
-
-        if (gameType.blackJack) {
-            if (gsRedScore) {
-                gsRedScore.innerHTML = 0;
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = 0;
-            };
-        };
-
-        if (gameType.neoShuffle) {
-            if (gsRedScore) {
-                gsRedScore.innerHTML = roundScoreNeoShuffle.red;
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = roundScoreNeoShuffle.blue;
-            };
-        };
-
-        //------ turn round and game stuff ----
-
-       // ----display turn---
-       if (gameState == "inProgress"){
-            if(roundsPlayed % 2 == 0){
-                if(shotsThrown % 2 == 0){
-                    redTurnIndicator();
-                } else {
-                    blueTurnIndicator();
-                };
-            } else {
-                if(shotsThrown % 2 == 0){
-                    blueTurnIndicator();
-                } else {
-                    redTurnIndicator();
-                };
-            };
-        };
-
-        // ---end of round----
-        if (shotsThrown == 8) {
-            console.log("round over")
-            gameState = "endOfRound";
-            instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
-            instructions.innerHTML = "round over press next round";
-
-        };
-
-        //---end of game
-        if (roundsPlayed == 8) {
-            console.log("game over")
-            gameState = "endOfGame";
-            instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
-            instructions.innerHTML = "game over press new game";
+        if (gsBlueScore) {
+            gsBlueScore.innerHTML = blueCurlingScore;
         };
     };
+
+    if (gameTypeDB == "classicShuffle") {
+        if (gsRedScore) {
+            gsRedScore.innerHTML = roundScoreClassicShuffle.red;
+        };
+        if (gsBlueScore) {
+            gsBlueScore.innerHTML = roundScoreClassicShuffle.blue;
+        };
+    };
+
+    if (gameTypeDB == "spaceInvaders") {
+        if (gsRedScore) {
+            gsRedScore.innerHTML = Math.round(redPercent) + "﹪";
+        };
+        if (gsBlueScore) {
+            gsBlueScore.innerHTML = Math.round(bluePercent) + "﹪";
+        };
+    };
+
+    if (gameTypeDB == "blackJack") {
+        if (gsRedScore) {
+            gsRedScore.innerHTML = 0;
+        };
+        if (gsBlueScore) {
+            gsBlueScore.innerHTML = 0;
+        };
+    };
+
+    if (gameTypeDB == "neoShuffle") {
+        if (gsRedScore) {
+            gsRedScore.innerHTML = roundScoreNeoShuffle.red;
+        };
+        if (gsBlueScore) {
+            gsBlueScore.innerHTML = roundScoreNeoShuffle.blue;
+        };
+    };
+
+    //------ turn round and game stuff ----
+
+    // ----display turn---
+    if (gameStateDB == "inProgress"){
+        if(roundsPlayedDB % 2 == 0){
+            if(shotsPlayedDB % 2 == 0){
+                redTurnIndicator();
+            } else {
+                blueTurnIndicator();
+            };
+        } else {
+            if(shotsPlayedDB % 2 == 0){
+                blueTurnIndicator();
+            } else {
+                redTurnIndicator();
+            };
+        };
+    };
+
+    // ---end of round----
+    if (shotsPlayedDB == 8) {
+        console.log("round over")
+        gameStateDB = "endOfRound";
+        instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
+        instructions.innerHTML = "round over press next round";
+
+    };
+
+    //---end of game
+    if (roundsPlayedDB == 8) {
+        console.log("game over")
+        gameStateDB = "endOfGame";
+        instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
+        instructions.innerHTML = "game over press new game";
+    };
+
 
 
 
@@ -1571,8 +1571,7 @@ animate();
 
 function addRoundScoreToGameScore(){
 
-    console.log("run");
-    if (gameType.neoCurling) {
+    if (gameTypeDB == "neoCurling") {
         if (redGameScore) {
             // redGameScore.innerHTML = redGameScoreTotal + redCurlingScore;
             redGameScoreTotal = redGameScoreTotal + redCurlingScore;
@@ -1583,7 +1582,7 @@ function addRoundScoreToGameScore(){
         };
     };
 
-    if (gameType.classicShuffle) {
+    if (gameTypeDB == "classicShuffle") {
         if (redGameScore) {
             // redGameScore.innerHTML = redGameScoreTotal + roundScoreClassicShuffle.red;
             redGameScoreTotal = redGameScoreTotal + roundScoreClassicShuffle.red
@@ -1601,7 +1600,7 @@ function addRoundScoreToGameScore(){
 
     };
 
-    if (gameType.spaceInvaders) {
+    if (gameTypeDB == "spaceInvaders") {
         if (redGameScore && blueGameScore) {
             redGameScore.innerHTML = Math.round(redPercent) + "﹪";
             if(Math.round(redPercent) >= Math.round(bluePercent)){
@@ -1616,7 +1615,7 @@ function addRoundScoreToGameScore(){
 
     };
 
-    if (gameType.blackJack) {
+    if (gameTypeDB == "blackJack") {
         if (redGameScore) {
             redGameScore.innerHTML = 0;
         };
@@ -1625,7 +1624,7 @@ function addRoundScoreToGameScore(){
         };
     };
 
-    if (gameType.neoShuffle) {
+    if (gameTypeDB == "neoShuffle") {
         if (redGameScore) {
             // redGameScore.innerHTML = redGameScoreTotal + roundScoreNeoShuffle.red;
             redGameScoreTotal = redGameScoreTotal + roundScoreNeoShuffle.red;
