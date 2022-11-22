@@ -8,31 +8,6 @@ import { TextGeometry } from 'three/examples/jsm//geometries/TextGeometry.js';
 import { ReverseSubtractEquation } from 'three';
 
 
-function callAPI(table, id, verb, APIdata) {
-    let endPoint = "http://localhost:3000/" + table + "/" + id
-    console.log(endPoint)
-    console.log(verb)
-    console.log(APIdata)
-    fetch(endPoint, {
-            method: verb,
-            headers: {
-                'Accept': 'application/json',
-                'Content-type': 'application/json; charset=UTF-8'
-            },
-            body: APIdata
-        })
-        .then(response => response.text())
-        .then((data) => {
-            console.log('Success:', data);
-        })
-        .then(data => {
-            puckData = JSON.stringify(data);
-        })
-};
-
-
-
-
 //game type
 // const gameType = new Object();
 // gameType.neoShuffle = true;
@@ -217,21 +192,6 @@ addRedBtn.onclick = () => {
 };
 
 
-function addRedPlayer() {
-    var inputField = document.getElementById('playerNameInputRed');
-    var w = inputField.value;
-    var li = document.createElement("li");
-    var rule = document.createTextNode(w);
-    li.appendChild(rule);
-    inputField.value = "";
-
-    var removeBtn = document.createElement("input");
-    removeBtn.type = "button";
-    removeBtn.value = "Remove";
-    removeBtn.onclick = remove;
-    li.appendChild(removeBtn);
-    document.getElementById("redPlayerList").appendChild(li);
-}
 
 
 //---Blue player
@@ -241,26 +201,7 @@ addBlueBtn.onclick = () => {
 };
 
 
-function addBluePlayer() {
-    var inputField = document.getElementById('playerNameInputBlue');
-    var w = inputField.value;
-    var li = document.createElement("li");
-    var rule = document.createTextNode(w);
-    li.appendChild(rule);
-    inputField.value = "";
 
-    var removeBtn = document.createElement("input");
-    removeBtn.type = "button";
-    removeBtn.value = "Remove";
-    removeBtn.onclick = remove;
-    li.appendChild(removeBtn);
-    document.getElementById("bluePlayerList").appendChild(li);
-}
-
-function remove(e) {
-    var el = e.target;
-    el.parentNode.remove();
-}
 
 
 
@@ -1410,19 +1351,10 @@ function animate() {
             });
 
 
-
-
             let redArea = redAreaArray.reduce((a, b) => a + b, 0);;
             let blueArea = blueAreaArray.reduce((a, b) => a + b, 0);;
             const totalArea = redArea + blueArea;
 
-
-
-
-
-
-
-            
 
             if(blueAreaArray.length == 0 && redAreaArray.length != 0) {
                 console.log("xxx ba= ", blueAreaArray.length)
@@ -1435,6 +1367,7 @@ function animate() {
             if(redAreaArray.length == 0) {
                 console.log("xxx ra= ", redAreaArray.length)
                 redPercent = 0
+                bluePercent = 100
                 siFullRectangleMat = blueSiMat
                 //blue box
             }
@@ -1675,6 +1608,66 @@ function blueTurnIndicator(){
     instructionRow.style.background = "linear-gradient(180deg, #03b1fc00 0%, #03b1fc 100%)";
     instructions.innerHTML = "blue turn";
 };
+
+function callAPI(table, id, verb, APIdata) {
+    let endPoint = "http://localhost:3000/" + table + "/" + id
+    console.log(endPoint)
+    console.log(verb)
+    console.log(APIdata)
+    fetch(endPoint, {
+            method: verb,
+            headers: {
+                'Accept': 'application/json',
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: APIdata
+        })
+        .then(response => response.text())
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .then(data => {
+            puckData = JSON.stringify(data);
+        })
+};
+
+function addBluePlayer() {
+    var inputField = document.getElementById('playerNameInputBlue');
+    var w = inputField.value;
+    var li = document.createElement("li");
+    var rule = document.createTextNode(w);
+    li.appendChild(rule);
+    inputField.value = "";
+
+    var removeBtn = document.createElement("input");
+    removeBtn.type = "button";
+    removeBtn.value = "Remove";
+    removeBtn.onclick = remove;
+    li.appendChild(removeBtn);
+    document.getElementById("bluePlayerList").appendChild(li);
+}
+
+function remove(e) {
+    var el = e.target;
+    el.parentNode.remove();
+}
+
+
+function addRedPlayer() {
+    var inputField = document.getElementById('playerNameInputRed');
+    var w = inputField.value;
+    var li = document.createElement("li");
+    var rule = document.createTextNode(w);
+    li.appendChild(rule);
+    inputField.value = "";
+
+    var removeBtn = document.createElement("input");
+    removeBtn.type = "button";
+    removeBtn.value = "Remove";
+    removeBtn.onclick = remove;
+    li.appendChild(removeBtn);
+    document.getElementById("redPlayerList").appendChild(li);
+}
 
 
 //✅curling blue cant win
