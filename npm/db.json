@@ -1,32 +1,18 @@
 {
   "PuckLocations": [
     {
-      "puckLocationsRed": [
-        [
-          255,
-          1459
-        ]
-      ],
-      "puckLocationsBlue": [
-        [
-          242,
-          1878
-        ],
-        [
-          154,
-          1864
-        ]
-      ],
+      "puckLocationsRed": [],
+      "puckLocationsBlue": [],
       "id": 1
     }
   ],
   "TableData": [
     {
       "PythonShotCounter": 34,
-      "GameType": null,
-      "ShotsPlayed": 1,
-      "RoundsPlayed": 0,
-      "GameState": "idle",
+      "GameType": "neoShuffle",
+      "ShotsPlayed": 0,
+      "RoundsPlayed": 1,
+      "GameState": "inProgress",
       "id": 1
     }
   ]

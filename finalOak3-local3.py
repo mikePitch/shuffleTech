@@ -470,14 +470,14 @@ def main(a):
             if key == 113: #key q
                 tabCorners = [(1700,297), (1644,810), (578,451), (566,575)]
                 print("Manual tab corners obtained")
-            # if key == 115: #key "s"
-            #     #start Looking for pucks
-            print("Puck detection Initiallized")
+            if key == 115: #key "s"
+                 #start Looking for pucks
+                print("Puck detection Initiallized")
             tabCorners = readPuckFile()
             
             tick = 0
             round = 1 
-            while True:
+            '''while True:
                 shotCount = 0
                 # print ("Round: " + str(round))
                 # print("Red: " + str(RedRounds))
@@ -485,10 +485,11 @@ def main(a):
                 print("Shot Count: " + str(shotCount))
                 round = round + puckDetection(key, tick,tabCorners) 
                 time.sleep(1)
-                    
+            '''        
                     
             if key == 100: #key "d"
                 #send table corners to xano
+                a = 1
                 print("d pressed")
             if key == 27: #key "esc"
                 break
@@ -592,6 +593,7 @@ def colorCal():
     cv2.destroyAllWindows()
     
 
+#main(0)
 
 def menu():
     start = False
