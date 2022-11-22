@@ -647,19 +647,11 @@ function animate() {
         }
 
     //update HUD
-    turnNumber.innerHTML = (shotsPlayedDB + 1).toString();
-    if (shotsPlayedDB > 7) {
-        turnNumber.innerHTML = "8";
-    }
-    roundNumberTxt.innerHTML = (roundsPlayedDB + 1).toString()
-    if (roundsPlayedDB > 7) {
-        turnNumber.innerHTML = "8";
-    }
-
+    updateShotsPlayedText();
+    updateRoundsPlayedText();
 
     // -----3d Perspective-----
     // camera.lookAt(300, -200, 1200);
-
 
     const bpBest = [];
     const rpBest = [];
@@ -1573,11 +1565,17 @@ function addRoundScoreToGameScore(){
 };
 
 function updateShotsPlayedText(){
-    turnNumber.innerHTML = (shotsThrown + 1).toString();
+    turnNumber.innerHTML = (shotsPlayedDB + 1).toString();
+    if (shotsPlayedDB > 7) {
+        turnNumber.innerHTML = "8";
+    }
 };
 
 function updateRoundsPlayedText(){
-    roundNumberTxt.innerHTML = (roundsPlayed + 1).toString();
+    roundNumberTxt.innerHTML = (roundsPlayedDB + 1).toString()
+    if (roundsPlayedDB > 7) {
+        turnNumber.innerHTML = "8";
+    }
 };
 
 function updateGameScore(){
