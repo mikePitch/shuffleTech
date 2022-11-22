@@ -477,14 +477,14 @@ def main(a):
             
             tick = 0
             round = 1 
-            while True:
-                shotCount = 0
-                # print ("Round: " + str(round))
-                # print("Red: " + str(RedRounds))
-                # print("Blue: " + str (BlueRounds))
-                print("Shot Count: " + str(shotCount))
-                round = round + puckDetection(key, tick,tabCorners) 
-                time.sleep(1)
+            # while True:
+                # shotCount = 0
+                # # print ("Round: " + str(round))
+                # # print("Red: " + str(RedRounds))
+                # # print("Blue: " + str (BlueRounds))
+                # print("Shot Count: " + str(shotCount))
+                # round = round + puckDetection(key, tick,tabCorners) 
+                # time.sleep(1)
                     
                     
             if key == 100: #key "d"
