@@ -47,7 +47,7 @@
 ### Run the python Puck Detection code 
 1. Plug the depthAI OAK camera into your laptop
 2. cd to *shuffleTech*
-3. Run `python3 finalOak3-local3.py`
+3. Run `python run_shuffle_board.py`
 4. Click `1` for main
 5. Play some shuffleboard
 - Updated puck locations are found at http://localhost:3000/PuckLocations/1
