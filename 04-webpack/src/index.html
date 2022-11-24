@@ -6,6 +6,7 @@
     <title>04 - Webpack</title>
 </head>
 <body>
+    <!-- threejs Container -->
     <div id="container">
         <div id="scene" style="width: 100%; height: 100%">
         </div>
@@ -45,44 +46,155 @@
 
         </div>
         <div id="bottomRowHud">
-            <h1 class="headingMed" id="instructions">Intructions</h1>
+            <h1 class="kioskHeading" id="instructions">Intructions</h1>
         </div>
     </div>
+    <!--Set session time screen 
+        Set end time tiles
+
+        End Session Lock Kiosk
+    -->
+    
+    <!--Add Players to each team
+        Name
+        Email*
+        Phone*
+        Imgae*
+
+        End Session Lock Kiosk
+        Help
+        Order food
+    -->
+    <div class="selectteamslayout">
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-start">
+                <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            </div>
+            <h1 class="kioskHeading">Select Teams</h1>
+            <div class="rowRightCol flex-start">
+                <button class="primaryButton">⚙️</button>
+            </div>
+        </div>
+        <div class="kioskBody">
+            <div class="addPlayersLayout">
+                <div class="teamWrapper">
+                    <h2 class="headingMed redText">add red player</h2>
+                    <div class="playerInputWrapper">
+                        <input type="text" id="playerNameInputRed" class="primaryInput playerInput" maxlength="10">
+                        <button id="addRedPlayerBtn" class="primaryButton playerAddBtn">+</button>
+                    </div>
+                    <ul id="redPlayerList" class="playerList headingMed">
+                    </ul>
+                </div>
+        
+        
+                <div class="teamWrapper">
+                    <h2 class="headingMed blueText">add blue player</h2>
+                    <div class="playerInputWrapper">
+                        <input type="text" id="playerNameInputBlue" class="primaryInput playerInput" maxlength="10">
+                        <button id="addBluePlayerBtn" class="primaryButton playerAddBtn">+</button>
+                    </div>
+                    <ul id="bluePlayerList" class="playerList headingMed">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rowCenterCol">
+                <button class="primaryButton">Select Game</button>
+            </div>
+
+        </div>
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-end">
+                <button class="primaryButton">Help</button>
+            </div>
+            <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            <div class="rowRightCol flex-end">
+                <button class="primaryButton">🍕🍸</button>
+            </div>
+        </div>
+    </div>
+    
+    
+
+
+    <!--Select Game
+        Game Tiles
+        Play Game
+        Game Rules
+
+        End Session Lock Kiosk
+        Help
+        Edit Teams
+        Order food
+    -->
+    <div class="selectteamslayout">
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-start">
+                <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            </div>
+            <h1 class="kioskHeading">Select Game</h1>
+            <div class="rowRightCol flex-start">
+                <button class="primaryButton">⚙️</button>
+            </div>
+        </div>
+
+        <div class="kioskBody">
+            <ul class="gameSelector">
+                <li class="selectBJ">
+                    <img src="/static/images/coming-soon.png" alt="" class="gameImage">Black Jack</li>
+                <li class="selectCS">
+                    <img src="/static/images/cs.png" alt="" class="gameImage">Classic Shuffle</li>
+                <li class="selectNS">
+                    <img src="/static/images/ns.png" alt="" class="gameImage">Neo Shuffle</li>
+                <li class="selectSI">
+                    <img src="/static/images/si.png" alt="" class="gameImage">Space Invaders</li>
+                <li class="selectCU">
+                    <img src="/static/images/cu.png" alt="" class="gameImage">Neo Curling</li>
+                <li class="selectALL">
+                    <img src="/static/images/ns2.png" alt="" class="gameImage">All</li>
+            </ul>
+            
+
+        </div>
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-end">
+                <button class="primaryButton">Help</button>
+            </div>
+            <div class="rowCenterCol flex-end">
+                <button class="primaryButton">Edit Teams</button>
+            </div>
+            <div class="rowRightCol flex-end">
+                <button class="primaryButton">🍕🍸</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Kiosk 
+        Turn Incrementer
+        Quit Game
+        Team Players
+        Game Type
+
+        End Session Lock Kiosk
+        Help
+        Quit Game
+        Order food
+    -->
+
     <div class="kiosk">
         <h4>turn stepper </h4>
         <div class="turnStepper">
             <span id="backTurn">◀︎</span>
             <span id="nextTurn">▶︎</span>
         </div>
-
-
-        <h4>add red player </h4>
-        <input type="text" id="playerNameInputRed">
-        <button id="addRedPlayerBtn">add</button>
-        <ul id="redPlayerList">
-
-        </ul>
-
-
-
-        <h4>add blue player </h4>
-        <input type="text" id="playerNameInputBlue">
-        <button id="addBluePlayerBtn">add</button>
-        <ul id="bluePlayerList">
-
-        </ul>
+    
 
 
         <h4>select game</h4>
 
-        <ul class="gameSelector">
-            <li class="selectBJ">BJ</li>
-            <li class="selectCS">CS</li>
-            <li class="selectNS">NS</li>
-            <li class="selectSI">SI</li>
-            <li class="selectCU">CU</li>
-            <li class="selectALL">ALL</li>
-        </ul>
+
 
         <button id="startGame">Start Game</button>
         <button id="startNextRound">Start Next Round</button>

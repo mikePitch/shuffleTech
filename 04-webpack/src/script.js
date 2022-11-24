@@ -1467,7 +1467,8 @@ function addBluePlayer() {
 
     var removeBtn = document.createElement("input");
     removeBtn.type = "button";
-    removeBtn.value = "Remove";
+    removeBtn.value = "❌";
+    removeBtn.className = "removePlayerButton";
     removeBtn.onclick = remove;
     li.appendChild(removeBtn);
     document.getElementById("bluePlayerList").appendChild(li);
@@ -1489,11 +1490,55 @@ function addRedPlayer() {
 
     var removeBtn = document.createElement("input");
     removeBtn.type = "button";
-    removeBtn.value = "Remove";
+    removeBtn.value = "❌";
+    removeBtn.className = "removePlayerButton";
     removeBtn.onclick = remove;
     li.appendChild(removeBtn);
     document.getElementById("redPlayerList").appendChild(li);
 }
+
+//----------------
+//Create Session--
+//----------------
+
+//Open Kiosk With Passcode 
+//Create Session
+//With  Start Time = Current Time, Location, and table number pre defined
+//Set End Time
+
+//---------------
+//Create Game Object
+//-----------------
+//Create Player Objects and Add to red or blue team within the Game object
+//Select game type
+//Add Game type and Game start time when the start game button is pressed
+//Add Game Completed status, Game end time, and add Game to Session object when either quit game or Game over occurs.
+
+//---------------
+//During game
+//-----------------
+//Add Round Scores to game object at the end of each round
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //✅curling blue cant win
