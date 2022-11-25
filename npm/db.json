@@ -3,18 +3,14 @@
     {
       "puckLocationsRed": [
         [
-          255,
-          1459
+          251,
+          1335
         ]
       ],
       "puckLocationsBlue": [
         [
-          242,
-          1878
-        ],
-        [
-          154,
-          1864
+          340,
+          976
         ]
       ],
       "id": 1
@@ -22,9 +18,9 @@
   ],
   "TableData": [
     {
-      "PythonShotCounter": 34,
-      "GameType": "neoCurling",
-      "ShotsPlayed": 8,
+      "PythonShotCounter": 1,
+      "GameType": "spaceInvaders",
+      "ShotsPlayed": 1,
       "RoundsPlayed": 2,
       "GameState": "Idle",
       "id": 1
