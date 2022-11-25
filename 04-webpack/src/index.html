@@ -65,7 +65,7 @@
         Help
         Order food
     -->
-    <div class="selectteamslayout">
+    <div class="kioskLayout">
         <div class="kioskRow">
             <div class="rowLeftCol flex-start">
                 <img src="/static/images/ballers-logo.png" alt="" class="logo">
@@ -128,7 +128,7 @@
         Edit Teams
         Order food
     -->
-    <div class="selectteamslayout">
+    <div class="kioskLayout">
         <div class="kioskRow">
             <div class="rowLeftCol flex-start">
                 <img src="/static/images/ballers-logo.png" alt="" class="logo">
@@ -173,9 +173,12 @@
 
     <!--Kiosk 
         Turn Incrementer
-        Quit Game
         Team Players
         Game Type
+        Scores
+        Round
+        Turns
+    
 
         End Session Lock Kiosk
         Help
@@ -183,22 +186,58 @@
         Order food
     -->
 
-    <div class="kiosk">
-        <h4>turn stepper </h4>
-        <div class="turnStepper">
-            <span id="backTurn">◀︎</span>
-            <span id="nextTurn">▶︎</span>
+    <div class="kioskLayout">
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-start">
+                <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            </div>
+            <h1 class="kioskHeading">Game Kiosk</h1>
+            <div class="rowRightCol flex-start">
+                <button class="primaryButton">⚙️</button>
+            </div>
         </div>
-    
+
+        <div class="kioskBody">
+            <div class="vertCol">
+                <p>Game Type</p>
+                <h2 class="headingMed">Neo Shuffle</h2>
 
 
-        <h4>select game</h4>
+                <h2 class="headingMed">Game Score</h2>
+                <div class="scoreHolder">
+                    <h1 id="redGameScore" class="smallScore redTeamSmallScore">00</h1>
+                    <h1 class="smallScore">-</h1>
+                    <h1 id="blueGameScore" class="smallScore blueTeamSmallScore">00</h1>
+                </div>
+                <button id="startGame" class="primaryButton bigButton positiveButton">Start Game</button>
+                <button id="startNextRound" class="primaryButton bigButton positiveButton">Start Next Round</button>
+                <h2 class="headingMed">Round Ending... 5</h2>
+                <button id="startNextRound" class="primaryButton negativeButton">Abort</button>
+                <p>Manual Turn Stepper</p>
+                <div class="turnStepper">
+                    <span id="backTurn">◀︎</span>
+                    <span id="nextTurn">▶︎</span>
+                </div>
+            </div>
 
+        </div>
 
-
-        <button id="startGame">Start Game</button>
-        <button id="startNextRound">Start Next Round</button>
-        
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-end">
+                <button class="primaryButton">Help</button>
+            </div>
+            <div class="rowCenterCol flex-end">
+                <button class="primaryButton">Edit Teams</button>
+                <button class="primaryButton">Quit Game</button>
+            </div>
+            <div class="rowRightCol flex-end">
+                <button class="primaryButton">🍕🍸</button>
+            </div>
+        </div>
     </div>
+
+
 </body>
 </html>
+
+<!-- round ends - idle state untill round start -->

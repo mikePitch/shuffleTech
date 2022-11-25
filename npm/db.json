@@ -43,10 +43,28 @@
   "TableData": [
     {
       "PythonShotCounter": 34,
-      "GameType": null,
-      "ShotsPlayed": 1,
+      "GameType": "neoShuffle",
+      "ShotsPlayed": 0,
       "RoundsPlayed": 0,
-      "GameState": "idle",
+      "GameState": "inProgress",
+      "RoundScoresRed": [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "RoundScoresBlue": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
       "id": 1
     }
   ]

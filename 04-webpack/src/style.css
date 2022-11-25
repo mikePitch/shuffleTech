@@ -194,7 +194,7 @@ ul.gameSelector > li:hover{
     padding: 8px 12px;
     gap: 10px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 100px;
+    border-radius: 200px;
     color: #ffffff;
     border-width: 0px;
     cursor: pointer;
@@ -327,13 +327,19 @@ ul.gameSelector > li:hover{
     align-items: flex-end;
 }
 
+.vertCol{
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
 
 
 
 
 /* select teams */
 
-.selectteamslayout {
+.kioskLayout {
   display: grid;
   width: 100%;
   height: 100vh;
@@ -351,4 +357,29 @@ ul.gameSelector > li:hover{
     border-radius: 18px;
     object-fit: cover;
 }
+
+.negativeButton{
+    background-color: #ef4444;
+}
+
+.negativeButton:hover{
+    background-color: #b91c1c;
+}
+
+.positiveButton{
+    background-color: #22c55e;
+    color: #290A54;
+}
+
+.positiveButton:hover{
+    background-color: #15803d;
+}
+
+.bigButton{
+    padding: 16px 32px;
+    gap: 10px;
+    font-size: 32px;
+    font-family: inherit;
+}
+
 

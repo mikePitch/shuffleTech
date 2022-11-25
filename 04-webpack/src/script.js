@@ -36,14 +36,20 @@ instructions.innerHTML = "Press Start";
 
 let shotsThrown = 0;
 let roundsPlayed = 0;
-let redGameScoreTotal = 0;
-let blueGameScoreTotal = 0;
+let redRoundScore = 0;
+let blueRoundScore = 0;
 let redGamesWon = 0;
 let blueGamesWon = 0;
 let gameTypeDB = null;
 let gameStateDB = null;
 let shotsPlayedDB = 0;
 let roundsPlayedDB = 0;
+const roundScoresRedLocal = [];
+const roundScoresBlueLocal =[];
+let blueGameScoreTotal = 0;
+let redGameScoreTotal = 0;
+let roundScoresRedDB = [];
+let roundScoresBlueDB = [];
 
 let pythonShotCounterDB = 0;
 
@@ -57,7 +63,7 @@ let tableData = undefined;
 
 
 
-callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState":"idle", "GameType": null}');
+callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
 
 //---------------------kiosk stuff-------------------
 
@@ -68,7 +74,7 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
 function startGame() {
     console.log("startGame Pressed")
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress"}');
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
 
 }
 
@@ -513,6 +519,9 @@ function animate() {
             gameTypeDB = tableDataObj.GameType;
             gameStateDB = tableDataObj.GameState;
             pythonShotCounterDB = tableDataObj.PythonShotCounter;
+            roundScoresRedDB = tableDataObj.RoundScoresRed;
+            roundScoresBlueDB = tableDataObj.RoundScoresBlue;
+
 
             //check for change
             if (pythonShotCounterDB !== prevPythonShotCount) {
@@ -526,6 +535,7 @@ function animate() {
     //update HUD
     updateShotsPlayedText();
     updateRoundsPlayedText();
+    updateGameScore();
 
     // -----3d Perspective-----
     // camera.lookAt(300, -200, 1200);
@@ -1335,58 +1345,68 @@ function addRoundScoreToGameScore(){
 
     if (gameTypeDB == "neoCurling") {
         if (redGameScore) {
-            redGameScoreTotal = redGameScoreTotal + redCurlingScore;
+            redRoundScore = redCurlingScore;
         };
         if (blueGameScore) {
-            blueGameScoreTotal = blueGameScoreTotal + blueCurlingScore;
+            blueRoundScore = blueCurlingScore;
         };
     };
 
     if (gameTypeDB == "classicShuffle") {
         if (redGameScore) {
-            redGameScoreTotal = redGameScoreTotal + roundScoreClassicShuffle.red
+            redRoundScore = roundScoreClassicShuffle.red
         };
         if (blueGameScore) {
-            blueGameScoreTotal = blueGameScoreTotal + roundScoreClassicShuffle.blue
+            blueRoundScore = roundScoreClassicShuffle.blue
         };
-        if ( blueGameScoreTotal>=21 && redGameScoreTotal<21 ){
-            console.log("blue won");
-        }
-        if ( redGameScoreTotal>=21 && blueGameScoreTotal<21 ){
-            console.log("red won");
-        }
+        // if ( blueGameScoreTotal>=21 && redGameScoreTotal<21 ){
+        //     console.log("blue won");
+        // }
+        // if ( redGameScoreTotal>=21 && blueGameScoreTotal<21 ){
+        //     console.log("red won");
+        // }
 
     };
 
     if (gameTypeDB == "spaceInvaders") {
         if (redGameScore && blueGameScore) {
             if(Math.round(redPercent) >= Math.round(bluePercent)){
-                redGameScoreTotal = redGameScoreTotal + 1
+                redRoundScore = 1
             }
             if(Math.round(redPercent) <= Math.round(bluePercent)){
-                blueGameScoreTotal = blueGameScoreTotal + 1
+                blueRoundScore = 1
             }
         };
     };
 
     if (gameTypeDB == "blackJack") {
         if (redGameScore) {
-            redGameScore.innerHTML = 0;
+            redRoundScore = 1
         };
         if (blueGameScore) {
-            blueGameScore.innerHTML = 0;
+            blueRoundScore = 1
         };
     };
 
     if (gameTypeDB == "neoShuffle") {
         if (redGameScore) {
-            redGameScoreTotal = redGameScoreTotal + roundScoreNeoShuffle.red;
+            redRoundScore = roundScoreNeoShuffle.red;
         };
         if (blueGameScore) {
-            blueGameScoreTotal = blueGameScoreTotal + roundScoreNeoShuffle.blue
+            blueRoundScore = roundScoreNeoShuffle.blue
         };
 
     };
+
+    roundScoresBlueLocal.splice(0, roundScoresBlueLocal.length, ...roundScoresBlueDB);
+    roundScoresRedLocal.splice(0, roundScoresRedLocal.length, ...roundScoresRedDB);
+
+
+    roundScoresRedLocal.push(redRoundScore);
+    roundScoresBlueLocal.push(blueRoundScore);
+    
+
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
     updateGameScore()
 };
 
@@ -1405,8 +1425,8 @@ function updateRoundsPlayedText(){
 };
 
 function updateGameScore(){
-    blueGameScore.innerHTML = blueGameScoreTotal;
-    redGameScore.innerHTML = redGameScoreTotal;
+    blueGameScore.innerHTML = roundScoresBlueDB.reduce((a, b) => a + b, 0);
+    redGameScore.innerHTML = roundScoresRedDB.reduce((a, b) => a + b, 0);
 };
 
 function addToGamesWon(){
@@ -1475,8 +1495,10 @@ function addBluePlayer() {
 }
 
 function remove(e) {
+    console.log("test =",e);
     var el = e.target;
     el.parentNode.remove();
+    console.log(e);
 }
 
 
