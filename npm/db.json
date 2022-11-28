@@ -3,38 +3,34 @@
     {
       "puckLocationsRed": [
         [
-          172,
-          1473
+          354,
+          2299
         ],
         [
-          151,
-          1344
+          216,
+          1860
         ],
         [
-          276,
-          1098
-        ],
-        [
-          366,
-          932
+          521,
+          1724
         ]
       ],
       "puckLocationsBlue": [
         [
-          235,
-          1351
+          162,
+          2821
         ],
         [
-          403,
-          1085
+          234,
+          2369
         ],
         [
-          118,
-          528
+          380,
+          1913
         ],
         [
-          431,
-          731
+          102,
+          1892
         ]
       ],
       "id": 1
@@ -42,29 +38,18 @@
   ],
   "TableData": [
     {
-
-      "PythonShotCounter": 34,
+      "PythonShotCounter": 345,
       "GameType": "neoShuffle",
-      "ShotsPlayed": 0,
+      "ShotsPlayed": 8,
       "RoundsPlayed": 0,
       "GameState": "inProgress",
       "RoundScoresRed": [
-        9,
-        9,
-        9,
-        9,
-        9,
-        9,
-        9
+        7,
+        7
       ],
       "RoundScoresBlue": [
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10
+        5,
+        8
       ],
       "id": 1
     }
