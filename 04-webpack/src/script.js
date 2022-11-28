@@ -28,6 +28,7 @@ const turnNumber = document.getElementById('turnNumber');
 const startNextRoundBtn = document.getElementById('startNextRound');
 const roundNumberTxt = document.getElementById('roundNumber');
 const startGameBtn = document.getElementById('startGame');
+const gameTitle = document.getElementById('gameTitle');
 
 instructionRow.style.backgroundColor = "linear-gradient(180deg, #34FD8400 0%, #34FD84 100%)";
 instructions.innerHTML = "Press Start";
@@ -110,13 +111,7 @@ nextTurn.onclick = function() { shotsThrownUp() };
 
 
 startNextRoundBtn.onclick = () => {
-    shotsThrown = 0;
-    roundsPlayed = roundsPlayedDB + 1;
-    if (roundsPlayed > 7) {
-        roundsPlayed = 8;
-    }
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + ', "RoundsPlayed":' + roundsPlayed  + '}');
-
+    
     //---add score to game scrore
     addRoundScoreToGameScore();
 
@@ -130,7 +125,6 @@ const selectCS = document.getElementsByClassName("selectCS")[0];
 const selectSI = document.getElementsByClassName("selectSI")[0];
 const selectBJ = document.getElementsByClassName("selectBJ")[0];
 const selectCU = document.getElementsByClassName("selectCU")[0];
-const selectALL = document.getElementsByClassName("selectALL")[0];
 let gameChanged = false;
 
 
@@ -158,10 +152,6 @@ selectBJ.onclick = () => {
 
 selectCU.onclick = () => {
     callAPI("TableData", 1, "PATCH", '{"GameType": "neoCurling" }')
-};
-
-selectALL.onclick = () => {
-    callAPI("TableData", 1, "PATCH", '{"GameType": "ALL" }')
 };
 
 //---add player---
@@ -1248,6 +1238,7 @@ function animate() {
 
 
     if (gameTypeDB == "neoCurling") {
+        gameTitle.innerHTML = "Neo Curling";
 
         console.log("curling running score red =", redCurlingScore)
         if (gsRedScore) {
@@ -1259,6 +1250,7 @@ function animate() {
     };
 
     if (gameTypeDB == "classicShuffle") {
+        gameTitle.innerHTML = "Classic Shuffle";
         if (gsRedScore) {
             gsRedScore.innerHTML = roundScoreClassicShuffle.red;
         };
@@ -1268,6 +1260,7 @@ function animate() {
     };
 
     if (gameTypeDB == "spaceInvaders") {
+        gameTitle.innerHTML = "Space Invaders";
         if (gsRedScore) {
             gsRedScore.innerHTML = Math.round(redPercent) + "﹪";
         };
@@ -1277,6 +1270,7 @@ function animate() {
     };
 
     if (gameTypeDB == "blackJack") {
+        gameTitle.innerHTML = "Black Jack";
         if (gsRedScore) {
             gsRedScore.innerHTML = 0;
         };
@@ -1286,6 +1280,7 @@ function animate() {
     };
 
     if (gameTypeDB == "neoShuffle") {
+        gameTitle.innerHTML = "Neo Shuffle";
         if (gsRedScore) {
             gsRedScore.innerHTML = roundScoreNeoShuffle.red;
         };
@@ -1315,11 +1310,8 @@ function animate() {
 
     // ---end of round----
     if (shotsPlayedDB == 8) {
+        endOfRound();
         console.log("round over")
-        gameStateDB = "endOfRound";
-        instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
-        instructions.innerHTML = "round over press next round";
-
     };
 
     //---end of game
@@ -1401,12 +1393,20 @@ function addRoundScoreToGameScore(){
     roundScoresBlueLocal.splice(0, roundScoresBlueLocal.length, ...roundScoresBlueDB);
     roundScoresRedLocal.splice(0, roundScoresRedLocal.length, ...roundScoresRedDB);
 
+  
+    shotsThrown = 0;
+    console.log("rounds played before add =", roundsPlayedDB)
+    roundsPlayed = roundsPlayedDB + 1;
+    if (roundsPlayed > 7) {
+        roundsPlayed = 8;
+    }
+    console.log("rounds played before add =", roundsPlayedDB)
 
     roundScoresRedLocal.push(redRoundScore);
     roundScoresBlueLocal.push(blueRoundScore);
     
 
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": ' + shotsThrown + ', "RoundsPlayed": ' + roundsPlayed + ', "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
     updateGameScore()
 };
 
@@ -1420,7 +1420,7 @@ function updateShotsPlayedText(){
 function updateRoundsPlayedText(){
     roundNumberTxt.innerHTML = (roundsPlayedDB + 1).toString()
     if (roundsPlayedDB > 7) {
-        turnNumber.innerHTML = "8";
+        roundNumberTxt.innerHTML = "8";
     }
 };
 
@@ -1428,6 +1428,7 @@ function updateGameScore(){
     blueGameScore.innerHTML = roundScoresBlueDB.reduce((a, b) => a + b, 0);
     redGameScore.innerHTML = roundScoresRedDB.reduce((a, b) => a + b, 0);
 };
+
 
 function addToGamesWon(){
     if (blueGameScoreTotal >= redGameScoreTotal){
@@ -1517,6 +1518,16 @@ function addRedPlayer() {
     removeBtn.onclick = remove;
     li.appendChild(removeBtn);
     document.getElementById("redPlayerList").appendChild(li);
+}
+
+function endOfRound() {
+instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
+instructions.innerHTML = "round over press next round";
+if (gameStateDB != "endOfRound"){
+    console.log("running end of round")
+    callAPI("TableData", 1, "PATCH", '{"GameState": "endOfRound"}');
+}
+
 }
 
 //----------------
