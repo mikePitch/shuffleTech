@@ -44,15 +44,21 @@
     {
       "PythonShotCounter": 25,
       "GameType": "spaceInvaders",
-      "ShotsPlayed": 8,
-      "RoundsPlayed": 2,
-      "GameState": "endOfRound",
+      "ShotsPlayed": 0,
+      "RoundsPlayed": 5,
+      "GameState": "inProgress",
       "RoundScoresRed": [
         1,
-        1
+        1,
+        13,
+        13,
+        13
       ],
       "RoundScoresBlue": [
         0,
+        1,
+        11,
+        11,
         1
       ],
       "id": 1
