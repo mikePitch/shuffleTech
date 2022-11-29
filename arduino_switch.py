@@ -13,7 +13,7 @@ from requests.structures import CaseInsensitiveDict
 headers = CaseInsensitiveDict()
 headers["Content-Type"] = "application/json"
 
-board = pyfirmata.Arduino('/dev/cu.usbmodem1101')
+board = pyfirmata.Arduino('/dev/cu.usbmodem14101')
 
 it = pyfirmata.util.Iterator(board)
 it.start()
