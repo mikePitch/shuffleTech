@@ -3,7 +3,8 @@ import * as THREE from 'three'
 import Voronoi from 'voronoi'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm//geometries/TextGeometry.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 
 
@@ -477,6 +478,9 @@ curlingCircleMesh2.position.set(0, 0, -2);
 curlingCircles.rotation.x = Math.PI / 2;
 
 const curlingLines = new THREE.Group();
+scene.add(curlingLines);
+
+
 
 //---------------------------------------------------------
 //-----------------------animation loop--------------------
@@ -641,6 +645,7 @@ function animate() {
     //-----------NeoCurling---------------
     curlingLines.remove(...curlingLines.children);
     curlingPuckCircles.remove(...curlingPuckCircles.children);
+    
     if (gameTypeDB == "neoCurling") {
 
         const rpCurlingDistances = [];
@@ -669,13 +674,6 @@ function animate() {
             const lineCircle = new THREE.Line(curlingPuckRadGeo, curlingRedMaterial);
             curlingPuckCircles.add(lineCircle);
 
-            //scoring
-            const rpCurlingObj = new Object();
-            rpCurlingObj.dist = lineLength;
-            rpCurlingObj.x = redX;
-            rpCurlingObj.y = redY;
-            rpCurlingDistances.push(rpCurlingObj);
-
             //add dist above puck
 
             fontLoader.load('fonts/helvetiker_bold.typeface.json', function(font) {
@@ -695,8 +693,19 @@ function animate() {
                 mesh.geometry.center()
                 curlingLines.add(mesh);
 
-
             });
+
+     
+            
+
+            //scoring
+            const rpCurlingObj = new Object();
+            rpCurlingObj.dist = lineLength;
+            rpCurlingObj.x = redX;
+            rpCurlingObj.y = redY;
+            rpCurlingDistances.push(rpCurlingObj);
+
+
         }
 
         for (let i = 0; i < bpyv.length; i++) {
@@ -710,6 +719,7 @@ function animate() {
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
             const line = new THREE.Line(geometry, curlingBlueMaterial);
+            line.name = "helloPoppet";
 
             curlingLines.add(line);
             const lineLength = bluePos.distanceTo(centerPos);
@@ -745,8 +755,13 @@ function animate() {
                 mesh.position.z = blueY;
                 mesh.lookAt(camera.position);
                 mesh.geometry.center()
+                mesh.name = "curlingNumber";
                 curlingLines.add(mesh);
             });
+
+            
+
+            
         }
 
         function compare(a, b) {
@@ -762,10 +777,35 @@ function animate() {
         bpCurlingDistances.sort(compare);
         rpCurlingDistances.sort(compare);
 
-        if (rpCurlingDistances[0] && rpCurlingDistances[0].dist < bpCurlingDistances[0].dist) {
+
+   
+
+        // if ((rpCurlingDistances.length == 0)||){
+        //     console.log("no red pucks")
+        // }
+
+        // if (bpCurlingDistances.length == 0){
+        //     console.log("no blue pucks")
+        // }
+        let rpCurlBestDist = 10000;
+        let bpCurlBestDist = 10000;
+
+        if (rpCurlingDistances.length > 0){
+            console.log(" curl red pucks")
+            rpCurlBestDist = rpCurlingDistances[0].dist
+        }
+
+        if (bpCurlingDistances.length > 0){
+            console.log("curl blue pucks")
+            bpCurlBestDist = bpCurlingDistances[0].dist
+        }
+
+
+
+        if (rpCurlingDistances[0] && rpCurlBestDist < bpCurlBestDist) {
             //red wins
             for (let i = 0; i < rpCurlingDistances.length; i++) {
-                if (rpCurlingDistances[i].dist < bpCurlingDistances[0].dist) {
+                if (rpCurlingDistances[i].dist < bpCurlBestDist) {
                     curlingRedScore.push(1);
                     const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
                     puckScoreBox.position.set(rpCurlingDistances[i].x, 60, rpCurlingDistances[i].y);
@@ -777,11 +817,11 @@ function animate() {
         };
 
 
-        if (bpCurlingDistances[0] && bpCurlingDistances[0].dist < rpCurlingDistances[0].dist) {
+        if (bpCurlingDistances[0] && bpCurlBestDist < rpCurlBestDist) {
             //blue wins
 
             for (let i = 0; i < bpCurlingDistances.length; i++) {
-                if (bpCurlingDistances[i].dist < rpCurlingDistances[0].dist) {
+                if (bpCurlingDistances[i].dist < rpCurlBestDist) {
                     curlingBlueScore.push(1);
                     const puckScoreBox = new THREE.Mesh(puckScoreBoxGeo, puckScoreBoxMat);
                     puckScoreBox.position.set(bpCurlingDistances[i].x, 60, bpCurlingDistances[i].y);
@@ -791,6 +831,7 @@ function animate() {
                 };
             };
         }
+        
 
         for (let i = 0; i < curlingRedScore.length; i++) {
             const puckScoreBox = new THREE.Mesh(scoreBoxClassicGeometry, rpCoreMat);
@@ -811,6 +852,7 @@ function animate() {
         redCurlingScore = curlingRedScore.length;
 
         scene.add(curlingLines);
+        console.log(scene);
 
     }
 
@@ -1521,14 +1563,17 @@ function addRedPlayer() {
 }
 
 function endOfRound() {
-instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
-instructions.innerHTML = "round over press next round";
-if (gameStateDB != "endOfRound"){
-    console.log("running end of round")
-    callAPI("TableData", 1, "PATCH", '{"GameState": "endOfRound"}');
+    instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
+    instructions.innerHTML = "round over press next round";
+    
+    if (gameStateDB != "endOfRound"){
+        
+        console.log("running end of round")
+        callAPI("TableData", 1, "PATCH", '{"GameState": "endOfRound"}');
+        
+    }
 }
 
-}
 
 //----------------
 //Create Session--
