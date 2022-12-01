@@ -7,105 +7,20 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 
-
-
-
-
-
-
-//🎉🎉🎉Game screen!!🎉🎉🎉
+console.log("bbb= ", window.location.href);
 
 if( window.location.pathname  == "/index.html"){
 
 
-    ////🎉🎉🎉Both Pages!!🎉🎉🎉
-
-console.log("bbb= ", window.location.href);
-
-//game states
-//idle, inProgress, endOfRound, endOfGame
-let gameState = "idle";
-
-//score and round trackers
-
-let shotsThrown = 0;
-let roundsPlayed = 0;
-let redRoundScore = 0;
-let blueRoundScore = 0;
-let redGamesWon = 0;
-let blueGamesWon = 0;
-let gameTypeDB = null;
-let gameStateDB = null;
-let shotsPlayedDB = 0;
-let roundsPlayedDB = 0;
-const roundScoresRedLocal = [];
-const roundScoresBlueLocal =[];
-let blueGameScoreTotal = 0;
-let redGameScoreTotal = 0;
-let roundScoresRedDB = [];
-let roundScoresBlueDB = [];
-let pythonShotCounterDB = 0;
-
-//---table shit---
-
-let prevPythonShotCount = 0;
-let prevPuckPosSum = 1;
-let puckMovement = false;
-let puckData = undefined;
-let tableData = undefined;
-
-
-function updateValuesFromDB(){
-    fetch('http://localhost:3000/TableData/1', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        },
-    })
-    .then(response => response.text())
-    .then(data => {
-        tableData = data;
-    })
-
-    if (tableData) {
-        let tableDataObj = JSON.parse(tableData);
-        shotsPlayedDB = tableDataObj.ShotsPlayed;
-        roundsPlayedDB = tableDataObj.RoundsPlayed;
-        gameTypeDB = tableDataObj.GameType;
-        gameStateDB = tableDataObj.GameState;
-        pythonShotCounterDB = tableDataObj.PythonShotCounter;
-        roundScoresRedDB = tableDataObj.RoundScoresRed;
-        roundScoresBlueDB = tableDataObj.RoundScoresBlue;
-    }
-}
-
-function shotsThrownUp() {
-    shotsThrown = shotsPlayedDB + 1;
-
-    if (shotsThrown > 7) {
-        shotsThrown = 8;
-    }
-    
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
-
-};
-
-function shotsThrownDown() {
-    shotsThrown = shotsPlayedDB - 1;
-        if (shotsThrown < 1) {
-        shotsThrown = 0;
-    }
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
-    
-
-};
 
 
 
-callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
 
+    let gameType = null;
 
-//🏁🏁🏁Both Pages End 🏁🏁🏁
+    //game states
+    //idle, inProgress, endOfRound, endOfGame
+    let gameState = "idle";
 
     const instructions = document.getElementById('instructions');
     const instructionRow = document.getElementById('bottomRowHud');
@@ -115,17 +30,151 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
     const blueGameScore = document.getElementById("blueGameScore");
     const redGamesWonScore = document.getElementById("redGamesWon");
     const blueGamesWonScore = document.getElementById("blueGamesWon");
+    const nextTurn = document.getElementById('nextTurn');
+    const backTurn = document.getElementById('backTurn');
     const turnNumber = document.getElementById('turnNumber');
+    const startNextRoundBtn = document.getElementById('startNextRound');
     const roundNumberTxt = document.getElementById('roundNumber');
+    const startGameBtn = document.getElementById('startGame');
     const gameTitle = document.getElementById('gameTitle');
 
     instructionRow.style.backgroundColor = "linear-gradient(180deg, #34FD8400 0%, #34FD84 100%)";
     instructions.innerHTML = "Press Start";
 
+    //score and round trackers
 
-    
+    let shotsThrown = 0;
+    let roundsPlayed = 0;
+    let redRoundScore = 0;
+    let blueRoundScore = 0;
+    let redGamesWon = 0;
+    let blueGamesWon = 0;
+    let gameTypeDB = null;
+    let gameStateDB = null;
+    let shotsPlayedDB = 0;
+    let roundsPlayedDB = 0;
+    const roundScoresRedLocal = [];
+    const roundScoresBlueLocal =[];
+    let blueGameScoreTotal = 0;
+    let redGameScoreTotal = 0;
+    let roundScoresRedDB = [];
+    let roundScoresBlueDB = [];
 
-    
+    let pythonShotCounterDB = 0;
+
+    //---table shit---
+
+    let prevPythonShotCount = 0;
+    let prevPuckPosSum = 1;
+    let puckMovement = false;
+    let puckData = undefined;
+    let tableData = undefined;
+
+
+
+    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
+
+    //---------------------kiosk stuff-------------------
+
+
+
+    //----start Game---
+
+
+    function startGame() {
+        console.log("startGame Pressed")
+        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
+
+    }
+
+    startGameBtn.onclick = function() { startGame() };
+
+    //----manually increment shot----
+
+
+    function shotsThrownUp() {
+        shotsThrown = shotsPlayedDB + 1;
+
+        if (shotsThrown > 7) {
+            shotsThrown = 8;
+        }
+        console.log("shotsThrown = ", shotsPlayedDB);
+        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
+    };
+
+    function shotsThrownDown() {
+        shotsThrown = shotsPlayedDB - 1;
+            if (shotsThrown < 1) {
+            shotsThrown = 0;
+        }
+        console.log("shotsThrown = ", shotsPlayedDB);
+        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
+
+    };
+
+    backTurn.onclick = function() { shotsThrownDown() };
+    nextTurn.onclick = function() { shotsThrownUp() };
+
+    //--- Start Next Round ---
+
+
+    startNextRoundBtn.onclick = () => {
+        
+        //---add score to game scrore
+        addRoundScoreToGameScore();
+
+    };
+
+
+
+    //----select game-----
+    const selectNS = document.getElementsByClassName("selectNS")[0];
+    const selectCS = document.getElementsByClassName("selectCS")[0];
+    const selectSI = document.getElementsByClassName("selectSI")[0];
+    const selectBJ = document.getElementsByClassName("selectBJ")[0];
+    const selectCU = document.getElementsByClassName("selectCU")[0];
+    let gameChanged = false;
+
+
+
+    startGameBtn.onclick = () => {
+        startGame()
+    };
+
+
+    selectNS.onclick = () => {
+        callAPI("TableData", 1, "PATCH", '{"GameType": "neoShuffle" }')
+    };
+
+    selectCS.onclick = () => {
+        callAPI("TableData", 1, "PATCH", '{"GameType": "classicShuffle" }')
+    };
+
+    selectSI.onclick = () => {
+        callAPI("TableData", 1, "PATCH", '{"GameType": "spaceInvaders" }')
+    };
+
+    selectBJ.onclick = () => {
+        callAPI("TableData", 1, "PATCH", '{"GameType": "blackJack" }')
+    };
+
+    selectCU.onclick = () => {
+        callAPI("TableData", 1, "PATCH", '{"GameType": "neoCurling" }')
+    };
+
+    //---add player---
+    //---red player
+    var addRedBtn = document.getElementById('addRedPlayerBtn');
+    addRedBtn.onclick = () => {
+        addRedPlayer();
+    };
+
+    //---Blue player
+    var addBlueBtn = document.getElementById('addBluePlayerBtn');
+    addBlueBtn.onclick = () => {
+        addBluePlayer();
+    };
+
 
     //set table and puck values
     const tableWidth = 600;
@@ -1013,7 +1062,7 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
         if (gameTypeDB == "spaceInvaders") {
             const cellObjArray = [];
-
+            // console.log("spaceInvaders = ", gameType.spaceInvaders)
 
             spaceInvadersGroup.add(bpBar, rpBar);
             bpBar.position.set(-80, 0, 25);
@@ -1289,8 +1338,6 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
             };
         };
 
-        calculateCurrentScore();
-
         //------ turn round and game stuff ----
 
         // ----display turn---
@@ -1331,7 +1378,11 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
     }
     animate();
 
-    function calculateCurrentScore(){
+
+
+
+
+    function addRoundScoreToGameScore(){
 
         if (gameTypeDB == "neoCurling") {
             if (redGameScore) {
@@ -1388,99 +1439,25 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
         };
 
-        callAPI("TableData", 1, "PATCH", '{"CurrentRedScore": ' + redRoundScore + ', "CurrentBlueScore": ' + blueRoundScore + '}');
-
-    };
-
-
-
-
-
-
-
-    // function addRoundScoreToGameScore(){
-
-    //     if (gameTypeDB == "neoCurling") {
-    //         if (redGameScore) {
-    //             redRoundScore = redCurlingScore;
-    //         };
-    //         if (blueGameScore) {
-    //             blueRoundScore = blueCurlingScore;
-    //         };
-    //     };
-
-    //     if (gameTypeDB == "classicShuffle") {
-    //         if (redGameScore) {
-    //             redRoundScore = roundScoreClassicShuffle.red
-    //         };
-    //         if (blueGameScore) {
-    //             blueRoundScore = roundScoreClassicShuffle.blue
-    //         };
-    //         // if ( blueGameScoreTotal>=21 && redGameScoreTotal<21 ){
-    //         //     console.log("blue won");
-    //         // }
-    //         // if ( redGameScoreTotal>=21 && blueGameScoreTotal<21 ){
-    //         //     console.log("red won");
-    //         // }
-
-    //     };
-
-    //     if (gameTypeDB == "spaceInvaders") {
-    //         if (redGameScore && blueGameScore) {
-    //             if(Math.round(redPercent) >= Math.round(bluePercent)){
-    //                 redRoundScore = 1
-    //             }
-    //             if(Math.round(redPercent) <= Math.round(bluePercent)){
-    //                 blueRoundScore = 1
-    //             }
-    //         };
-    //     };
-
-    //     if (gameTypeDB == "blackJack") {
-    //         if (redGameScore) {
-    //             redRoundScore = 1
-    //         };
-    //         if (blueGameScore) {
-    //             blueRoundScore = 1
-    //         };
-    //     };
-
-    //     if (gameTypeDB == "neoShuffle") {
-    //         if (redGameScore) {
-    //             redRoundScore = roundScoreNeoShuffle.red;
-    //         };
-    //         if (blueGameScore) {
-    //             blueRoundScore = roundScoreNeoShuffle.blue
-    //         };
-
-    //     };
-
-    //     roundScoresBlueLocal.splice(0, roundScoresBlueLocal.length, ...roundScoresBlueDB);
-    //     roundScoresRedLocal.splice(0, roundScoresRedLocal.length, ...roundScoresRedDB);
+        roundScoresBlueLocal.splice(0, roundScoresBlueLocal.length, ...roundScoresBlueDB);
+        roundScoresRedLocal.splice(0, roundScoresRedLocal.length, ...roundScoresRedDB);
 
     
-    //     shotsThrown = 0;
-    //     console.log("rounds played before add =", roundsPlayedDB)
-    //     roundsPlayed = roundsPlayedDB + 1;
-    //     if (roundsPlayed > 7) {
-    //         roundsPlayed = 8;
-    //     }
-    //     console.log("rounds played before add =", roundsPlayedDB)
+        shotsThrown = 0;
+        console.log("rounds played before add =", roundsPlayedDB)
+        roundsPlayed = roundsPlayedDB + 1;
+        if (roundsPlayed > 7) {
+            roundsPlayed = 8;
+        }
+        console.log("rounds played before add =", roundsPlayedDB)
 
-    //     roundScoresRedLocal.push(redRoundScore);
-    //     roundScoresBlueLocal.push(blueRoundScore);
+        roundScoresRedLocal.push(redRoundScore);
+        roundScoresBlueLocal.push(blueRoundScore);
         
 
-    //     callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": ' + shotsThrown + ', "RoundsPlayed": ' + roundsPlayed + ', "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
-    //     updateGameScore()
-    // };
-
-
-
-
-
-
-
+        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": ' + shotsThrown + ', "RoundsPlayed": ' + roundsPlayed + ', "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
+        updateGameScore()
+    };
 
     function updateShotsPlayedText(){
         turnNumber.innerHTML = (shotsPlayedDB + 1).toString();
@@ -1526,9 +1503,71 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
         instructions.innerHTML = "blue turn";
     };
 
+    function callAPI(table, id, verb, APIdata) {
+        let endPoint = "http://localhost:3000/" + table + "/" + id
+        console.log(endPoint)
+        console.log(verb)
+        console.log(APIdata)
+        fetch(endPoint, {
+                method: verb,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type': 'application/json; charset=UTF-8'
+                },
+                body: APIdata
+            })
+            .then(response => response.text())
+            .then((data) => {
+                console.log('Success:', data);
+            })
+            .then(data => {
+                puckData = JSON.stringify(data);
+            })
+    };
 
 
 
+    function addBluePlayer() {
+        var inputField = document.getElementById('playerNameInputBlue');
+        var w = inputField.value;
+        var li = document.createElement("li");
+        var rule = document.createTextNode(w);
+        li.appendChild(rule);
+        inputField.value = "";
+
+        var removeBtn = document.createElement("input");
+        removeBtn.type = "button";
+        removeBtn.value = "❌";
+        removeBtn.className = "removePlayerButton";
+        removeBtn.onclick = remove;
+        li.appendChild(removeBtn);
+        document.getElementById("bluePlayerList").appendChild(li);
+    }
+
+    function remove(e) {
+        console.log("test =",e);
+        var el = e.target;
+        el.parentNode.remove();
+        console.log(e);
+    }
+
+
+    function addRedPlayer() {
+        var inputField = document.getElementById('playerNameInputRed');
+        var w = inputField.value;
+        var li = document.createElement("li");
+        var rule = document.createTextNode(w);
+        li.appendChild(rule);
+        inputField.value = "";
+
+        var removeBtn = document.createElement("input");
+        removeBtn.type = "button";
+        removeBtn.value = "❌";
+        removeBtn.className = "removePlayerButton";
+        removeBtn.onclick = remove;
+        li.appendChild(removeBtn);
+        document.getElementById("redPlayerList").appendChild(li);
+    }
 
     function endOfRound() {
         instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
@@ -1537,7 +1576,8 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
         if (gameStateDB != "endOfRound"){
             
             console.log("running end of round")
-            callAPI("TableData", 1, "PATCH", '{"GameState": "endOfRound"}');   
+            callAPI("TableData", 1, "PATCH", '{"GameState": "endOfRound"}');
+            
         }
     }
 
@@ -1597,321 +1637,7 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
 }
 
-//🏁🏁🏁Game Screen End 🏁🏁🏁
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//🎉🎉🎉Kiosk screen!!🎉🎉🎉
-
 if( window.location.pathname  == "/index2.html"){
-    
 
     console.log("Fuck yess !!!")
-
-
-    //score and round trackers
-
-    let shotsThrown = 0;
-    let gameTypeDB = null;
-    let gameStateDB = null;
-    let shotsPlayedDB = 0;
-    let roundsPlayedDB = 0;
-    let roundsPlayed = 0;
-
-    const roundScoresRedLocal = [];
-    const roundScoresBlueLocal =[];
-
-    let roundScoresRedDB = [];
-    let roundScoresBlueDB = [];
-    let pythonShotCounterDB = 0;
-    let currentRedScoreDB = 0;
-    let currentBlueScoreDB = 0;
-
-    //---table shit---
-
-    let prevPythonShotCount = 0;
-    let prevPuckPosSum = 1;
-    let puckMovement = false;
-    let puckData = undefined;
-    let tableData = undefined;
-
-
-
-    function updateValuesFromDB(){
-        fetch('http://localhost:3000/TableData/1', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-        .then(response => response.text())
-        .then(data => {
-            tableData = data;
-        })
-
-        if (tableData) {
-            let tableDataObj = JSON.parse(tableData);
-            shotsPlayedDB = tableDataObj.ShotsPlayed;
-            roundsPlayedDB = tableDataObj.RoundsPlayed;
-            gameTypeDB = tableDataObj.GameType;
-            gameStateDB = tableDataObj.GameState;
-            pythonShotCounterDB = tableDataObj.PythonShotCounter;
-            roundScoresRedDB = tableDataObj.RoundScoresRed;
-            roundScoresBlueDB = tableDataObj.RoundScoresBlue;
-            currentRedScoreDB = tableDataObj.CurrentRedScore;
-            currentBlueScoreDB = tableDataObj.CurrentBlueScore;
-        }
-    }
-
-    function shotsThrownUp() {
-        shotsThrown = shotsPlayedDB + 1;
-
-        if (shotsThrown > 7) {
-            shotsThrown = 8;
-        }
-        
-        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
-
-    };
-
-    function shotsThrownDown() {
-        shotsThrown = shotsPlayedDB - 1;
-            if (shotsThrown < 1) {
-            shotsThrown = 0;
-        }
-        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed":' + shotsThrown + '}');
-
-        
-
-    };
-
-
-
-    callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
-
-
-//🏁🏁🏁Both Pages End 🏁🏁🏁
-
-    const startGameBtn = document.getElementById('startGame');
-    const nextTurn = document.getElementById('nextTurn');
-    const backTurn = document.getElementById('backTurn');
-    const startNextRoundBtn = document.getElementById('startNextRound');
-
-
-    //---------------------kiosk stuff-------------------
-
-
-
-
-
-    //----start Game---
-
-
-    function startGame() {
-        console.log("startGame Pressed")
-        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameState": "inProgress", "RoundScoresRed": [], "RoundScoresBlue": []}');
-
-    }
-
-
-    
-
-    startGameBtn.onclick = function() { 
-        startGame() 
-    };
-
-    //----manually increment shot----
-
-
-
-
-    backTurn.onclick = function() {  
-        shotsThrownDown() 
-    };
-    nextTurn.onclick = function() { 
-        shotsThrownUp()
-    };
-
-    //--- Start Next Round ---
-
-    function saveRound(){
-        roundScoresBlueLocal.splice(0, roundScoresBlueLocal.length, ...roundScoresBlueDB);
-        roundScoresRedLocal.splice(0, roundScoresRedLocal.length, ...roundScoresRedDB);
-
-        shotsThrown = 0;
-        console.log("rounds played before add =", roundsPlayedDB)
-        roundsPlayed = roundsPlayedDB + 1;
-        if (roundsPlayed > 7) {
-            roundsPlayed = 8;
-        }
-        console.log("rounds played before add =", roundsPlayedDB)
-
-        roundScoresRedLocal.push(currentRedScoreDB);
-        roundScoresBlueLocal.push(currentBlueScoreDB);
-
-        callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": ' + shotsThrown + ', "RoundsPlayed": ' + roundsPlayed + ', "RoundScoresBlue":[' + roundScoresBlueLocal + '], "RoundScoresRed":[' + roundScoresRedLocal + '], "GameState": "inProgress"}');
-
-    }
-
-
-    startNextRoundBtn.onclick = () => {
-        //---add score to game scrore
-        saveRound();
-        
-
-    };
-
-
-
-    //----select game-----
-    const selectNS = document.getElementsByClassName("selectNS")[0];
-    const selectCS = document.getElementsByClassName("selectCS")[0];
-    const selectSI = document.getElementsByClassName("selectSI")[0];
-    const selectBJ = document.getElementsByClassName("selectBJ")[0];
-    const selectCU = document.getElementsByClassName("selectCU")[0];
-    let gameChanged = false;
-
-
-
-    startGameBtn.onclick = () => {
-        startGame()
-    };
-
-
-    selectNS.onclick = () => {
-        callAPI("TableData", 1, "PATCH", '{"GameType": "neoShuffle" }')
-    };
-
-    selectCS.onclick = () => {
-        callAPI("TableData", 1, "PATCH", '{"GameType": "classicShuffle" }')
-    };
-
-    selectSI.onclick = () => {
-        callAPI("TableData", 1, "PATCH", '{"GameType": "spaceInvaders" }')
-    };
-
-    selectBJ.onclick = () => {
-        callAPI("TableData", 1, "PATCH", '{"GameType": "blackJack" }')
-    };
-
-    selectCU.onclick = () => {
-        callAPI("TableData", 1, "PATCH", '{"GameType": "neoCurling" }')
-    };
-
-    //---add player---
-    //---red player
-    var addRedBtn = document.getElementById('addRedPlayerBtn');
-    addRedBtn.onclick = () => {
-        addRedPlayer();
-    };
-
-    //---Blue player
-    var addBlueBtn = document.getElementById('addBluePlayerBtn');
-    addBlueBtn.onclick = () => {
-        addBluePlayer();
-    };
-
-
-    function addBluePlayer() {
-        var inputField = document.getElementById('playerNameInputBlue');
-        var w = inputField.value;
-        var li = document.createElement("li");
-        var rule = document.createTextNode(w);
-        li.appendChild(rule);
-        inputField.value = "";
-
-        var removeBtn = document.createElement("input");
-        removeBtn.type = "button";
-        removeBtn.value = "❌";
-        removeBtn.className = "removePlayerButton";
-        removeBtn.onclick = remove;
-        li.appendChild(removeBtn);
-        document.getElementById("bluePlayerList").appendChild(li);
-    }
-
-    function remove(e) {
-        console.log("test =",e);
-        var el = e.target;
-        el.parentNode.remove();
-        console.log(e);
-    }
-
-
-    function addRedPlayer() {
-        var inputField = document.getElementById('playerNameInputRed');
-        var w = inputField.value;
-        var li = document.createElement("li");
-        var rule = document.createTextNode(w);
-        li.appendChild(rule);
-        inputField.value = "";
-
-        var removeBtn = document.createElement("input");
-        removeBtn.type = "button";
-        removeBtn.value = "❌";
-        removeBtn.className = "removePlayerButton";
-        removeBtn.onclick = remove;
-        li.appendChild(removeBtn);
-        document.getElementById("redPlayerList").appendChild(li);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        updateValuesFromDB()
-    }
-    animate()
-
-
 }
-
-//🏁🏁🏁Kiosk Screen End 🏁🏁🏁
-
-
-
-
-
-
-
-
-
-
-
-
-let puckData;
-
-
-
-function callAPI(table, id, verb, APIdata) {
-    let endPoint = "http://localhost:3000/" + table + "/" + id
-    console.log(endPoint)
-    console.log(verb)
-    console.log(APIdata)
-    fetch(endPoint, {
-            method: verb,
-            headers: {
-                'Accept': 'application/json',
-                'Content-type': 'application/json; charset=UTF-8'
-            },
-            body: APIdata
-        })
-        .then(response => response.text())
-        .then((data) => {
-            console.log('Success:', data);
-        })
-        .then(data => {
-            puckData = JSON.stringify(data);
-        })
-};
-
-

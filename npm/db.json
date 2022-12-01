@@ -14,14 +14,14 @@
       "puckLocationsBlue": [
         [
           275,
-          1340
+          1240
         ],
         [
           231,
           2119
         ],
         [
-          268,
+          468,
           748
         ],
         [
@@ -35,13 +35,15 @@
   "TableData": [
     {
       "PythonShotCounter": 82,
-      "GameType": "neoCurling",
+      "GameType": "neoShuffle",
       "ShotsPlayed": 1,
       "RoundsPlayed": 0,
       "GameState": "inProgress",
       "RoundScoresRed": [],
       "RoundScoresBlue": [],
-      "id": 1
+      "id": 1,
+      "CurrentRedScore": 4,
+      "CurrentBlueScore": 9
     }
   ]
 }
