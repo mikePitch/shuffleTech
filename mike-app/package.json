@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "three": "^0.147.0",
+    "voronoi": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}

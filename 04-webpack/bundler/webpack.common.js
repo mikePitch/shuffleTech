@@ -23,6 +23,13 @@ module.exports = {
             template: path.resolve(__dirname, '../src/index.html'),
             minify: true
         }),
+
+        new HtmlWebpackPlugin({
+            template: './src/index2.html',
+            filename: 'index2.html'
+        }),
+
+
         new MiniCSSExtractPlugin()
     ],
     module:

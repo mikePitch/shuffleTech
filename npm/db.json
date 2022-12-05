@@ -3,38 +3,38 @@
     {
       "puckLocationsRed": [
         [
-          83,
-          735
+          490,
+          1897
         ],
         [
-          438,
-          715
+          247,
+          1754
         ],
         [
-          165,
-          686
+          345,
+          1716
         ],
         [
-          366,
-          936
+          96,
+          1443
         ]
       ],
       "puckLocationsBlue": [
         [
-          314,
-          1113
+          228,
+          2520
         ],
         [
-          507,
-          991
+          159,
+          1789
         ],
         [
-          118,
-          928
+          20,
+          1578
         ],
         [
-          250,
-          985
+          211,
+          1517
         ]
       ],
       "id": 1
@@ -42,26 +42,16 @@
   ],
   "TableData": [
     {
-      "PythonShotCounter": 25,
+      "PythonShotCounter": 82,
       "GameType": "spaceInvaders",
-      "ShotsPlayed": 0,
-      "RoundsPlayed": 5,
+      "ShotsPlayed": 1,
+      "RoundsPlayed": 0,
       "GameState": "inProgress",
-      "RoundScoresRed": [
-        1,
-        1,
-        13,
-        13,
-        13
-      ],
-      "RoundScoresBlue": [
-        0,
-        1,
-        11,
-        11,
-        1
-      ],
-      "id": 1
+      "RoundScoresRed": [],
+      "RoundScoresBlue": [],
+      "id": 1,
+      "CurrentRedScore": 1,
+      "CurrentBlueScore": 1
     }
   ]
 }
