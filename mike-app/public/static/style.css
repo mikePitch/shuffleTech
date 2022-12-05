@@ -1,0 +1,385 @@
+
+
+body {
+    margin: 0;
+    background-color: #290A54;
+    color: white;
+    font-family: 'Ulm Grotesk';
+   
+}
+
+#container{
+    position: absolute;
+    width: 100%; 
+    height: 100vh;
+    z-index: 1;
+}
+
+
+
+.hud{
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+    display: grid;
+    width: 100%;
+    height: 100vh;
+    grid-auto-columns: 1fr;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 9fr 1fr;
+    z-index: 2;      
+}
+
+.rightColHud{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.leftColHud{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.autoTop{
+    margin-top: auto;
+}
+
+.scoreHolder{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 40px;
+    gap: 8px;
+        
+    background: #290a546f;
+    border: 1px solid #FFFFFF;
+    /* newWhite */
+    
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+}
+
+.headingMed{
+    font-weight: 400;
+    font-size: 24px;
+}
+
+.bigScore {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 100px;
+    line-height: 100%;
+    text-align: center;
+    color: #ffffff69;
+    margin: 0px;
+
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #ffffff;
+    text-shadow: 0 0 36px #ffffff80;
+}
+
+.smallScore {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 60px;
+    line-height: 100%;
+    text-align: center;
+    color: #ffffff69;
+    margin: 0px;
+
+    text-shadow: 0 0 36px #ffffff80;
+}
+
+.blueTeamBigScore {
+    color: #212F76;
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #C5F1FF;
+    text-shadow: 0 0 36px #00C2FF80;
+}
+
+.redTeamBigScore {
+    color: #541853;
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #FFCBCB;
+    text-shadow: 0 0 36px rgba(255, 78, 78, 0.5);
+}
+
+.blueTeamSmallScore {
+    color: #00C2FF;
+    text-shadow: 0 0 36px #00C2FF80;
+}
+
+.redTeamSmallScore {
+    color: #FF4E4E;
+    text-shadow: 0 0 36px rgba(255, 78, 78, 0.5);
+}
+
+#bottomRowHud{
+    /* background-color: #00C2FF80; */
+
+    background: linear-gradient(180deg, #34FD8400 0%, #34FD84 100%);
+    /* background-color: #00ff00; */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-column-start: span 3;
+    grid-column-end: span 3;
+    grid-row-start: span 1;
+    grid-row-end: span 1;
+}
+
+
+.gameSelector {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    flex-wrap: wrap;
+    row-gap: 20px;
+    column-gap: 20px;
+    max-width: 800px;
+    margin: auto;
+}
+
+
+ul.gameSelector > li {
+    pointer-events: all;
+    min-width: 40px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px;
+    background-color:rgba(255, 255, 255, 0.2);
+    row-gap: 8px;
+    border-radius: 20px;
+    padding-bottom: 10px;
+}
+
+ul.gameSelector > li:hover{
+    color: #290A54;
+    background-color:rgba(255, 255, 255, 1);
+    box-shadow: 0 0 36px #ffffff80;
+
+}
+
+#nextTurn:hover, #backTurn:hover{
+    color: #ff00ea;
+    cursor: pointer;
+}
+
+.kiosk{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+.removePlayerButton{
+    background-color: transparent;
+    border-style: none;
+    cursor: pointer;
+}
+
+.primaryButton{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 200px;
+    color: #ffffff;
+    border-width: 0px;
+    cursor: pointer;
+    font-size: 20px;
+    font-family: inherit;
+}
+
+.primaryButton:hover{
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.primaryInput{
+    background: rgba(255, 255, 255, 0.1);
+    border-style: solid;
+    border-radius: 100px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+    padding: 0px 12px;
+    color: #ffffff;
+    cursor: text;
+    height: 48px;
+    font-family: inherit;
+}
+
+.playerInput{
+    margin-right: -48px;
+}
+
+.playerAddBtn{
+    width: 48px;
+    height: 48px;
+    border-width: 1px;
+    border-color: #ffffff;
+    border-style: solid;
+}
+
+
+.redText{
+    color: #FF4E4E;
+}
+
+.blueText{
+    color: #00C2FF;
+}
+
+.playerInputWrapper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.playerList{
+    list-style-type: none;
+    padding-inline-start: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.addPlayersLayout{
+    display:flex;
+    flex-direction: row;
+    column-gap: 40px;
+    justify-content: center;
+}
+.teamWrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+
+
+.kioskRow{
+  display: grid;
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  grid-auto-columns: 1fr;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto;
+}
+
+.kioskHeading{
+    font-style: normal;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 100%;
+    text-align: center;
+    color: #ffffff;
+    margin: 0px;
+    text-shadow: 0 0 36px #ffffff80;
+
+}
+
+.logo{
+    width: 80px;
+}
+
+.rowRightCol{
+    display:flex;
+    flex-direction: row;
+    column-gap: 20px;
+    justify-content: right;
+}
+
+.rowLeftCol{
+    display:flex;
+    flex-direction: row;
+    column-gap: 20px;
+    justify-content: left;    
+}
+
+.rowCenterCol{
+    display:flex;
+    flex-direction: row;
+    column-gap: 20px;
+    justify-content: center;    
+}
+
+
+
+.flex-start{
+    align-items: flex-start;
+}
+
+.flex-end{
+    align-items: flex-end;
+}
+
+.vertCol{
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+
+
+
+
+/* select teams */
+
+.kioskLayout {
+  display: grid;
+  width: 100%;
+  height: 100vh;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  grid-auto-columns: 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 8fr 1fr;
+}
+
+
+.gameImage{
+    width: 300px;
+    height:180px;
+    border-radius: 18px;
+    object-fit: cover;
+}
+
+.negativeButton{
+    background-color: #ef4444;
+}
+
+.negativeButton:hover{
+    background-color: #b91c1c;
+}
+
+.positiveButton{
+    background-color: #22c55e;
+    color: #290A54;
+}
+
+.positiveButton:hover{
+    background-color: #15803d;
+}
+
+.bigButton{
+    padding: 16px 32px;
+    gap: 10px;
+    font-size: 32px;
+    font-family: inherit;
+}
+
+

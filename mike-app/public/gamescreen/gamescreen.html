@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mike-app</title>
+    <link rel="stylesheet" href="../static/style.css" />
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "../build/three.module.js"
+            }
+        }
+    </script>
+
+</head>
+<body>
+<!-- threejs Container -->
+    <div id="container">
+        <div id="scene" style="width: 100%; height: 100%">
+        </div>
+
+    </div>
+    <!-- Heads up display -->
+    <div class="hud">
+
+        <div class="leftColHud">
+            <h2 class="headingMed autoTop">Games Won</h2>
+            <div class="scoreHolder">
+                <h1 id="redGamesWon" class="smallScore redTeamSmallScore">0</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueGamesWon" class="smallScore blueTeamSmallScore">0</h1>
+            </div>
+        </div>
+        <div class="midColHud">
+            <h1 class="kioskHeading" id="gameTitle">Game</h1>
+        </div>
+        <div class="rightColHud">
+            <h2 class="headingMed">Round Score</h2>
+            <div class="scoreHolder">
+                <h1 id="redRoundScore" class="bigScore redTeamBigScore">00</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueRoundScore" class="bigScore blueTeamBigScore">00</h1>
+            </div>
+
+            <h2 class="headingMed">Throw <span id="turnNumber">1</span><span>/8</span></h2>
+            
+            <h2 class="headingMed">Round <span id="roundNumber">1</span><span>/8</span></h2>
+
+            <h2 class="headingMed autoTop">Game Score</h2>
+            <div class="scoreHolder">
+                <h1 id="redGameScore" class="smallScore redTeamSmallScore">00</h1>
+                <h1 class="smallScore">-</h1>
+                <h1 id="blueGameScore" class="smallScore blueTeamSmallScore">00</h1>
+            </div>
+
+
+        </div>
+        <div id="bottomRowHud">
+            <h1 class="kioskHeading" id="instructions">Intructions</h1>
+        </div>
+    </div>
+
+    <script type="module" src="gamescreen.js"></script>
+    <script src="../node_modules/voronoi/rhill-voronoi-core.min.js"></script>
+
+    
+</body>
+</html>
