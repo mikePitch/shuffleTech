@@ -1,0 +1,59 @@
+#video {
+    width: 640px;
+    height: 480px;
+    transform: scale(-1, 1);
+}
+
+#photo {
+    width: 640px;
+    height: 480px;
+    transform: scale(-1, 1);
+
+}
+
+#canvas {
+    display: none;
+    
+}
+
+.camera {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    border-radius: 50%;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    
+
+  }
+  
+.output {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    border-radius: 50%;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    display: none;
+
+}
+
+.primaryButton.overCamera {
+    display: block;
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    bottom: 32px;
+    background-color: #290A54;
+}
+
+.contentarea {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}

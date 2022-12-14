@@ -22,6 +22,7 @@ def puckDetection_chris(cnrDict, pts1, pts2, video):
     while True:
 
         frame = video.get().getCvFrame()
+        cv2.imshow("frame", frame)
 
         # Change perspective of frame - M is the transformation matirx
         M = cv2.getPerspectiveTransform(pts1,pts2)

@@ -1,4 +1,5 @@
 import cv2
+import dim
 
 
 def tableCalibration(tableCorners):
@@ -11,6 +12,7 @@ def findCornermarkers(video):
     print("Finding Table Corner Locations")
     tableCorners = [(0,0), (10,0), (0,10), (10,10)]
     frame = video.get().getCvFrame()
+    cv2.imshow("Frame", frame)
 
     frameBW = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frameBW = cv2.bitwise_not(frameBW)
@@ -48,3 +50,4 @@ def findCornermarkers(video):
         print(ids)
         
     return tableCorners
+
