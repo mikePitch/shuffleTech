@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>04 - Webpack</title>
+    <title>Kiosk</title>
+    <link rel="stylesheet" href="webcam.css" />
+    <link rel="stylesheet" href="modal.css" />
+    <link rel="stylesheet" href="sessiontime.css" />
     <link rel="stylesheet" href="../static/style.css" />
+
     
     <script type="importmap">
         {
@@ -16,17 +20,78 @@
 </head>
 <body>
 
-    <div class="kioskLayout">
+    <div id="orderModal" class="modal">
+        <div id="orderModalContent" class="modalContent">
+            <h1 class="kioskHeading">Order Food & Drinks</h1>
+            <p>scan the qr code and order food and drinks directly to your game</p>
+            <img id="qrcode" class="qrcodeImage" src="/static/images/pitchvcqrcode.png" alt="">
+            <div id="orderModalClose" class="primaryButton modalClose">Close</div>
+        </div>
+    </div>
+
+
+    <!-- set session time -->
+
+    <div id="sessionPage" class="kioskLayout">
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-start">
+                <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            </div>
+            <h1 class="kioskHeading">Session End Time</h1>
+            <div class="rowRightCol flex-start">
+                <button class="primaryButton">54mins ⚙️</button>
+            </div>
+        </div>
+        <div class="kioskBody">
+            <ul id="timeList">
+
+            </ul>
+           
+
+        </div>
+        <div class="kioskRow">
+            <div class="rowLeftCol flex-end">
+                <button class="primaryButton">Help</button>
+            </div>
+            <img src="/static/images/ballers-logo.png" alt="" class="logo">
+            <div class="rowRightCol flex-end">
+                <button id="orderButton" class="primaryButton orderButton">🍕🍸</button>
+            </div>
+        </div>
+    </div>
+    
+
+
+
+
+
+
+
+
+    <div id="selectTeamsPage" class="kioskLayout">
         <div class="kioskRow">
             <div class="rowLeftCol flex-start">
                 <img src="/static/images/ballers-logo.png" alt="" class="logo">
             </div>
             <h1 class="kioskHeading">Select Teams</h1>
             <div class="rowRightCol flex-start">
-                <button class="primaryButton">⚙️</button>
+                <button class="primaryButton">54mins ⚙️</button>
             </div>
         </div>
         <div class="kioskBody">
+            <!-- webcam popup -->
+            <div class="contentarea">
+                <div class="camera" id="camera">
+                <video id="video">Video stream not available.</video>
+                <button class="primaryButton overCamera" id="startbutton">Take photo</button>
+                </div>
+                <canvas id="canvas"> </canvas>
+                <div class="output" id="output">
+                <img id="photo" alt="The screen capture will appear in this box." />
+                <button class="primaryButton overCamera" id="tryagain">Try Again</button>
+                </div>
+            </div>
+            
             <div class="addPlayersLayout">
                 <div class="teamWrapper">
                     <h2 class="headingMed redText">add red player</h2>
@@ -51,7 +116,7 @@
             </div>
 
             <div class="rowCenterCol">
-                <button class="primaryButton">Select Game</button>
+                <button id="goToSelectGame" class="primaryButton">Select Game</button>
             </div>
 
         </div>
@@ -61,7 +126,7 @@
             </div>
             <img src="/static/images/ballers-logo.png" alt="" class="logo">
             <div class="rowRightCol flex-end">
-                <button class="primaryButton">🍕🍸</button>
+                <button id="orderButton" class="primaryButton orderButton">🍕🍸</button>
             </div>
         </div>
     </div>
@@ -79,14 +144,14 @@
         Edit Teams
         Order food
     -->
-    <div class="kioskLayout">
+    <div id="selectGamePage" class="kioskLayout">
         <div class="kioskRow">
             <div class="rowLeftCol flex-start">
                 <img src="/static/images/ballers-logo.png" alt="" class="logo">
             </div>
             <h1 class="kioskHeading">Select Game</h1>
             <div class="rowRightCol flex-start">
-                <button class="primaryButton">⚙️</button>
+                <button class="primaryButton">54mins ⚙️</button>
             </div>
         </div>
 
@@ -114,7 +179,7 @@
                 <button class="primaryButton">Edit Teams</button>
             </div>
             <div class="rowRightCol flex-end">
-                <button class="primaryButton">🍕🍸</button>
+                <button id="orderButton" class="primaryButton orderButton">🍕🍸</button>
             </div>
         </div>
     </div>
@@ -135,14 +200,14 @@
         Order food
     -->
 
-    <div class="kioskLayout">
+    <div id="kioskPage"class="kioskLayout">
         <div class="kioskRow">
             <div class="rowLeftCol flex-start">
                 <img src="/static/images/ballers-logo.png" alt="" class="logo">
             </div>
             <h1 class="kioskHeading">Game Kiosk</h1>
             <div class="rowRightCol flex-start">
-                <button class="primaryButton">⚙️</button>
+                <button class="primaryButton">54mins ⚙️</button>
             </div>
         </div>
 
@@ -180,15 +245,17 @@
                 <button class="primaryButton">Quit Game</button>
             </div>
             <div class="rowRightCol flex-end">
-                <button class="primaryButton">🍕🍸</button>
+                <button id="orderButton" class="primaryButton orderButton">🍕🍸</button>
             </div>
         </div>
     </div>
 
     <script type="module" src="kiosk.js"></script>
+    <script src="webcam.js"></script>
+    <script src="pagestate.js"></script>
+    <script src="modal.js"></script>
+    <script src="sessiontime.js"></script>
 
 
 </body>
 </html>
-
-<!-- round ends - idle state untill round start -->
