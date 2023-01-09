@@ -43,6 +43,13 @@ body {
     padding: 20px;
 }
 
+.midColHud{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
 .autoTop{
     margin-top: auto;
 }
