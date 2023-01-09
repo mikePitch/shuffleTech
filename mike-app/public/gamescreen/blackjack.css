@@ -1,0 +1,76 @@
+.zoneWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: auto;
+}
+
+.cardImage {
+  position: relative;
+  height: 120px;
+  width: fit-content;
+  margin-bottom: -70px;
+  transform: rotate(-80deg);
+  filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.4));
+}
+
+.teamCardsWrapper {
+  display: grid;
+  height: 83px;
+  grid-auto-columns: 1fr;
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ffffff;
+  border-radius: 20px;
+  background: rgba(0, 194, 255, 0.2);
+  box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.6);
+}
+
+.zoneHeading{
+    font-size: 20px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: -18px;
+}
+
+.cardText{
+    font-size: .8em;
+    /* font-weight: 400; */
+    opacity: 80%;
+}
+
+.bjCardsWrapper {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-column-gap: 40px;
+  grid-row-gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  margin-top: 20px;
+  align-self: stretch;
+}
+
+#redCardsHand{
+    background: rgba(255, 78, 78, 0.4);
+    border-color: #FF4E4E;    
+}
+
+#blueCardsHand{
+    background: rgba(0, 194, 255, 0.4);
+    border-color: #00C2FF;
+    
+}
+
+.explode{
+  position: absolute;
+  z-index: 100;
+  width: 100px;
+  bottom: 0px;
+  transform: scale(0);
+  margin-bottom: -70px;
+}

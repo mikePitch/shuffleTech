@@ -7,6 +7,55 @@ import { TextGeometry } from '/node_modules/three/examples/jsm/geometries/TextGe
 // import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 
+let newRedNameOne = ''
+let newRedImageOne = ''
+
+let newRedNameTwo = ''
+let newRedImageTwo = ''
+
+let newRedNameThree = ''
+let newRedImageThree = ''
+
+let newRedNameFour = ''
+let newRedImageFour = ''
+
+let newBlueNameOne = ''
+let newBlueImageOne = ''
+
+let newBlueNameTwo = ''
+let newBlueImageTwo = ''
+
+let newBlueNameThree = ''
+let newBlueImageThree = ''
+
+let newBlueNameFour = ''
+let newBlueImageFour = ''
+
+const redTeamOne = document.getElementById('redTeamNameOne')
+const redImageOne = document.getElementById('redTeamImageOne')
+
+const redTeamTwo = document.getElementById('redTeamNameTwo')
+const redImageTwo = document.getElementById('redTeamImageTwo')
+
+const redTeamThree = document.getElementById('redTeamNameThree')
+const redImageThree = document.getElementById('redTeamImageThree')
+
+const redTeamFour = document.getElementById('redTeamNameFour')
+const redImageFour = document.getElementById('redTeamImageFour')
+
+const blueTeamOne = document.getElementById('blueTeamNameOne')
+const blueImageOne = document.getElementById('blueTeamImageOne')
+
+const blueTeamTwo = document.getElementById('blueTeamNameTwo')
+const blueImageTwo = document.getElementById('blueTeamImageTwo')
+
+const blueTeamThree = document.getElementById('blueTeamNameThree')
+const blueImageThree = document.getElementById('blueTeamImageThree')
+
+const blueTeamFour = document.getElementById('blueTeamNameFour')
+const blueImageFour = document.getElementById('blueTeamImageFour')
+
+
 
 
 
@@ -50,9 +99,29 @@ let pythonShotCounterDB = 0;
 
 let prevPythonShotCount = 0;
 let prevPuckPosSum = 1;
-let puckMovement = false;
+let puckMovement = true;
 let puckData = undefined;
 let tableData = undefined;
+
+
+// ------ 🕹🕹🕹🕹 Check for movement 🕹🕹🕹🕹 -------
+
+let currentTick = 0;
+let movementTick = 0;
+let pucksStationary = true;
+
+function ticks(){
+    currentTick +=1;
+    return currentTick
+}
+// ------ 🕹🕹🕹🕹 End 🕹🕹🕹🕹 -------
+
+
+
+
+
+
+
 
 
 function updateValuesFromDB(){
@@ -239,33 +308,180 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
     // ------------Game Specific UI-----------
 
-    // ---Black Jack---
+    // ---🃏♠️♥️♣️♦️ Black Jack 🃏♠️♥️♣️♦️---
 
-    // 1 area = random cards between 2 and 4
-    // 2 area = random cards between 5 and 7
-    // 3 area = random cards between 8 and 10
-    // 4 area = random Picture cards (J, Q, or K)
-    // 5/6 area = Ace
+    const blackJackUI = document.getElementById('blackJackUI');
 
-    // let cardsObjArray = [];
+    let blueBlackJackScore = 0;
+    let redBlackJackScore = 0;
 
-    // let cardsArray =  ['H2', 'D2', 'S2', 'C2', 'H3', 'D3', 'S3', 'C3', 'H4', 'D4', 'S4', 'C4', 'H5', 'D5', 'S5', 'C5', 'H6', 'D6', 'S6', 'C6', 'H7', 'D7', 'S7', 'C7', 'H8', 'D8', 'S8', 'C8', 'H9', 'D9', 'S9', 'C9', 'H10', 'D10', 'S10', 'C10', 'HJ', 'DJ', 'SJ', 'CJ', 'HQ', 'DQ', 'SQ', 'CQ', 'HK', 'DK', 'SK', 'CK', 'HA', 'DA', 'SA', 'CA'];
+    //is, isnt bust gif
+    let redIsBust = false
+    let blueIsBust = false
+    let thisFrameRedIsBust = false
+    let thisFrameBlueIsBust = false
+    let bustDelay = 0
 
-    // cardsArray.forEach(e => {
-    //     const cardObj = new Object();
-    //     cardObj.name = e;
-    //     cardObj. value = 0;
-    //     cardObj.zone = 0;
-    //     let card = "H" + e;
-    //     allCards.push(card);
-    //     card = "D" + e;
-    //     allCards.push(card);
-    //     card = "S" + e;
-    //     allCards.push(card);
-    //     card = "C" + e;
-    //     allCards.push(card);
+    //number of red pucks per zone
+
+    let currentZone1red = [];
+    let currentZone2red = [];
+    let currentZone3red = [];
+    let currentZone4red = [];
+    let currentZone5red = [];
+
+    let currentZone1blue = [];
+    let currentZone2blue = [];
+    let currentZone3blue = [];
+    let currentZone4blue = [];
+    let currentZone5blue = [];
+
+    let zone1redCardsArray = [];
+    let zone2redCardsArray = [];
+    let zone3redCardsArray = [];
+    let zone4redCardsArray = [];
+    let zone5redCardsArray = [];
+
+    let zone1blueCardsArray = [];
+    let zone2blueCardsArray = [];
+    let zone3blueCardsArray = [];
+    let zone4blueCardsArray = [];
+    let zone5blueCardsArray = [];
+
+
+    //set up cards
+    let allCards = []
+    let cardNumbers =  ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+    let cardSuits = ['H','D','S','C']
+    cardSuits.forEach((suit, i) => {
+        cardNumbers.forEach((e, i) => {
+            const cardObj = new Object();
+            cardObj.number = e;
+            cardObj.suit = suit;
+            let x = i+1
+            cardObj.image = "Card-" + suit + x + ".svg"
+            //assign card values
+            if (i<1){
+                cardObj.value = 11;
+            } else if (i<10){
+                cardObj.value = i+1;
+            } else {
+                cardObj.value = 10;
+            };
+            //assign card zones
+            if(i<13){
+                cardObj.zone = 4;
+            }
+            if(i<10){
+                cardObj.zone = 3;
+            }
+            if(i<7){
+                cardObj.zone = 2;
+            }
+            if(i<4){
+                cardObj.zone = 1;
+            }
+            if(i<1){
+                cardObj.zone = 5;
+            }
+            allCards.push(cardObj);
+        });
+    });
+
+    function showGifPopUp (imageSrc, text){
+        const slideIn = [
+            { transform: 'scale(0)' },
+            { transform: 'scale(0)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(0)' }
+
+          ];
+          
+        const slideInTiming = {
+        duration: 6500,
+        iterations: 1,
+        }
+
+        const gifModal = document.getElementById('gifModal');
+        const gifSrc = imageSrc;
+        const gifImage = document.getElementById('popUpGif');
+        const popUpText = document.getElementById('popUpText');
+        popUpText.innerText = text;
+        gifImage.src = gifSrc;
+        gifModal.animate(slideIn, slideInTiming);
+        
+    }
+
+
+
+    //add card function
+    function addCard(zone, team, card) {
+        let image = document.createElement("img");
+        image.src = "/static/images/cards/" + card; 
+        image.className = "cardImage"
+        let slotId = "zone-" + zone + "-" + team
+        let slot =  document.getElementById(slotId)
+        slot.appendChild(image);
+        const rotateIn = [
+            { transform: 'scale(0) rotate(-10deg)' },
+            { transform: 'scale(1) rotate(-80deg)' }
+          ];
+          
+        const rotateInTiming = {
+        duration: 750,
+        iterations: 1,
+        }
+        image.animate(rotateIn, rotateInTiming);
+
+        
+    }
+
+    function removeCard(zone, team) {
+        let slotId = "zone-" + zone + "-" + team
+        let slot =  document.getElementById(slotId)
+        slot.removeChild(slot.lastElementChild)
+        // slot.removeChild(slot.getElementsByTagName('img')[0]);
+
+        let explodeAnimation = slot.getElementsByTagName('img')[0];
+
+        const explosion = [
+            { transform: 'scale(0)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(1)' },
+            { transform: 'scale(0)' }
+          ];
+          
+          const explosionTiming = {
+            duration: 900,
+            iterations: 1,
+          }
+
+        explodeAnimation.animate(explosion, explosionTiming);
+          
+
+    }
+
+
+
+    // const body = document.querySelector('body');
+
+    // body.addEventListener('click', (event) => {
+    //     console.log("hi")
+    //     removeCard("1","red");
     // });
-    // console.log("ccc=",allCards)
+
+    
+
+    // ----------🃏♠️♥️♣️♦️  End 🃏♠️♥️♣️♦️---------
+
+
 
     // ---Space Invaders---
     const detectionZone = 2000 //length of zone
@@ -437,6 +653,7 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
     const curlingLines = new THREE.Group();
     scene.add(curlingLines);
+    
 
 
 
@@ -473,6 +690,34 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
                 pythonShotCounterDB = tableDataObj.PythonShotCounter;
                 roundScoresRedDB = tableDataObj.RoundScoresRed;
                 roundScoresBlueDB = tableDataObj.RoundScoresBlue;
+
+                newRedNameOne = tableDataObj.redPlayers[0].name
+                newRedImageOne = tableDataObj.redPlayers[0].image
+                newRedNameTwo = tableDataObj.redPlayers[1].name
+                newRedImageTwo = tableDataObj.redPlayers[1].image
+                newRedNameThree = tableDataObj.redPlayers[2].name
+                newRedImageThree = tableDataObj.redPlayers[2].image
+
+                newBlueNameOne = tableDataObj.bluePlayers[0].name
+                newBlueImageOne = tableDataObj.bluePlayers[0].image
+                newBlueNameTwo = tableDataObj.bluePlayers[1].name
+                newBlueImageTwo = tableDataObj.bluePlayers[1].image
+                newBlueNameThree = tableDataObj.bluePlayers[2].name
+                newBlueImageThree = tableDataObj.bluePlayers[2].image
+
+                redTeamOne.innerHTML = newRedNameOne
+                redImageOne.src = newRedImageOne
+                redTeamTwo.innerHTML = newRedNameTwo
+                redImageTwo.src = newRedImageTwo
+                redTeamThree.innerHTML = newRedNameThree
+                redImageThree.src = newRedImageThree
+
+                blueTeamOne.innerHTML = newBlueNameOne
+                blueImageOne.src = newBlueImageOne
+                blueTeamTwo.innerHTML = newBlueNameTwo
+                blueImageTwo.src = newBlueImageTwo
+                blueTeamThree.innerHTML = newBlueNameThree
+                blueImageThree.src = newBlueImageThree
 
 
                 //check for change
@@ -580,6 +825,52 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
         }
 
         scene.add(puckGrp);
+
+
+        // ------ 🕹🕹🕹🕹 Check for movement 🕹🕹🕹🕹 -------
+
+        function checkForPuckStillness(buffer, ticks) {
+            const puckPosArr = rpxv.concat(rpyv, bpxv, bpyv);
+            const puckPosSum = puckPosArr.reduce((a, b) => a + b, 0);
+            let totalPuckMovement = puckPosSum - prevPuckPosSum;
+            totalPuckMovement = Math.abs(totalPuckMovement)
+
+            if(totalPuckMovement < buffer){
+                puckMovement = false;
+            } else {
+                puckMovement = true;
+            }
+
+            // if (puckPosSum === prevPuckPosSum) {
+            //     puckMovement = false;
+            //     // console.log("puckMovement = ", puckMovement);
+            // } else {
+            //     puckMovement = true;
+            //     // console.log("puckMovement = ", puckMovement);
+            // }
+
+            if (puckMovement == false){
+                movementTick += 1
+            } else {
+                movementTick = 0
+            }
+
+            if (movementTick > ticks){
+                pucksStationary = true
+                console.log("pucksStationary: ", pucksStationary)
+            } else {
+                pucksStationary = false
+            }
+
+            prevPuckPosSum = puckPosSum;
+        
+            return pucksStationary;
+        }    
+        console.log("current tick = ", ticks())
+        console.log("Pucks Still: ", checkForPuckStillness(8, 1));
+
+
+        // ------ 🕹🕹🕹🕹 Check for movement 🕹🕹🕹🕹 -------
 
         //-------------------Check for movement---------------------
 
@@ -1237,6 +1528,164 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
         //----------spaceinvaders end-------------------------
 
 
+
+        //----------🃏♠️♥️♣️♦️ Black Jack Start 🃏♠️♥️♣️♦️-------------------------
+
+        if (gameTypeDB == "blackJack") {
+
+            //number of red pucks per zone
+
+            let zone1red = 0;
+            let zone2red = 0;
+            let zone3red = 0;
+            let zone4red = 0;
+            let zone5red = 0;
+
+            let zone1blue = 0;
+            let zone2blue = 0;
+            let zone3blue = 0;
+            let zone4blue = 0;
+            let zone5blue = 0;
+
+
+
+            // red puck in each zone
+            rpyv.forEach((e, i) => {
+                if (rpyv[i] + puckRadius < scoreLines[1]) {
+                    zone5red += 1
+                } else if (rpyv[i] + puckRadius < scoreLines[2]) {
+                    zone4red += 1
+                } else if (rpyv[i] + puckRadius < scoreLines[3]) {
+                    zone3red += 1
+                } else if (rpyv[i] + puckRadius < scoreLines[4]) {
+                    zone2red += 1
+                } else if (rpyv[i] + puckRadius < scoreLines[5]) {
+                    zone1red += 1
+                } else {
+                    // do nothing
+                }
+            });
+
+            // blue puck in each zone
+            bpyv.forEach((e, i) => {
+                if (bpyv[i] + puckRadius < scoreLines[1]) {
+                    zone5blue += 1
+                } else if (bpyv[i] + puckRadius < scoreLines[2]) {
+                    zone4blue += 1
+                } else if (bpyv[i] + puckRadius < scoreLines[3]) {
+                    zone3blue += 1
+                } else if (bpyv[i] + puckRadius < scoreLines[4]) {
+                    zone2blue += 1
+                } else if (bpyv[i] + puckRadius < scoreLines[5]) {
+                    zone1blue += 1
+                } else {
+                    // do nothing
+                }
+            });
+
+
+
+            function assignCards(oldPucksPerZone, currentPucksPerZone, zoneCardsArray, zone, team) {
+
+                // if change assign cards to zones
+
+                if (oldPucksPerZone !== currentPucksPerZone[0]){ 
+
+                    let dif = oldPucksPerZone - currentPucksPerZone;
+                    dif = Math.abs(dif)
+
+
+                    if (oldPucksPerZone < currentPucksPerZone){
+                        console.log("remove card")
+                        for (let index = 0; index < dif; index++) {
+                            zoneCardsArray.pop();
+                            removeCard(zone, team)
+                        }
+                        
+                    }
+
+                    if (oldPucksPerZone > currentPucksPerZone){
+                        console.log("add card")
+                        for (let index = 0; index < dif; index++) {
+                            let filteredCards = allCards.filter(function (el) {
+                                return el.zone == parseInt(zone)
+                            });
+        
+                            const random = Math.floor(Math.random() * filteredCards.length);
+                            zoneCardsArray.push(filteredCards[random])
+                            console.log(filteredCards[random].image)
+                            console.log("run")
+                            addCard(zone, team, filteredCards[random].image)
+        
+                            
+
+                        }
+                    }
+
+                    currentPucksPerZone.pop();
+                    currentPucksPerZone.push(oldPucksPerZone);
+                }
+
+                
+            }
+
+            assignCards(zone1red, currentZone1red, zone1redCardsArray, "1", "red");
+            assignCards(zone2red, currentZone2red, zone2redCardsArray, "2", "red");
+            assignCards(zone3red, currentZone3red, zone3redCardsArray, "3", "red");
+            assignCards(zone4red, currentZone4red, zone4redCardsArray, "4", "red");
+            assignCards(zone5red, currentZone5red, zone5redCardsArray, "5", "red");
+
+            assignCards(zone1blue, currentZone1blue, zone1blueCardsArray, "1", "blue");
+            assignCards(zone2blue, currentZone2blue, zone2blueCardsArray, "2", "blue");
+            assignCards(zone3blue, currentZone3blue, zone3blueCardsArray, "3", "blue");
+            assignCards(zone4blue, currentZone4blue, zone4blueCardsArray, "4", "blue");
+            assignCards(zone5blue, currentZone5blue, zone5blueCardsArray, "5", "blue");
+            
+
+            function getBlackJackScoreRed() {
+                //loop through each array
+                let allCardValues = zone1redCardsArray.concat(zone2redCardsArray, zone3redCardsArray, zone4redCardsArray, zone5redCardsArray);
+                const allCardsValueSum = allCardValues.reduce((accumulator, object) => {
+                    return accumulator + object.value;
+                  }, 0);
+                 return allCardsValueSum 
+            }
+
+            function getBlackJackScoreBlue() {
+                //loop through each array
+                let allCardValues = zone1blueCardsArray.concat(zone2blueCardsArray, zone3blueCardsArray, zone4blueCardsArray, zone5blueCardsArray);
+                const allCardsValueSum = allCardValues.reduce((accumulator, object) => {
+                    return accumulator + object.value;
+                  }, 0);
+                 return allCardsValueSum 
+            }
+
+
+
+
+            // blueBlackJackScore = 
+            redBlackJackScore = getBlackJackScoreRed()
+            blueBlackJackScore = getBlackJackScoreBlue()
+
+
+
+
+
+
+        };
+
+
+    
+
+        //----------🃏♠️♥️♣️♦️  Black Jack end  🃏♠️♥️♣️♦️-------------------------
+
+
+
+
+
+
+
+
         if (gameTypeDB == "neoCurling") {
             gameTitle.innerHTML = "Neo Curling";
 
@@ -1269,15 +1718,111 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
             };
         };
 
+        // ---🃏♠️♥️♣️♦️ Black Jack 🃏♠️♥️♣️♦️---
+
         if (gameTypeDB == "blackJack") {
+
+
+
+            //show gif if score goes over 21
+
+            blackJackUI.style.display = "grid";
             gameTitle.innerHTML = "Black Jack";
-            if (gsRedScore) {
-                gsRedScore.innerHTML = 0;
-            };
-            if (gsBlueScore) {
-                gsBlueScore.innerHTML = 0;
-            };
+
+            if (checkForPuckStillness(10,30)){
+
+                if (gsRedScore) {
+                    gsRedScore.innerHTML = redBlackJackScore;
+                    if (redBlackJackScore>21){
+                        gsRedScore.style.textDecoration = "line-through";
+                        gsRedScore.style.opacity = "50%"
+    
+    
+                        //start delay
+                        
+    
+    
+                        thisFrameRedIsBust = true
+    
+    
+    
+                        // let thisFrameRedIsBust = true
+    
+                        if (redIsBust != thisFrameRedIsBust) {
+                            console.log("red bust!!")
+    
+                            redIsBust = thisFrameRedIsBust
+                            showGifPopUp("/static/images/bust.gif", "Ooooo Red Team busted!!!");
+    
+                        }
+    
+                    } else {
+                        gsRedScore.style.textDecoration = "none";
+                        gsRedScore.style.opacity = "100%"
+                        
+    
+                        thisFrameRedIsBust = false
+    
+                        
+                        if (redIsBust != thisFrameRedIsBust) {
+                            console.log("red safe!!")
+                            redIsBust = thisFrameRedIsBust
+    
+                            showGifPopUp("/static/images/safe.gif", "Red Back in the game! Noice");
+                        }
+    
+                    }
+                };
+                if (gsBlueScore) {
+                    gsBlueScore.innerHTML = blueBlackJackScore;
+                    if (blueBlackJackScore>21){
+                        gsBlueScore.style.textDecoration = "line-through";
+                        gsBlueScore.style.opacity = "50%"
+    
+    
+                        thisFrameBlueIsBust = true
+    
+    
+                        if (blueIsBust != thisFrameBlueIsBust) {
+                            console.log("blue bust!!")
+    
+                            blueIsBust = thisFrameBlueIsBust
+    
+                            showGifPopUp("/static/images/bust.gif", "Ooooo Blue Team busted!!!");
+    
+                        }
+    
+                    } else {
+                        gsBlueScore.style.textDecoration = "none";
+                        gsBlueScore.style.opacity = "100%"
+                        
+    
+                        thisFrameBlueIsBust = false
+    
+    
+                        if (blueIsBust != thisFrameBlueIsBust) {
+                            console.log("blue safe!!")
+    
+                            blueIsBust = thisFrameBlueIsBust
+    
+                            showGifPopUp("/static/images/safe.gif", "Blue Back in the game! Noice");
+                        }
+    
+                    }
+                };
+
+            }
         };
+
+        if (gameTypeDB != "blackJack") {
+            gsBlueScore.style.textDecoration = "none";
+            gsBlueScore.style.opacity = "100%";
+            gsRedScore.style.textDecoration = "none";
+            gsRedScore.style.opacity = "100%";
+            blackJackUI.style.display = "none";
+        }
+
+        // ---🃏♠️♥️♣️♦️ End 🃏♠️♥️♣️♦️---
 
         if (gameTypeDB == "neoShuffle") {
             gameTitle.innerHTML = "Neo Shuffle";
@@ -1309,20 +1854,31 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
                 };
             };
         };
-
+        
         // ---end of round----
-        if (shotsPlayedDB == 8) {
-            endOfRound();
-            console.log("round over")
-        };
-
-        //---end of game
-        if (roundsPlayedDB == 8) {
-            console.log("game over")
-            gameStateDB = "endOfGame";
-            instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
-            instructions.innerHTML = "game over press new game";
-        };
+        if (checkForPuckStillness(8,30)){
+            if (shotsPlayedDB == 8) {
+                endOfRound();
+                console.log("round over")
+                if (redRoundScore > blueRoundScore) {
+                    showGifPopUp("/static/images/redwins.gif", "Red Wins!!!");
+                }
+                if (redRoundScore < blueRoundScore) {
+                    showGifPopUp("/static/images/bluewins.gif", "Blue Wins!!!");
+                }
+                if (redRoundScore == blueRoundScore) {
+                    showGifPopUp("/static/images/draw.gif", "It's a draw 😬");
+                }
+            };
+    
+            //---end of game
+            if (roundsPlayedDB == 8) {
+                console.log("game over")
+                gameStateDB = "endOfGame";
+                instructionRow.style = "background: linear-gradient(180deg, rgba(52, 205, 253, 0) 0%, #34FD84 100%);";
+                instructions.innerHTML = "game over press new game";
+            };
+        }
 
 
 
@@ -1349,6 +1905,7 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
             if (blueGameScore) {
                 blueRoundScore = roundScoreClassicShuffle.blue
             };
+            console.log("run cs")
             // if ( blueGameScoreTotal>=21 && redGameScoreTotal<21 ){
             //     console.log("blue won");
             // }
@@ -1371,11 +1928,13 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
 
         if (gameTypeDB == "blackJack") {
             if (redGameScore) {
-                redRoundScore = 1
+                redRoundScore = redBlackJackScore
+                console.log("run bj")
             };
             if (blueGameScore) {
                 blueRoundScore = 1
             };
+
         };
 
         if (gameTypeDB == "neoShuffle") {
@@ -1387,8 +1946,8 @@ callAPI("TableData", 1, "PATCH", '{"ShotsPlayed": 0, "RoundsPlayed": 0, "GameSta
             };
 
         };
-        console.log("redscore =", redRoundScore)
-        console.log("bluescore =", blueRoundScore)
+        // console.log("redscore =", redRoundScore)
+        // console.log("bluescore =", blueRoundScore)
 
         // callAPI("TableData", 1, "PATCH", '{"CurrentRedScore": ' + redRoundScore + ', "CurrentBlueScore": ' + blueRoundScore + '}');
 

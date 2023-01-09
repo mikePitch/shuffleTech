@@ -8,6 +8,7 @@
     
     <link rel="stylesheet" href="../static/style.css" />
     <link rel="stylesheet" href="modal.css" />
+    <link rel="stylesheet" href="blackjack.css" />
 
     
     <script type="importmap">
@@ -20,10 +21,11 @@
 
 </head>
 <body>
+
     <button id="testPopUp">Test Gif popup</button>
 <!-- Gif Pop UP -->
-    <div id="orderModal" class="modal">
-        <div id="orderModalContent" class="modalContent">
+    <div id="gifModal" class="modal">
+        <div id="gifModalContent" class="modalContent">
             <img id="popUpGif" class="popUpGif" src="/static/reactionGifs/g10.gif" alt="">
             <div class="popUpTextHolder scoreHolder">
                 <h2 id="popUpText" class="headingMed">Text for the pop up</h2>
@@ -40,8 +42,52 @@
     </div>
     <!-- Heads up display -->
     <div class="hud">
-
         <div class="leftColHud">
+            <h2 class="redTeamHeading redText" id="redTeamNames">Red Team</h2>
+            <div>
+                <div class="avatar_name">
+                    <img id="redTeamImageOne" src="redTeamImage" alt="redTeamImage" style="width:50px;height:50px;">
+                    <h1 id="redTeamNameOne" class="headingMed"></h1>
+                </div>   
+                <div class="avatar_name"> 
+                    <img id="redTeamImageTwo" src="redTeamImage" alt="redTeamImage" style="width:50px;height:50px;">
+                    <h1 id="redTeamNameTwo" class="headingMed"></h1>
+                </div>
+                <div class="avatar_name">
+                    <img id="redTeamImageThree" src="redTeamImage" alt="redTeamImage" style="width:50px;height:50px;">
+                    <h1 id="redTeamNameThree" class="headingMed"></h1>
+                </div>   
+                <!-- <div class="avatar_name"> 
+                    <img id="redTeamImageFour" src="redTeamImage" alt="redTeamImage" style="width:50px;height:50px;">
+                    <h1 id="redTeamNameFour" class="headingMed"></h1>
+                </div> -->
+            </div>
+        
+            <h2 class="blueTeamHeading blueText" id="blueTeamSmallScore">Blue Team</h2>
+            <div>
+                <div class="avatar_name">
+                    <img id="blueTeamImageOne" src="blueTeamImage" alt="blueTeamImage" style="width:50px;height:50px;">
+                    <h1 id="blueTeamNameOne" class="headingMed"></h1>
+                </div>   
+                <div class="avatar_name"> 
+                    <img id="blueTeamImageTwo" src="blueTeamImage" alt="blueTeamImage" style="width:50px;height:50px;">
+                    <h1 id="blueTeamNameTwo" class="headingMed"></h1>
+                </div>
+                <div class="avatar_name">
+                    <img id="blueTeamImageThree" src="blueTeamImage" alt="blueTeamImage" style="width:50px;height:50px;">
+                    <h1 id="blueTeamNameThree" class="headingMed"></h1>
+                </div>   
+                <!-- <div class="avatar_name"> 
+                    <img id="blueTeamImageFour" src="blueTeamImage" alt="blueTeamImage" style="width:50px;height:50px;">
+                    <h1 id="blueTeamNameFour" class="headingMed"></h1>
+                </div> -->
+            </div>
+            <div id="blueTeamContainerId" class="blueTeamContainerClass">
+                <!-- <ul id="blueTeamListElementId" class="blueTeamListElementClass">
+                </ul> -->
+                <!-- <ul id="bluePlayerList" class="playerList headingMed">
+                </ul> -->
+            </div> 
             <h2 class="headingMed autoTop">Games Won</h2>
             <div class="scoreHolder">
                 <h1 id="redGamesWon" class="smallScore redTeamSmallScore">0</h1>
@@ -51,6 +97,91 @@
         </div>
         <div class="midColHud">
             <h1 class="kioskHeading" id="gameTitle">Game</h1>
+<!-- 🃏♠️♥️♣️♦️ card display 🃏♠️♥️♣️♦️ -->
+            <div class="bjCardsWrapper" id="blackJackUI">
+
+                <div class="teamCardsWrapper" id="redCardsHand">
+
+                    <div class="zoneWrapper" id="zone-1-red">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        
+                        <h1 class="zoneHeading">
+                            Zone 1<br>
+                            <span class="cardText">[2, 3, 4]</span>
+                        </h1>
+                        <!-- <img src="/static/images/cards/Card-C2.svg" alt="card" class="cardImage"> -->
+                        <!-- <img src="/static/images/cards/Card-H4.svg" alt="card" class="cardImage"> -->
+                        <!-- <img src="/static/images/cards/Card-S3.svg" alt="card" class="cardImage"> -->
+                    </div>
+                    <div class="zoneWrapper" id="zone-2-red">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 2<br>
+                            <span class="cardText">[5, 6, 7]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-3-red">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 3<br>
+                            <span class="cardText">[8, 9, 10]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-4-red">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 4<br>
+                            <span class="cardText">[J, Q, K]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-5-red">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 5<br>
+                            <span class="cardText">[Ace]</span>
+                        </h1>
+                    </div>
+                </div>
+                <div class="teamCardsWrapper" id="blueCardsHand">
+
+                    <div class="zoneWrapper" id="zone-1-blue">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 1<br>
+                            <span class="cardText">[2, 3, 4]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-2-blue">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 2<br>
+                            <span class="cardText">[5, 6, 7]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-3-blue">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 3<br>
+                            <span class="cardText">[8, 9, 10]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-4-blue">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 4<br>
+                            <span class="cardText">[J, Q, K]</span>
+                        </h1>
+                    </div>
+                    <div class="zoneWrapper" id="zone-5-blue">
+                        <img src="/static/images/explode.gif" alt="explode" class="explode">
+                        <h1 class="zoneHeading">
+                            Zone 5<br>
+                            <span class="cardText">[Ace]</span>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+<!-- 🃏♠️♥️♣️♦️ card display 🃏♠️♥️♣️♦️ -->
         </div>
         <div class="rightColHud">
             <h2 class="headingMed">Round Score</h2>
@@ -84,6 +215,7 @@
     <script type="module" src="gamescreen.js"></script>
     <script src="../node_modules/voronoi/rhill-voronoi-core.min.js"></script>
     <script src="modal.js"></script>
+    <!-- <script src="blackjack.js"></script> -->
 
     
 </body>
